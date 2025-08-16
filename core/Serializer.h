@@ -26,6 +26,11 @@ namespace Funccia::Core {
         requires DerivedPointer<typename T::value_type, Base>;
     };
 
+    template<typename T>
+    concept PrimitiveContainer =
+        requires { typename T::value_type; } &&
+        std::is_arithmetic_v<typename T::value_type>;
+
     //=============> Serializer class <=================
     class Serializer {
     public:
@@ -33,15 +38,24 @@ namespace Funccia::Core {
         virtual ~Serializer();
         void Close();
 
+        //==========> primitive types <=================
+        template<class T>
+        requires std::is_arithmetic_v<T>
+        auto write(const T& var) -> Serializer&;
+        /*
         auto write(const int& var) -> Serializer&;
         auto write(const uint32_t &var) -> Serializer&;
         auto write(const float &var) -> Serializer&;
-        auto write(const std::string &var) -> Serializer&;
         auto write(const bool &var) -> Serializer&;
         auto write(const char &var) -> Serializer&;
+        */
+
         auto write(const byte &var) -> Serializer&;
+        auto write(const std::string &var) -> Serializer&;
         auto write(const TypeID &var) -> Serializer&;
 
+
+        //============> Pointer types <=============
         template<class T>
         requires std::derived_from<T, Resource>
         auto write(T *_pointer) -> Serializer&;
@@ -54,6 +68,12 @@ namespace Funccia::Core {
     private:
         std::ofstream _stream;
     };
+
+    template<class T> requires std::is_arithmetic_v<T>
+    auto Serializer::write(const T &var) -> Serializer & {
+        _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
+        return *this;
+    }
 
     template<class T> requires std::derived_from<T, Resource>
     auto Serializer::write(T *_pointer) -> Serializer& {
@@ -87,13 +107,19 @@ namespace Funccia::Core {
         virtual ~Deserializer();
         void Close();
 
+        //============>primitive types <================
+        template<class T> requires std::is_arithmetic_v<T>
+        auto read(T& var) -> Deserializer&;
+        /*
         auto read(int& var) -> Deserializer&;
         auto read(uint32_t &var) -> Deserializer&;
         auto read(float &var) -> Deserializer&;
-        auto read(std::string &var) -> Deserializer&;
         auto read(bool &var) -> Deserializer&;
         auto read(char &var) -> Deserializer&;
+        */
+
         auto read(byte &var) -> Deserializer&;
+        auto read(std::string &var) -> Deserializer&;
         auto read(TypeID &var) -> Deserializer&;
 
         template<class T>
@@ -107,6 +133,12 @@ namespace Funccia::Core {
     private:
         std::ifstream _stream;
     };
+
+    template<class T> requires std::is_arithmetic_v<T>
+    auto Deserializer::read(T &var) -> Deserializer & {
+        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
+        return *this;
+    }
 
     template<class T> requires std::derived_from<T, Resource>
     auto Deserializer::read(T *&_pointer) -> Deserializer & {
