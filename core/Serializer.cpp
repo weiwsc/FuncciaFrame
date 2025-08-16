@@ -22,20 +22,6 @@ namespace Funccia::Core {
         }
     }
 
-    auto Serializer::write(const int &var) -> Serializer& {
-        _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Serializer::write(const uint32_t &var) -> Serializer & {
-        _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Serializer::write(const float &var) -> Serializer& {
-        _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
-        return *this;
-    }
 
     auto Serializer::write(const std::string &var) -> Serializer& {
         auto length = static_cast<std::uint32_t>(var.size());
@@ -46,15 +32,6 @@ namespace Funccia::Core {
         return *this;
     }
 
-    auto Serializer::write(const bool &var) -> Serializer& {
-        _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Serializer::write(const char &var) -> Serializer& {
-        _stream.write(&var, sizeof(var));
-        return *this;
-    }
 
     auto Serializer::write(const byte &var) -> Serializer & {
         _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
@@ -94,21 +71,6 @@ namespace Funccia::Core {
         }
     }
 
-    auto Deserializer::read(int &var) -> Deserializer & {
-        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Deserializer::read(uint32_t &var) -> Deserializer & {
-        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Deserializer::read(float &var) -> Deserializer & {
-        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
-        return *this;
-    }
-
     auto Deserializer::read(std::string &var) -> Deserializer & {
         std::uint32_t length;
         read(length);
@@ -116,16 +78,6 @@ namespace Funccia::Core {
         if (length > 0) {
             _stream.read(&var[0], length);
         }
-        return *this;
-    }
-
-    auto Deserializer::read(bool &var) -> Deserializer & {
-        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
-        return *this;
-    }
-
-    auto Deserializer::read(char &var) -> Deserializer & {
-        _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
         return *this;
     }
 

@@ -20,16 +20,21 @@ namespace Funccia::Core {
     concept DerivedPointer = std::is_pointer_v<T> &&
                         std::is_base_of_v<Base, std::remove_pointer_t<T>>;
 
-    template<typename T, typename Base>
-    concept PointerContainerOf = requires {
-        typename T::value_type;
-        requires DerivedPointer<typename T::value_type, Base>;
-    };
+    template<class R, class Base>
+    concept PointerIterableContainer =
+        std::ranges::range<R> &&
+        std::is_pointer_v<std::remove_cvref_t<std::ranges::range_value_t<R>>> &&
+        std::is_base_of_v<
+            Base,
+            std::remove_cv_t<std::remove_pointer_t<
+                std::remove_cvref_t<std::ranges::range_value_t<R>>
+            >>
+        >;
 
-    template<typename T>
-    concept PrimitiveContainer =
-        requires { typename T::value_type; } &&
-        std::is_arithmetic_v<typename T::value_type>;
+    template<typename R>
+    concept PrimitiveIterableContainer =
+        std::ranges::range<R> &&
+        std::is_arithmetic_v<std::remove_cvref_t<std::ranges::range_value_t<R>>>;
 
     //=============> Serializer class <=================
     class Serializer {
@@ -42,6 +47,9 @@ namespace Funccia::Core {
         template<class T>
         requires std::is_arithmetic_v<T>
         auto write(const T& var) -> Serializer&;
+
+        template<PrimitiveIterableContainer Container>
+        auto write(const Container& _container) -> Serializer&;
         /*
         auto write(const int& var) -> Serializer&;
         auto write(const uint32_t &var) -> Serializer&;
@@ -60,7 +68,7 @@ namespace Funccia::Core {
         requires std::derived_from<T, Resource>
         auto write(T *_pointer) -> Serializer&;
 
-        template<PointerContainerOf<Resource> Container>
+        template<PointerIterableContainer<Resource> Container>
         auto write(const Container &_container) -> Serializer&;
 
         auto write(Asset *_asset) -> Serializer&;
@@ -72,6 +80,15 @@ namespace Funccia::Core {
     template<class T> requires std::is_arithmetic_v<T>
     auto Serializer::write(const T &var) -> Serializer & {
         _stream.write(reinterpret_cast<const char*>(&var), sizeof(var));
+        return *this;
+    }
+
+    template<PrimitiveIterableContainer Container>
+    auto Serializer::write(const Container &_container) -> Serializer & {
+        write(static_cast<std::uint32_t>(_container.size()));
+        for (auto& var : _container) {
+            write(var);
+        }
         return *this;
     }
 
@@ -90,7 +107,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<PointerContainerOf<Resource> Container>
+    template<PointerIterableContainer<Resource> Container>
     auto Serializer::write(const Container& _container) -> Serializer& {
         auto size = static_cast<std::uint32_t>(_container.size());
         write(size);
@@ -110,6 +127,9 @@ namespace Funccia::Core {
         //============>primitive types <================
         template<class T> requires std::is_arithmetic_v<T>
         auto read(T& var) -> Deserializer&;
+
+        template<PrimitiveIterableContainer Container>
+        auto read(Container& _container) -> Deserializer&;
         /*
         auto read(int& var) -> Deserializer&;
         auto read(uint32_t &var) -> Deserializer&;
@@ -126,7 +146,7 @@ namespace Funccia::Core {
         requires std::derived_from<T, Resource>
         auto read(T *&_pointer) -> Deserializer&;
 
-        template<PointerContainerOf<Resource> Container>
+        template<PointerIterableContainer<Resource> Container>
         auto read(Container &_container) -> Deserializer&;
 
         auto read(Asset *&_asset) -> Deserializer&;
@@ -137,6 +157,18 @@ namespace Funccia::Core {
     template<class T> requires std::is_arithmetic_v<T>
     auto Deserializer::read(T &var) -> Deserializer & {
         _stream.read(reinterpret_cast<char*>(&var), sizeof(var));
+        return *this;
+    }
+
+    template<PrimitiveIterableContainer Container>
+    auto Deserializer::read(Container &_container) -> Deserializer & {
+        std::uint32_t size {};
+        read(size);
+        _container.clear();
+        _container.resize(size);
+        for (auto& var : _container) {
+            read(var);
+        }
         return *this;
     }
 
@@ -157,7 +189,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<PointerContainerOf<Resource> Container>
+    template<PointerIterableContainer<Resource> Container>
     auto Deserializer::read(Container &_container) -> Deserializer & {
         std::uint32_t size {};
         read(size);
