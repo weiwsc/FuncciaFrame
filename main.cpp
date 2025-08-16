@@ -1,8 +1,14 @@
 #include <iostream>
 #include <chrono>
+#include "core/Asset.h"
+#include "core/AssetController.h"
 #include "core/FileController.h"
+#include "core/ObjectPoolManager.h"
+#include "core/Resource.h"
+#include "test/ContainerA.h"
 
 int main() {
+    /*
     std::cout << "Hello, World!" << std::endl;
     auto* fr = new Funccia::Core::FileController();
     const std::string filename = "/Users/dvillera/Projects/cpp/FuncciaFrameWin/FuncciaFramWIn/Controller.cpp";
@@ -23,6 +29,16 @@ int main() {
     auto* buffer = new std::byte[size];
     fr->ReadFileStream(filename, buffer, size);
     std::cout << std::string(reinterpret_cast<char*>(buffer)) << std::endl;
-
+    */
+    Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
+    Funccia::Core::ObjectPoolManager::Object1Pool = new Funccia::Core::ObjectPool<Funccia::Core::Object1>();
+    Funccia::Core::ObjectPoolManager::Object2Pool = new Funccia::Core::ObjectPool<Funccia::Core::Object2>();
+    Funccia::Core::ObjectPoolManager::ResourcePool = new Funccia::Core::ObjectPool<Funccia::Core::Resource>();
+    Funccia::Core::ObjectPoolManager::ContainerAPool = new Funccia::Core::ObjectPool<Funccia::Core::ContainerA>();
+    auto var = Funccia::Core::ObjectPoolManager::Object1Pool->GetResource();
+    var->ToString();
+    auto level = new Funccia::Core::ContainerA();
+    std::cout << "Hello, World!" << std::endl;
+    level->Load();
     return 0;
 }

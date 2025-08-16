@@ -29,7 +29,7 @@ if (!(_cond)) {OutputDebugStringA(_msg); std::abort();}
 // if (!(_cond)) {std::cerr << _msg << std::endl;; std::abort();}
 
 void FF_ASSERT(bool _cond, const std::string& _msg);
-
+auto toReadableSize(std::size_t _size) -> std::string;
 #define GetCurrentDir getcwd
 #endif
 

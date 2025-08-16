@@ -1,0 +1,143 @@
+//
+// Created by Wangsicong Wei on 2025-08-15.
+//
+
+#ifndef FUNCCIAFRAME_SERIALIZER_H
+#define FUNCCIAFRAME_SERIALIZER_H
+#include <fstream>
+#include <ostream>
+#include <concepts>
+#include <type_traits>
+#include "TypeRegistry.h"
+class Resource;
+#include "Asset.h"
+
+namespace Funccia::Core {
+    using std::byte, std::string;
+
+    //===========> template for containers with pointers of Resource types <================
+    template<typename T, typename Base>
+    concept DerivedPointer = std::is_pointer_v<T> &&
+                        std::is_base_of_v<Base, std::remove_pointer_t<T>>;
+
+    template<typename T, typename Base>
+    concept PointerContainerOf = requires {
+        typename T::value_type;
+        requires DerivedPointer<typename T::value_type, Base>;
+    };
+
+    //=============> Serializer class <=================
+    class Serializer {
+    public:
+        explicit Serializer(const string& _file_name);
+        virtual ~Serializer();
+        void Close();
+
+        auto write(const int& var) -> Serializer&;
+        auto write(const uint32_t &var) -> Serializer&;
+        auto write(const float &var) -> Serializer&;
+        auto write(const std::string &var) -> Serializer&;
+        auto write(const bool &var) -> Serializer&;
+        auto write(const char &var) -> Serializer&;
+        auto write(const byte &var) -> Serializer&;
+        auto write(const TypeID &var) -> Serializer&;
+
+        template<class T>
+        requires std::derived_from<T, Resource>
+        auto write(T *_pointer) -> Serializer&;
+
+        template<PointerContainerOf<Resource> Container>
+        auto write(const Container &_container) -> Serializer&;
+
+        auto write(Asset *_asset) -> Serializer&;
+
+    private:
+        std::ofstream _stream;
+    };
+
+    template<class T> requires std::derived_from<T, Resource>
+    auto Serializer::write(T *_pointer) -> Serializer& {
+        byte exists {1} ;
+        if (_pointer != nullptr) {
+            write(exists);
+            write(_pointer->TypeID());
+            _pointer->Serialize(*this);
+        }
+        else {
+            exists = std::byte{0};
+            write(exists);
+        }
+        return *this;
+    }
+
+    template<PointerContainerOf<Resource> Container>
+    auto Serializer::write(const Container& _container) -> Serializer& {
+        auto size = static_cast<std::uint32_t>(_container.size());
+        write(size);
+        for (auto& resource : _container) {
+            write(resource);
+        }
+        return *this;
+    }
+
+    //=============> Deserializer class <=================
+    class Deserializer {
+    public:
+        explicit Deserializer(const string& _file_name);
+        virtual ~Deserializer();
+        void Close();
+
+        auto read(int& var) -> Deserializer&;
+        auto read(uint32_t &var) -> Deserializer&;
+        auto read(float &var) -> Deserializer&;
+        auto read(std::string &var) -> Deserializer&;
+        auto read(bool &var) -> Deserializer&;
+        auto read(char &var) -> Deserializer&;
+        auto read(byte &var) -> Deserializer&;
+        auto read(TypeID &var) -> Deserializer&;
+
+        template<class T>
+        requires std::derived_from<T, Resource>
+        auto read(T *&_pointer) -> Deserializer&;
+
+        template<PointerContainerOf<Resource> Container>
+        auto read(Container &_container) -> Deserializer&;
+
+        auto read(Asset *&_asset) -> Deserializer&;
+    private:
+        std::ifstream _stream;
+    };
+
+    template<class T> requires std::derived_from<T, Resource>
+    auto Deserializer::read(T *&_pointer) -> Deserializer & {
+        std::byte exists{0};
+        read(exists);
+        if (static_cast<int>(exists) == 1) {
+            TypeID typeID;
+            read(typeID);
+            _pointer = static_cast<T*>(TypeRegistry::GetTypeDefaultObject(typeID));
+            if (_pointer) {
+                _pointer->Deserialize(*this);
+            }
+        } else {
+            _pointer = nullptr;
+        }
+        return *this;
+    }
+
+    template<PointerContainerOf<Resource> Container>
+    auto Deserializer::read(Container &_container) -> Deserializer & {
+        std::uint32_t size {};
+        read(size);
+        _container.clear();
+        for (std::uint32_t i = 0; i < size; ++i) {
+            typename Container::value_type resource = nullptr;
+            read(resource);
+            _container.push_back(resource);
+        }
+        return *this;
+    }
+}
+
+
+#endif //FUNCCIAFRAME_SERIALIZER_H

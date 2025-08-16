@@ -8,7 +8,6 @@
 #include <thread>
 #include "Singleton.h"
 
-
 namespace Funccia::Core {
     using std::string, std::byte;
 
