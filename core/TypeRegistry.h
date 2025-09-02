@@ -6,7 +6,7 @@
 #define FUNCCIAFRAME_TYPEREGISTRY_H
 
 namespace Funccia::Core {
-    class Resource;
+    class ISerializable;
     enum class TypeID {
         None = 0,
         Asset = 1,
@@ -17,7 +17,7 @@ namespace Funccia::Core {
     };
     class TypeRegistry {
     public:
-        static auto GetTypeDefaultObject(TypeID _typeID) -> Resource*;
+        static auto GetTypeDefaultObject(TypeID _typeID) -> ISerializable*;
 
     };
 }

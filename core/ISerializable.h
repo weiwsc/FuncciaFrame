@@ -7,9 +7,12 @@
 
 #include <iostream>
 
-#include "Serializer.h"
+
 
 namespace Funccia::Core {
+    class Deserializer;
+    class Serializer;
+
     class ISerializable {
     public:
         ISerializable() = default;

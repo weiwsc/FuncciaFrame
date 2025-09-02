@@ -1,3 +1,5 @@
+
+#include <cassert>
 #include <iostream>
 #include <chrono>
 #include "core/Asset.h"
@@ -30,15 +32,25 @@ int main() {
     fr->ReadFileStream(filename, buffer, size);
     std::cout << std::string(reinterpret_cast<char*>(buffer)) << std::endl;
     */
+
     Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
     Funccia::Core::ObjectPoolManager::Object1Pool = new Funccia::Core::ObjectPool<Funccia::Core::Object1>();
     Funccia::Core::ObjectPoolManager::Object2Pool = new Funccia::Core::ObjectPool<Funccia::Core::Object2>();
     Funccia::Core::ObjectPoolManager::ResourcePool = new Funccia::Core::ObjectPool<Funccia::Core::Resource>();
     Funccia::Core::ObjectPoolManager::ContainerAPool = new Funccia::Core::ObjectPool<Funccia::Core::ContainerA>();
-    auto var = Funccia::Core::ObjectPoolManager::Object1Pool->GetResource();
-    var->ToString();
+
     auto level = new Funccia::Core::ContainerA();
+    level->AddResource(dynamic_cast<Funccia::Core::Resource*>(Funccia::Core::ObjectPoolManager::Object1Pool->GetResource()));
+    level->Save();
+    delete level;
+
+    level = new Funccia::Core::ContainerA();
     std::cout << "Hello, World!" << std::endl;
     level->Load();
+
+
+
+
+
     return 0;
 }

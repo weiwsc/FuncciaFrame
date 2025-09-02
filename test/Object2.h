@@ -22,8 +22,14 @@ namespace Funccia::Core {
 
         void ToString() override {std::cout << m_name << std::endl;}
 
-        void Serialize(Serializer& serializer) override {serializer.write(m_name);};
-        void Deserialize(Deserializer& deserializer) override {deserializer.read(m_name);};
+        void Serialize(Serializer& serializer) override {
+            serializer.write(m_name);
+            Resource::Serialize(serializer);
+        };
+        void Deserialize(Deserializer& deserializer) override {
+            deserializer.read(m_name);
+            Resource::Deserialize(deserializer);
+        };
     private:
         string m_name;
     };

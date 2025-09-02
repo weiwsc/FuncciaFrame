@@ -8,6 +8,8 @@
 #include <ostream>
 #include <concepts>
 #include <type_traits>
+
+#include "ISerializable.h"
 #include "TypeRegistry.h"
 class Resource;
 #include "Asset.h"
@@ -65,10 +67,10 @@ namespace Funccia::Core {
 
         //============> Pointer types <=============
         template<class T>
-        requires std::derived_from<T, Resource>
+        requires std::derived_from<T, ISerializable>
         auto write(T *_pointer) -> Serializer&;
 
-        template<PointerIterableContainer<Resource> Container>
+        template<PointerIterableContainer<ISerializable> Container>
         auto write(const Container &_container) -> Serializer&;
 
         auto write(Asset *_asset) -> Serializer&;
@@ -92,7 +94,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<class T> requires std::derived_from<T, Resource>
+    template<class T> requires std::derived_from<T, ISerializable>
     auto Serializer::write(T *_pointer) -> Serializer& {
         byte exists {1} ;
         if (_pointer != nullptr) {
@@ -107,7 +109,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<PointerIterableContainer<Resource> Container>
+    template<PointerIterableContainer<ISerializable> Container>
     auto Serializer::write(const Container& _container) -> Serializer& {
         auto size = static_cast<std::uint32_t>(_container.size());
         write(size);
@@ -143,10 +145,10 @@ namespace Funccia::Core {
         auto read(TypeID &var) -> Deserializer&;
 
         template<class T>
-        requires std::derived_from<T, Resource>
+        requires std::derived_from<T, ISerializable>
         auto read(T *&_pointer) -> Deserializer&;
 
-        template<PointerIterableContainer<Resource> Container>
+        template<PointerIterableContainer<ISerializable> Container>
         auto read(Container &_container) -> Deserializer&;
 
         auto read(Asset *&_asset) -> Deserializer&;
@@ -172,7 +174,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<class T> requires std::derived_from<T, Resource>
+    template<class T> requires std::derived_from<T, ISerializable>
     auto Deserializer::read(T *&_pointer) -> Deserializer & {
         std::byte exists{0};
         read(exists);
@@ -189,7 +191,7 @@ namespace Funccia::Core {
         return *this;
     }
 
-    template<PointerIterableContainer<Resource> Container>
+    template<PointerIterableContainer<ISerializable> Container>
     auto Deserializer::read(Container &_container) -> Deserializer & {
         std::uint32_t size {};
         read(size);

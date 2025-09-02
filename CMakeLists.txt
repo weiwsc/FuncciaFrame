@@ -9,6 +9,10 @@ pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
 pkg_check_modules(SDL3_IMAGE REQUIRED IMPORTED_TARGET sdl3-image)
 pkg_check_modules(SDL3_TTF REQUIRED IMPORTED_TARGET sdl3-ttf)
 pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
+#pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw)
+pkg_check_modules(GLEW REQUIRED IMPORTED_TARGET glew)
+
+find_package(glfw3 3.4 REQUIRED)
 
 add_executable(FuncciaFrame main.cpp
         core/FileController.cpp
@@ -36,9 +40,13 @@ add_executable(FuncciaFrame main.cpp
         test/ContainerA.h
         test/Object1.cpp
         test/Object1.h
-        test/Object2.h)
+        test/Object2.h
+        test/OpenGLtest.cpp
+        test/OpenGLtest.h)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_IMAGE)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_TTF)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)
+target_link_libraries(FuncciaFrame PRIVATE glfw)
+target_link_libraries(FuncciaFrame PRIVATE PkgConfig::GLEW)

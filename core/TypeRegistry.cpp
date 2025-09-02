@@ -3,16 +3,15 @@
 //
 
 #include "TypeRegistry.h"
-#include "Resource.h"
+#include "ISerializable.h"
 #include "ObjectPoolManager.h"
 
-auto Funccia::Core::TypeRegistry::GetTypeDefaultObject(TypeID _typeID) -> Resource * {
+auto Funccia::Core::TypeRegistry::GetTypeDefaultObject(TypeID _typeID) -> ISerializable * {
     switch (_typeID) {
-            case TypeID::Asset: return dynamic_cast<Resource *>(ObjectPoolManager::AssetPool->GetResource());
-            case TypeID::Resource: return dynamic_cast<Resource *>(ObjectPoolManager::ResourcePool->GetResource());
-            case TypeID::ContainerA: return dynamic_cast<Resource *>(ObjectPoolManager::ContainerAPool->GetResource());
-            case TypeID::Object1: return dynamic_cast<Resource *>(ObjectPoolManager::Object1Pool->GetResource());
-            case TypeID::Object2: return dynamic_cast<Resource *>(ObjectPoolManager::Object2Pool->GetResource());
+            case TypeID::Resource: return dynamic_cast<ISerializable *>(ObjectPoolManager::ResourcePool->GetResource());
+            case TypeID::ContainerA: return dynamic_cast<ISerializable *>(ObjectPoolManager::ContainerAPool->GetResource());
+            case TypeID::Object1: return dynamic_cast<ISerializable *>(ObjectPoolManager::Object1Pool->GetResource());
+            case TypeID::Object2: return dynamic_cast<ISerializable *>(ObjectPoolManager::Object2Pool->GetResource());
 
     }
 }
