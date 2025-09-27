@@ -8,12 +8,14 @@
 namespace Funccia::Core {
     class ISerializable;
     enum class TypeID {
-        None = 0,
-        Asset = 1,
-        Resource = 2,
-        ContainerA = 3,
-        Object1 = 4,
-        Object2 = 5,
+        None,
+        Asset,
+        Resource,
+        TextFile,
+        Shader,
+        ContainerA,
+        Object1,
+        Object2,
     };
     class TypeRegistry {
     public:
