@@ -11,7 +11,7 @@ namespace Funccia::UI {
     public:
         Window();
         virtual ~Window(){};
-        auto Render(Graphic::GL::UIRenderer& renderer, float target_x = 0, float target_y = 0) -> void;
+        auto Render(Graphic::GL::UIRenderer& renderer, float target_x = 0, float target_y = 0 ,const glm::vec2& screenSize = {1920, 1080}) -> void;
     private:
         std::unique_ptr<UIElement> root;
     };

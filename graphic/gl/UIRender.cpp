@@ -47,7 +47,7 @@ void UIRenderer::CreateGeometry() {
     // Instance data buffer setup - 12 floats per instance (3 vec4s)
     glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
 
-    const size_t instanceSize = 12 * sizeof(float); // 3 vec4s
+    const size_t instanceSize = 28 * sizeof(float); // 3 vec4s
     size_t offset = 0;
 
     // a_borderBox (location 1)
@@ -66,12 +66,36 @@ void UIRenderer::CreateGeometry() {
     glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
     glEnableVertexAttribArray(3);
     glVertexAttribDivisor(3, 1);
+    offset += 4 * sizeof(float); // THIS WAS MISSING!
+
+    // a_shadowProperties (location 4)
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
+    glEnableVertexAttribArray(4);
+    glVertexAttribDivisor(4, 1);
+    offset += 4 * sizeof(float);
+
+    // a_shadowColor (location 5)
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
+    glEnableVertexAttribArray(5);
+    glVertexAttribDivisor(5, 1);
+    offset += 4 * sizeof(float);  // ADD THIS LINE
+
+    // a_borderWidths (location 6)
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
+    glEnableVertexAttribArray(6);
+    glVertexAttribDivisor(6, 1);
+    offset += 4 * sizeof(float);
+
+    // a_borderColor (location 7)
+    glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
+    glEnableVertexAttribArray(7);
+    glVertexAttribDivisor(7, 1);
 }
 
 void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screenSize) {
     if (instanceData.empty()) return;
 
-    const size_t floatsPerInstance = 12;
+    const size_t floatsPerInstance = 28;
     const size_t instanceCount = instanceData.size() / floatsPerInstance;
 
     if (instanceData.size() % floatsPerInstance != 0) {
@@ -79,15 +103,11 @@ void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screen
         return;
     }
 
-    // Save current state
-    GLboolean depthTestEnabled = glIsEnabled(GL_DEPTH_TEST);
-    GLboolean cullFaceEnabled = glIsEnabled(GL_CULL_FACE);
-    GLboolean blendEnabled = glIsEnabled(GL_BLEND);
-
     m_shader.use();
 
-    // Set uniforms
-    glUniformMatrix4fv(glGetUniformLocation(m_shader.getID(), "u_viewProjection"), 1, GL_FALSE, &viewProjection[0][0]);
+    // This shader uses u_viewSize, not u_viewProjection
+    glUniform2f(glGetUniformLocation(m_shader.getID(), "u_viewSize"),
+                screenSize.x, screenSize.y);
 
     // Upload instance data
     glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
@@ -96,26 +116,19 @@ void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screen
                  instanceData.data(),
                  GL_DYNAMIC_DRAW);
 
-    // Set UI rendering state
     glBindVertexArray(m_VAO);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendEquation(GL_FUNC_ADD);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instanceCount);
 
-    // Restore previous state
-    if (depthTestEnabled) glEnable(GL_DEPTH_TEST);
-    else glDisable(GL_DEPTH_TEST);
-
-    if (cullFaceEnabled) glEnable(GL_CULL_FACE);
-    else glDisable(GL_CULL_FACE);
-
-    if (blendEnabled) glEnable(GL_BLEND);
-    else glDisable(GL_BLEND);
-
+    // Restore state
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBindVertexArray(0);
 }
 

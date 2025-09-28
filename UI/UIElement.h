@@ -26,9 +26,9 @@ namespace Funccia::UI {
         [[nodiscard]] float borderBoxStartOnAxis(Axis axis) const;
         [[nodiscard]] float contentBoxStartOnAxis(Axis axis) const;
         [[nodiscard]] float borderBoxEndOnAxis(Axis axis) const;
-        //vec2 borderBox(const vec4& marginBox) const;
-        //vec2 paddingBox(const vec4& borderBox) const;
-        //vec2 contentBox(const vec4& paddingBox) const;
+        [[nodiscard]] auto borderBoxOnAxis(Axis axis) const -> float;
+        [[nodiscard]] auto marginBoxOnAxis(Axis axis) const -> float;
+        [[nodiscard]] auto contentBoxOnAxis(Axis axis) const -> float;
 
         //void SetParent(UIElement* parent);
         void AddChild(std::unique_ptr<UIElement> child);
@@ -36,10 +36,12 @@ namespace Funccia::UI {
         //void RemoveAllChildren();
 
         auto CalculateFitSizeOnAxis(Axis axis) -> float;
+        auto CalculateGrowSizeOnAxis(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
         auto RenderQueue(UIRender& render, float parent_content_box_x, float parent_content_box_y) -> void;
 
-    private:
+        auto Scale(float size) -> void;
+    protected:
         UIElement* m_parent {nullptr};
         std::vector<std::unique_ptr<UIElement>> m_children;
 
@@ -58,13 +60,14 @@ namespace Funccia::UI {
 
         SideOffset m_border_widths {0,0,0,0};
         vec4 m_border_radius {0,0,0,0};
+        vec4 m_border_color {0,0,0,0};
 
         Axis m_displayAxis {Axis::Horizontal};
         Position m_position {Position::Absolute};
         Sizing m_sizing {SizingType::Fit, SizingType::Fit, 0, 0};
         bool m_is_rendered {true};
 
-        Shadow m_shadow {vec4(1,1,1,0.3), vec2(0,0), 5, 5};
+        Shadow m_shadow {vec4(0,0,0,0), vec2(0,0), 0, 0};
 
         //cached by difference passes
         PositionOffset m_border_box_pos {0,0};

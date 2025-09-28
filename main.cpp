@@ -144,10 +144,13 @@ int main() {
 
 
 
-    int winW=0, winH=0;
-    glfwGetWindowSize(window, &winW, &winH);
+    int winW, winH;
+    glfwGetFramebufferSize(window, &winW, &winH);
     text.setProjection(winW, winH);
 
+
+
+    renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
 
     atlas.saveDebugPNG("font_atlas_debug.png", /*showGrid=*/true, /*showGlyphBoxes=*/true);
 
@@ -189,21 +192,22 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         mesh.Draw(&shader);
 
+        glfwGetFramebufferSize(window, &winW, &winH);
         renderer.BeginFrame();
-        uiWindow.Render(renderer, (mesh.GetTransform().position().x + 0.5)* float(winW)/7 + 500, 500 - (mesh.GetTransform().position().y + 0.5)* float(winH)/7);
-        renderer.Render(glm::ortho(0.0f, float(winW), float(winH), 0.0f ), glm::vec2(winW, winH));
-
+        //uiWindow.Render(renderer, (mesh.GetTransform().position().x + 0.5)* float(winW)/7 + 500, 500 - (mesh.GetTransform().position().y + 0.5)* float(winH)/7);
+        uiWindow.Render(renderer, 0, 0, glm::vec2(winW, winH));
+        renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
 
         text.clear();
-        text.queue("This is sample text", 25, 25, 1.0f, {0,0,0});
+        text.queue("This is sample text", 225, 25, 1.0f, {0,0,0});
         text.queue("(C) LearnOpenGL.com Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
                    "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took "
                    "a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but "
                    "also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with "
                    "the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software "
-                   "like Aldus PageMaker including versions of Lorem Ipsum.", 25, 570, 0.2f, {0,0,0}, 600);
+                   "like Aldus PageMaker including versions of Lorem Ipsum.", 225, 570, 0.35f, {0,0,0}, 600);
         //text.queue("This is text rendering test", 25, 540, 0.2f, {0,0,0});
-        text.queue("The quick brown fox jumps", 25, 120, 0.5f, {0.2f,0.4f,0.8f});
+        text.queue("The quick brown fox jumps", 225, 120, 0.5f, {0.2f,0.4f,0.8f});
         text.flush();
 
 
