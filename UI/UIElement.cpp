@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <numeric>
 
+#include "UIHelper.h"
+
 namespace Funccia::UI {
     float UIElement::borderBoxStartOnAxis(Axis axis) const {
         switch (axis) {
@@ -186,14 +188,58 @@ namespace Funccia::UI {
         }
     }
 
-    auto UIElement::RenderQueue(UIRender &render,Graphic::GL::TextRenderer& text_render ,float parent_content_box_x, float parent_content_box_y) -> void {
-        if (m_invisibleButOccupySpace || !m_is_rendered) {return;}
-        vec4 borderBox = {
+    auto UIElement::GlobalPositionPass(float parent_content_box_x, float parent_content_box_y) -> void {
+        if (!m_is_rendered) return;
+        m_global_border_box = {
             parent_content_box_x + m_border_box_pos.GetX(),
             parent_content_box_y + m_border_box_pos.GetY(),
             parent_content_box_x + m_border_box_pos.GetX() + m_border_box_size.GetX(),
             parent_content_box_y + m_border_box_pos.GetY() + m_border_box_size.GetY(),
         };
+        for (auto& child : m_children) {
+            child->GlobalPositionPass(parent_content_box_x + contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
+        }
+    }
+
+    auto UIElement::CullingPass(vec4 parent_clipping_box) -> void {
+        if (!m_is_rendered) return;
+        m_culled = false;
+
+
+        vec4 border_clipping_box = UIHelper::intersect(parent_clipping_box, m_global_border_box);
+
+        if (border_clipping_box.x > border_clipping_box.z || border_clipping_box.y > border_clipping_box.w) {
+            m_culled = true;
+            return;
+        }
+        m_clipping_box = parent_clipping_box;
+
+        vec4 content_culling_box = parent_clipping_box;
+        switch (m_overflow) {
+            case Overflow::Visible:
+                break;
+            case Overflow::ClipByBorderBox:
+                content_culling_box = border_clipping_box;
+                break;
+        }
+        content_culling_box.x += m_border_widths.left();
+        content_culling_box.y += m_border_widths.top();
+        content_culling_box.z -= m_border_widths.right();   //without cutting the border width, the clipped child will overlap the parent's border. if the border box calculated is changed, PLS CHANGE THIS AS WELL!!!!!!
+        content_culling_box.w -= m_border_widths.bottom();
+        for (auto& child : m_children) {
+            child->CullingPass(content_culling_box);
+        }
+    }
+
+
+    auto UIElement::RenderQueue(UIRender &render,Graphic::GL::TextRenderer& text_render ,float parent_content_box_x, float parent_content_box_y) -> void {
+        if (m_invisibleButOccupySpace || !m_is_rendered || m_culled) {return;}
+        // vec4 borderBox = {
+        //     parent_content_box_x + m_border_box_pos.GetX(),
+        //     parent_content_box_y + m_border_box_pos.GetY(),
+        //     parent_content_box_x + m_border_box_pos.GetX() + m_border_box_size.GetX(),
+        //     parent_content_box_y + m_border_box_pos.GetY() + m_border_box_size.GetY(),
+        // };
         vec4 borderColor;
         if (m_border_color.r == 0 ,m_border_color.g == 0, m_border_color.b == 0, m_border_color.a == 0) {
             borderColor.r = m_background.r;
@@ -207,7 +253,7 @@ namespace Funccia::UI {
 
         render.Collect({
             // a_borderBox (4 floats)
-            borderBox.x, borderBox.y, borderBox.z, borderBox.w,
+            m_global_border_box.x, m_global_border_box.y, m_global_border_box.z, m_global_border_box.w,
             // a_backgroundColor (4 floats)
             m_background.r, m_background.g, m_background.b, m_background.a,
             // a_borderRadius (4 floats)
@@ -219,7 +265,9 @@ namespace Funccia::UI {
             // a_borderWidths (4 floats)
             m_border_widths.top(), m_border_widths.right(), m_border_widths.bottom(), m_border_widths.left(),
             // a_borderColor (4 floats)
-            borderColor.r, borderColor.g, borderColor.b, borderColor.a
+            borderColor.r, borderColor.g, borderColor.b, borderColor.a,
+            // the clipping box (4 floats)
+            m_clipping_box.x, m_clipping_box.y, m_clipping_box.z, m_clipping_box.w,
         });
 
         if (!m_text.empty()) {

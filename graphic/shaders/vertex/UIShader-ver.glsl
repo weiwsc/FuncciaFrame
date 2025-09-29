@@ -8,7 +8,7 @@ layout(location=4) in vec4 a_shadowProps;   // ofsX, ofsY, blur, spread
 layout(location=5) in vec4 a_shadowCol;
 layout(location=6) in vec4 a_borderWidths;  // top, right, bottom, left
 layout(location=7) in vec4 a_borderColor;
-
+layout(location=8) in vec4 a_clippingBox;
 uniform vec2 u_viewSize;
 
 out vec4 v_borderBox;
@@ -18,6 +18,7 @@ out vec4 v_shadowProperties;
 out vec4 v_shadowColor;
 out vec4 v_borderWidths;
 out vec4 v_borderColor;
+out vec4 v_clippingBox;
 
 void main() {
     vec2 ofs    = a_shadowProps.xy;
@@ -48,4 +49,5 @@ void main() {
     v_shadowColor      = a_shadowCol;
     v_borderWidths     = a_borderWidths;
     v_borderColor      = a_borderColor;
+    v_clippingBox      = a_clippingBox;
 }

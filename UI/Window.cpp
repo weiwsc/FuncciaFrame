@@ -405,7 +405,7 @@ namespace Funccia::UI {
 // }
 
     Window::Window() {
-        UI1();
+        UI2();
     }
 
 
@@ -823,7 +823,7 @@ root->AddChild(std::move(bottomPanel));
 
         auto container = std::make_unique<UIElement>();
         container->HorizontalFixed(800);
-        container->VerticalGrow();
+        container->VerticalFixed(800);
         container->VerticalStack();
         container->Background({0.90f, 0.90f, 0.90f, 1.0f});
         container->m_border_widths = {2, 20, 2, 2};
@@ -840,14 +840,14 @@ root->AddChild(std::move(bottomPanel));
             "also very important, don't forget it",
         };
 
-        for (int i = 0; i < text.size(); ++i) {
+        for (int i = 0; i < 13; ++i) {
             auto row = std::make_unique<UIElement>(Tag::Paragraph);
             row->m_background = {0.90f, 0.90f, 0.90f, 1.0f};
             row->m_margin     = {5, 10, 5, 10}; // L T R B
             row->m_padding    = {0, 0, 5, 0}; // L T R B
             row->m_border_widths  = {2, 0, 2, 2};
             row->m_border_color   = {0.478f, 0.478f, 0.778f, 1.0f};
-            row->TextColor({0,0,0,1.0f}).Text(text[i]).VerticalGrow().HorizontalGrow();
+            //row->TextColor({0,0,0,1.0f}).Text(text[i]).VerticalGrow().HorizontalGrow();
             row->m_sizing.x_type  = SizingType::Grow;
             row->VerticalFixed(200);
 
@@ -869,6 +869,9 @@ root->AddChild(std::move(bottomPanel));
 
         root->PositionOnAxis(Axis::Horizontal, 0);
         root->PositionOnAxis(Axis::Vertical, 0);
+
+        root->GlobalPositionPass(target_x, target_y);
+        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
         root->RenderQueue(renderer,text_render, target_x, target_y);
 
         root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);

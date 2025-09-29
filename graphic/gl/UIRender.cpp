@@ -47,7 +47,7 @@ void UIRenderer::CreateGeometry() {
     // Instance data buffer setup - 12 floats per instance (3 vec4s)
     glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
 
-    const size_t instanceSize = 28 * sizeof(float); // 3 vec4s
+    const size_t instanceSize = 32 * sizeof(float); // 3 vec4s
     size_t offset = 0;
 
     // a_borderBox (location 1)
@@ -90,12 +90,18 @@ void UIRenderer::CreateGeometry() {
     glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
     glEnableVertexAttribArray(7);
     glVertexAttribDivisor(7, 1);
+    offset += 4 * sizeof(float);
+
+    // clipping box (location 8)
+    glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, instanceSize, (void*)offset);
+    glEnableVertexAttribArray(8);
+    glVertexAttribDivisor(8, 1);
 }
 
 void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screenSize) {
     if (instanceData.empty()) return;
 
-    const size_t floatsPerInstance = 28;
+    const size_t floatsPerInstance = 32;
     const size_t instanceCount = instanceData.size() / floatsPerInstance;
 
     if (instanceData.size() % floatsPerInstance != 0) {

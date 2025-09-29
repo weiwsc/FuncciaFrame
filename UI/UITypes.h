@@ -48,6 +48,11 @@ namespace Funccia::UI {
         Fixed
     };
 
+    enum class Overflow {
+        Visible,
+        ClipByBorderBox
+    };
+
     class Sizing {
     public:
         Sizing() = default;

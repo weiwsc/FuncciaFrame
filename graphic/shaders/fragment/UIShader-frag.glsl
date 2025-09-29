@@ -7,6 +7,7 @@ in vec4 v_shadowProperties; // (offsetX, offsetY, blur, spread)
 in vec4 v_shadowColor;      // rgba
 in vec4 v_borderWidths;     // (L, T, R, B)
 in vec4 v_borderColor;      // rgba
+in vec4 v_clippingBox;
 out vec4 FragColor;
 
 uniform vec2 u_viewSize;
@@ -60,6 +61,10 @@ void main(){
     // Screen-space pixel (Y flipped to match your box coords)
     vec2 pix    = vec2(gl_FragCoord.x, u_viewSize.y - gl_FragCoord.y);
 
+    if (pix.x <= v_clippingBox.x || pix.x >= v_clippingBox.z ||
+    pix.y <= v_clippingBox.y || pix.y >= v_clippingBox.w) {
+        discard;
+    }
     // Outer (border box)
     vec2 outerMin = v_borderBox.xy;
     vec2 outerMax = v_borderBox.zw;

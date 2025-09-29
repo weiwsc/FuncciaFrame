@@ -48,6 +48,8 @@ namespace Funccia::UI {
         auto CalculateGrowSizeOnAxis(Axis axis) -> void;
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
+        auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
+        auto CullingPass(vec4 parent_clipping_box) -> void;
         auto RenderQueue(UIRender& render,Graphic::GL::TextRenderer& text_render, float parent_content_box_x, float parent_content_box_y) -> void;
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
@@ -90,7 +92,10 @@ namespace Funccia::UI {
         //cached by difference passes
         PositionOffset m_border_box_pos {0,0};
         PositionOffset m_border_box_size {0,0};
-
+        vec4 m_global_border_box {0,0,0,0};
+        vec4 m_clipping_box {0,0,0,0};
+        bool m_culled {false};
+        Overflow m_overflow {Overflow::ClipByBorderBox};
 
         std::string m_text {};
         int m_font_size {30};
