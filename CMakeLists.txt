@@ -19,11 +19,12 @@ pkg_check_modules(SDL3_IMAGE REQUIRED IMPORTED_TARGET sdl3-image)
 pkg_check_modules(SDL3_TTF REQUIRED IMPORTED_TARGET sdl3-ttf)
 pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
 pkg_check_modules(FT2 REQUIRED freetype2)
-
+pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
 #pkg_check_modules(GLEW REQUIRED IMPORTED_TARGET glew)
 include_directories(external/glad/include)
 include_directories(external/std_image/include)
 
+find_package(harfbuzz REQUIRED)
 find_package(glfw3 3.4 REQUIRED)
 
 add_executable(FuncciaFrame main.cpp
@@ -80,24 +81,39 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/TextRenderer.cpp
         graphic/gl/TextRenderer.h
         external/std_image/include/stb_image_write.cpp
-        graphic/gl/GlyphAtlas.cpp
-        graphic/gl/GlyphAtlas.h
+        graphic/text/GlyphAtlas.cpp
+        graphic/text/GlyphAtlas.h
         UI/SideOffset.cpp
         UI/SideOffset.h
         UI/UITypes.h
         graphic/gl/UIRender.cpp
         graphic/gl/UIRender.h
         UI/Window.cpp
-        UI/Window.h)
+        UI/Window.h
+        UI/UIElementFluentAPI.cpp
+        UI/UIElementTemplates.cpp
+        graphic/text/HBShaper.cpp
+        graphic/text/HBShaper.h
+        graphic/text/Glyph.cpp
+        graphic/text/Glyph.h)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_IMAGE)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_TTF)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)
 target_link_libraries(FuncciaFrame PRIVATE glfw)
+target_link_libraries(FuncciaFrame
+        PRIVATE
+        harfbuzz
+)
+
 #target_link_libraries(FuncciaFrame PRIVATE PkgConfig::GLEW)
 target_include_directories(FuncciaFrame PRIVATE ${FT2_INCLUDE_DIRS})
 target_link_directories(FuncciaFrame PRIVATE ${FT2_LIBRARY_DIRS})
 target_link_libraries(FuncciaFrame PRIVATE ${FT2_LIBRARIES})
+
+target_include_directories(FuncciaFrame PRIVATE ${HARFBUZZ_INCLUDE_DIRS})
+target_link_directories(FuncciaFrame PRIVATE ${HARFBUZZ_LIBRARY_DIRS})
+target_link_libraries(FuncciaFrame PRIVATE ${HARFBUZZ_LIBRARIES})
 
 target_sources(FuncciaFrame PRIVATE external/glad/src/glad.c)

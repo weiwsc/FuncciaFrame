@@ -3,7 +3,8 @@
 //
 
 #include "UIElement.h"
-
+#include "../graphic/gl/UIRender.h"
+#include "../graphic/gl/TextRenderer.h"
 #include <algorithm>
 #include <numeric>
 
@@ -72,8 +73,10 @@ namespace Funccia::UI {
         }
     }
 
-    void UIElement::AddChild(std::unique_ptr<UIElement> child) {
-        m_children.push_back(std::move(child));
+    auto UIElement::AddChild(std::unique_ptr<UIElement> child)->UIElement* {
+        child->m_parent = this;
+        m_children.emplace_back(std::move(child));
+        return m_children.back().get(); // raw, non-owning
     }
 
     auto UIElement::CalculateFitSizeOnAxis(Axis axis)->float {
@@ -118,7 +121,8 @@ namespace Funccia::UI {
 
         for (auto& child : m_children) {
             if (child->m_sizing.TypeOnAxis(axis) == SizingType::Grow) { childToGrow.push_back(child.get()); }
-            usedSpace += child->marginBoxOnAxis(axis);
+            //usedSpace += child->marginBoxOnAxis(axis);
+            else{usedSpace += child->marginBoxOnAxis(axis);}
         }
 
         float availableSpace = std::max(contentBoxOnAxis(axis) - usedSpace, 0.0f);
@@ -130,7 +134,8 @@ namespace Funccia::UI {
         }
         else if (availableSpace > 0){ // if we are going along the axis
             if (childToGrow.size() == 1) {
-                childToGrow[0]->m_border_box_size.Set(axis, contentBoxOnAxis(axis) - childToGrow[0]->m_margin.firstAndSecond(axis));
+                //childToGrow[0]->m_border_box_size.Set(axis, contentBoxOnAxis(axis) - childToGrow[0]->m_margin.firstAndSecond(axis));
+                childToGrow[0]->m_border_box_size.Set(axis, availableSpace);
             }
             else if (!childToGrow.empty()) { //if there are multiple children to be resized
                 float totalWeight = 0;
@@ -159,6 +164,10 @@ namespace Funccia::UI {
         }
     }
 
+    auto UIElement::CalculateTextBounds(Axis axis) -> void {
+        //do I need this? maybe not for now
+    }
+
     auto UIElement::PositionOnAxis(Axis axis,  float parent_content_box_start) -> void {
         if (!m_is_rendered) return;
 
@@ -177,8 +186,8 @@ namespace Funccia::UI {
         }
     }
 
-    auto UIElement::RenderQueue(UIRender &render, float parent_content_box_x, float parent_content_box_y) -> void {
-        if (!m_is_rendered) return;
+    auto UIElement::RenderQueue(UIRender &render,Graphic::GL::TextRenderer& text_render ,float parent_content_box_x, float parent_content_box_y) -> void {
+        if (m_invisibleButOccupySpace || !m_is_rendered) {return;}
         vec4 borderBox = {
             parent_content_box_x + m_border_box_pos.GetX(),
             parent_content_box_y + m_border_box_pos.GetY(),
@@ -213,10 +222,20 @@ namespace Funccia::UI {
             borderColor.r, borderColor.g, borderColor.b, borderColor.a
         });
 
+        if (!m_text.empty()) {
+            // text_render.queue(m_text,
+            //     borderBox.x + contentBoxStartOnAxis(Axis::Horizontal),
+            //     borderBox.y + contentBoxStartOnAxis(Axis::Vertical),
+            //     1,
+            //     m_color,
+            //     contentBoxOnAxis(Axis::Horizontal));
+        }
+
         for (auto& child : m_children) {
-            child->RenderQueue(render, parent_content_box_x+ contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
+            child->RenderQueue(render, text_render, parent_content_box_x+ contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
         }
     }
+
 
     auto UIElement::Scale(float size) -> void {
         if (m_sizing.x_type == SizingType::Fixed) {

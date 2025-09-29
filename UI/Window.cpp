@@ -3,7 +3,7 @@
 //
 
 #include "Window.h"
-
+#include "UIElement.h"
 
 namespace Funccia::UI {
 // Window::Window() {
@@ -406,22 +406,29 @@ namespace Funccia::UI {
 
     Window::Window() {
         int wWidth = 1960;
+        // windowFrame = std::make_unique<UIElement>();
+        // windowFrame
+        // ->HorizontalFixed(2400)
+        // .VerticalFixed(1200);
+        //windowFrame->AddChild(Tag::AutoMargin);
+
         root = std::make_unique<UIElement>();
-        root->m_margin = {20, 20, 20, 20};
-        root->m_padding = {-2, -2, 20, -2};
+        root->m_margin = {200, 0, 0, 0};
+        root->m_padding = {-2, -2, 0, -2};
         root->m_background = {1.0, 1.0, 1.0, 1};
         root->m_border_radius = {12, 12, 12, 12};
-        root->m_border_widths = {4, 4, 4, 4};
+        root->m_border_widths = {4, 14, 4, 4};
         root->m_border_color = {0.478, 0.478, 0.978, 0.8}; // #e0e0e0
-        root->m_shadow = {{0.0, 0.0, 0.0, 0.14}, {0, 4}, 50, 0};
+        root->m_shadow = {{0.0, 0.0, 0.0, 0.10}, {0, 15}, 35, 0};
         root->m_displayAxis = Axis::Vertical;
-        root->m_sizing.x_type = SizingType::Fixed;
-        root->m_sizing.y_type = SizingType::Fit;
-        root->m_sizing.x_value = 2400;
-        //root->m_sizing.y_value = 1200;
+        root->HorizontalFixed(1600);
+        root->VerticalFixed(1600);
+
+        //windowFrame->AddChild(std::move(root));
+        //windowFrame->AddChild(Tag::AutoMargin);
 
         auto titleBar = std::make_unique<UIElement>();
-        titleBar->m_margin = {0, 0, 15, 0};
+        titleBar->m_margin = {0, 0, 0, 0};
         titleBar->m_padding = {17.5, 17.5, 17.5, 17.5};
         titleBar->m_background = {0.15, 0.2, 0.5, 1};
         titleBar->m_border_radius = {0, 12, 0, 12};
@@ -477,39 +484,60 @@ namespace Funccia::UI {
         const int kItemW    = 24;   // item width
         const int kItemH    = 24;   // item height
 
-        for (int i = 0; i < kRows; ++i) {
-            auto row = std::make_unique<UIElement>();
+        //root->AddChild(Tag::AutoMargin);
+        auto windowFrame = std::make_unique<UIElement>();
+        windowFrame->HorizontalGrow();
+        windowFrame->VerticalGrow();
+        windowFrame->Background({0.90f, 0.30f, 0.0f, 0.2f});
+        windowFrame->MarginBottom(1);
+        windowFrame->HorizontalStack();
+        windowFrame->m_border_radius = {0, 0, 12, 12};
+        //windowFrame->InvisibleButOccupySpace(true);
+
+
+        auto container = std::make_unique<UIElement>();
+        container->HorizontalFixed(800);
+        container->VerticalGrow();
+        container->VerticalStack();
+        container->Background({0.90f, 0.90f, 0.90f, 1.0f});
+        container->m_border_widths = {2, 20, 2, 2};
+        container->m_border_color = {0.0, 0.906, 0.922, 1}; // #e5e7eb
+        //container->InvisibleButOccupySpace(true);
+
+
+
+        std::vector<std::string> text = {
+            "This is line 1.",
+            "Music.mp3",
+            "If you want to switch to it, basically in the shader all you need to change is the in vec4 colors; to uniform vec4 colors; ",
+            "Then delete the portion in mesh render for the AttrColors, no idea if you can use it for the separate rgba vec4,  but its easier to just send it as a uniform similar to the checkbox example",
+            "also very important, don't forget it",
+        };
+
+        for (int i = 0; i < text.size(); ++i) {
+            auto row = std::make_unique<UIElement>(Tag::Paragraph);
             row->m_background = {0.90f, 0.90f, 0.90f, 1.0f};
             row->m_margin     = {5, 10, 5, 10}; // L T R B
-            row->m_border_widths  = {2, 2, 2, 2};
+            row->m_padding    = {0, 0, 5, 0}; // L T R B
+            row->m_border_widths  = {2, 0, 2, 2};
             row->m_border_color   = {0.478f, 0.478f, 0.778f, 1.0f};
+            row->TextColor({0,0,0,1.0f}).Text(text[i]).VerticalGrow().HorizontalGrow();
             row->m_sizing.x_type  = SizingType::Grow;
-            // If you have a layout flag/enum for containers, enable horizontal flow:
-            // row->SetLayoutDirection(LayoutDirection::Horizontal);
-            // row->SetGap(4); // optional, if supported
+            row->VerticalFixed(200);
 
-            for (int j = 0; j < kPerRow; ++j) {
-                auto item = std::make_unique<UIElement>();
-                item->m_background = {0.96f, 0.96f, 0.98f, 1.0f};
-                item->m_margin     = {4, 4, 4, 4}; // small gaps between items
-                item->m_sizing.x_type  = SizingType::Grow;
-                item->m_sizing.y_type  = SizingType::Fixed;
-                item->m_sizing.x_value = kItemW;
-                item->m_sizing.y_value = kItemH;
-                item->m_border_widths  = {1, 1, 1, 1};
-                item->m_border_color   = {0.75f, 0.75f, 0.95f, 1.0f};
-                // item->m_border_radius  = {4, 4, 4, 4}; // optional
 
-                row->AddChild(std::move(item));
-            }
-
-            root->AddChild(std::move(row));
+            container->AddChild(std::move(row));
         }
+        windowFrame->AddChild(std::move(container));
+        windowFrame->AddChild(Tag::AutoMargin);
+
+        root->AddChild(std::move(windowFrame));
+
     }
 
 
 
-    auto Window::Render(Graphic::GL::UIRenderer& renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
+    auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_render, float target_x, float target_y, const glm::vec2& screenSize) -> void {
         root->CalculateFitSizeOnAxis(Axis::Horizontal);
         root->CalculateGrowSizeOnAxis(Axis::Horizontal);
 
@@ -518,9 +546,11 @@ namespace Funccia::UI {
 
         root->PositionOnAxis(Axis::Horizontal, 0);
         root->PositionOnAxis(Axis::Vertical, 0);
-        root->RenderQueue(renderer, target_x, target_y);
-        //root->m_sizing.x_value = screenSize.x;
-        //root->m_sizing.y_value = screenSize.y;
+        root->RenderQueue(renderer,text_render, target_x, target_y);
+
+        root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+
     }
 
 }

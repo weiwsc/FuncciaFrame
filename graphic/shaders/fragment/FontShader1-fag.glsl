@@ -1,16 +1,18 @@
-#version 410 core
+#version 330 core
 in vec2 vUV;
 in vec3 vColor;
 out vec4 FragColor;
 
 uniform sampler2D fontAtlas;
 
-void main(){
-    float distance = texture(fontAtlas, vUV).a;
+void main() {
+    // Your atlas stores in RED channel but swizzles to ALPHA
+    // So sample .a (which contains the RED data due to swizzling)
+    float coverage = texture(fontAtlas, vUV).a;
 
-    // This is the key: fwidth() automatically adjusts smoothing based on zoom level
-    float width = fwidth(distance);
-    float alpha = smoothstep(0.5 - width, 0.5 + width, distance);
+    // Simple alpha blending (no SDF)
+    FragColor = vec4(vColor * coverage, coverage);
 
-    FragColor = vec4(vColor, alpha);
+    // Debug: uncomment to see raw coverage values
+    // FragColor = vec4(coverage, coverage, coverage, 1.0);
 }

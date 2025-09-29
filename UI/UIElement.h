@@ -11,7 +11,12 @@
 
 #include "SideOffset.h"
 #include "UITypes.h"
-#include "../graphic/gl/UIRender.h"
+
+
+namespace Funccia::Graphic::GL {
+    class TextRenderer;
+    class UIRenderer;
+}
 
 namespace Funccia::UI {
     using UIRender = Funccia::Graphic::GL::UIRenderer;
@@ -21,6 +26,8 @@ namespace Funccia::UI {
         friend class Window;
     public:
         UIElement() = default;
+
+        explicit UIElement(Tag tag);
         virtual ~UIElement() = default;
 
         [[nodiscard]] float borderBoxStartOnAxis(Axis axis) const;
@@ -31,17 +38,25 @@ namespace Funccia::UI {
         [[nodiscard]] auto contentBoxOnAxis(Axis axis) const -> float;
 
         //void SetParent(UIElement* parent);
-        void AddChild(std::unique_ptr<UIElement> child);
+        auto AddChild(std::unique_ptr<UIElement> child)->UIElement*;
+        auto AddChild(Tag tag) -> UIElement*;
         //void RemoveChild(UIElement* child);
         //void RemoveAllChildren();
 
+        // ==========> layout algorithms <==============
         auto CalculateFitSizeOnAxis(Axis axis) -> float;
         auto CalculateGrowSizeOnAxis(Axis axis) -> void;
+        auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
-        auto RenderQueue(UIRender& render, float parent_content_box_x, float parent_content_box_y) -> void;
+        auto RenderQueue(UIRender& render,Graphic::GL::TextRenderer& text_render, float parent_content_box_x, float parent_content_box_y) -> void;
+        //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
+        // ==========> layout algorithms ends <==============
+
 
         auto Scale(float size) -> void;
     protected:
+        Tag m_tag {Tag::None};
+
         UIElement* m_parent {nullptr};
         std::vector<std::unique_ptr<UIElement>> m_children;
 
@@ -50,10 +65,10 @@ namespace Funccia::UI {
         SideOffset m_padding {0,0,0,0};
 
 
-        vec2 m_min_size {0,0};
-        vec2 m_max_size {0,0};
+        //vec2 m_min_size {0,0};
+        //vec2 m_max_size {0,0};
 
-        SideOffset m_absoluteOffset {0,0,0,0}; //used for absolute positioning, right/up/left/buttom
+        //SideOffset m_absoluteOffset {0,0,0,0}; //used for absolute positioning, right/up/left/buttom
 
         vec4 m_background {0,0,0,0}; //color
         vec4 m_color {0,0,0,0}; //text color, no text rendering yet tho
@@ -65,13 +80,71 @@ namespace Funccia::UI {
         Axis m_displayAxis {Axis::Horizontal};
         Position m_position {Position::Absolute};
         Sizing m_sizing {SizingType::Fit, SizingType::Fit, 0, 0};
+
         bool m_is_rendered {true};
+        bool m_invisibleButOccupySpace {false};
+
 
         Shadow m_shadow {vec4(0,0,0,0), vec2(0,0), 0, 0};
 
         //cached by difference passes
         PositionOffset m_border_box_pos {0,0};
         PositionOffset m_border_box_size {0,0};
+
+
+        std::string m_text {};
+        int m_font_size {30};
+
+
+
+
+        // =========> fluent api <=============
+    public:
+        auto MarginTop(float value) -> UIElement&;
+        auto MarginLeft(float value) -> UIElement&;
+        auto MarginRight(float value) -> UIElement&;
+        auto MarginBottom(float value) -> UIElement&;
+        auto Margin(float all_values) -> UIElement&;
+        auto Margin(float topButton, float leftRight) -> UIElement&;
+        auto Margin(float top, float right, float bottom, float left) -> UIElement&;
+
+        auto PaddingTop(float value) -> UIElement&;
+        auto PaddingLeft(float value) -> UIElement&;
+        auto PaddingRight(float value) -> UIElement&;
+        auto PaddingBottom(float value) -> UIElement&;
+        auto Padding(float all_values) -> UIElement&;
+        auto Padding(float topButton, float leftRight) -> UIElement&;
+        auto Padding(float top, float right, float bottom, float left) -> UIElement&;
+
+        auto Background(vec4 color) -> UIElement&;
+        auto TextColor(vec4 color) -> UIElement&;
+
+        auto BoxShadow(vec2 offSet, float blur, float spread, vec4 color) -> UIElement&;
+        auto BoxShadowColor(vec4 color) -> UIElement&;
+        auto BoxShadowBlur(float blur) -> UIElement&;
+        auto BoxShadowSpread(float spread) -> UIElement&;
+        auto BoxShadowOffset(vec2 offSet) -> UIElement&;
+
+        auto BorderRadius(vec4 radius) -> UIElement&;
+        auto BorderColor(vec4 color) -> UIElement&;
+        auto BorderWidth(vec4 width) -> UIElement&;
+
+        auto HorizontalFixed(float size) -> UIElement&;
+        auto HorizontalGrow() -> UIElement&;
+        auto HorizontalFit() -> UIElement&;
+
+        auto VerticalFixed(float size) -> UIElement&;
+        auto VerticalGrow() -> UIElement&;
+        auto VerticalFit() -> UIElement&;
+
+        auto HorizontalStack() -> UIElement&;
+        auto VerticalStack() -> UIElement&;
+
+        auto SetTag(Tag tag) -> UIElement&;
+
+        auto Text(const std::string& text) -> UIElement&;
+
+        auto InvisibleButOccupySpace(bool option) -> UIElement&;
 
     };
 }

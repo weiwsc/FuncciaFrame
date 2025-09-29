@@ -82,6 +82,14 @@ namespace Funccia::UI {
         float y_value;
     };
 
+    enum class Tag {
+        None,
+        Label,         // label is horizontally grown, vertically fixed
+        Paragraph,     // paragraph is grown on both axes
+        AutoMargin
+    };
+
+
 }
 
 #endif //FUNCCIAFRAME_UITYPES_H

@@ -72,10 +72,10 @@ void main(){
 
     // --- Inner (content box) computed per-side ------------------------------
     // v_borderWidths = (L,T,R,B)
-    float L = v_borderWidths.x;
-    float T = v_borderWidths.y;
-    float R = v_borderWidths.z;
-    float B = v_borderWidths.w;
+    float L = v_borderWidths.w;
+    float T = v_borderWidths.x;
+    float R = v_borderWidths.y;
+    float B = v_borderWidths.z;
 
     // Inner edges (move each side inward); this also implies a center shift
     vec2 halfI   = max(halfO - 0.5 * vec2(L + R, T + B), vec2(0.0));

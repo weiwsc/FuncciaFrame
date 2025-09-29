@@ -10,12 +10,14 @@
 #include FT_FREETYPE_H
 
 #include "stb_image.h"
+#include "graphic/gl/FontAtlas.h"
 #include "graphic/gl/Mesh.h"
 #include "graphic/gl/Shader.h"
 #include "graphic/gl/ShaderUtil.h"
 #include "graphic/gl/TextRenderer.h"
 #include "graphic/gl/UIRender.h"
 #include "graphic/gl/WindowController.h"
+#include "graphic/text/GlyphAtlas.h"
 #include "test/TestRun.h"
 #include "UI/Window.h"
 
@@ -30,6 +32,9 @@ struct MousePickCtx {
     Funccia::Graphic::GL::Mesh* mesh = nullptr;
     float planeZ = 0.0f;
 };
+
+
+
 
 int main() {
     // Initialize core systems
@@ -111,6 +116,8 @@ int main() {
         glm::mat4 P = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 1000.0f);
         glm::mat4 invPV = glm::inverse(P * V);
 
+
+
         glm::vec4 nearNDC(x_ndc, y_ndc, -1.0f, 1.0f);
         glm::vec4 farNDC(x_ndc, y_ndc, 1.0f, 1.0f);
 
@@ -136,8 +143,8 @@ int main() {
     glfwSetCursorPosCallback(window, cursorPosCB);
 
 
-    Funccia::Graphic::GL::FontAtlas atlas("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/Recursive_Code/RecMonoLinear/RecMonoLinear-Regular-1.085.ttf",
-                                          2048, 16, 96, 2);
+    Funccia::Graphic::GL::FontAtlas atlas("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                                          32, 1024, 1);
     Funccia::Graphic::GL::TextRenderer text(atlas,
                                             "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/FontShader1-ver.glsl",
                                             "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/FontShader1-fag.glsl");
@@ -146,19 +153,22 @@ int main() {
 
     int winW, winH;
     glfwGetFramebufferSize(window, &winW, &winH);
-    text.setProjection(winW, winH);
 
+    Funccia::Graphic::GL::GlyphAtlas alt = Funccia::Graphic::GL::GlyphAtlas();
+    alt.CreateAtlas("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf", 1200, 1200);
+    alt.WriteAtlasToDisk();
 
 
     renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
 
-    atlas.saveDebugPNG("font_atlas_debug.png", /*showGrid=*/true, /*showGlyphBoxes=*/true);
+    //atlas.saveDebugPNG("font_atlas_debug.png", /*showGrid=*/true, /*showGlyphBoxes=*/true);
 
     // Timing variables
     double lastTime = glfwGetTime();
     int framesSinceUpdate = 0;
     double fpsWindowStart = lastTime;
     char titleBuf[128];
+
 
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
@@ -192,23 +202,27 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         mesh.Draw(&shader);
 
+
+
         glfwGetFramebufferSize(window, &winW, &winH);
+
         renderer.BeginFrame();
+        text.clear();
         //uiWindow.Render(renderer, (mesh.GetTransform().position().x + 0.5)* float(winW)/7 + 500, 500 - (mesh.GetTransform().position().y + 0.5)* float(winH)/7);
-        uiWindow.Render(renderer, 0, 0, glm::vec2(winW, winH));
+        uiWindow.Render(renderer, text,0, 0, glm::vec2(winW, winH));
         renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
 
-        text.clear();
-        text.queue("This is sample text", 225, 25, 1.0f, {0,0,0});
-        text.queue("(C) LearnOpenGL.com Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
-                   "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took "
-                   "a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but "
-                   "also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with "
-                   "the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software "
-                   "like Aldus PageMaker including versions of Lorem Ipsum.", 225, 570, 0.35f, {0,0,0}, 600);
-        //text.queue("This is text rendering test", 25, 540, 0.2f, {0,0,0});
-        text.queue("The quick brown fox jumps", 225, 120, 0.5f, {0.2f,0.4f,0.8f});
-        text.flush();
+
+        // text.queue("This is sample text", 225, 25, 1.0f, {0,0,0});
+        // text.queue("(C) LearnOpenGL.com Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
+        //            "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took "
+        //            "a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but "
+        //            "also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with "
+        //            "the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software "
+        //            "like Aldus PageMaker including versions of Lorem Ipsum.", 225, 570, 0.35f, {0,0,0}, 600);
+        // //text.queue("This is text rendering test", 25, 540, 0.2f, {0,0,0});
+        // text.queue("The quick brown fox jumps", 225, 120, 0.5f, {0.2f,0.4f,0.8f});
+        text.flush(window);
 
 
         glfwSwapBuffers(window);
