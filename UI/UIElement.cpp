@@ -82,7 +82,10 @@ namespace Funccia::UI {
     }
 
     auto UIElement::CalculateFitSizeOnAxis(Axis axis)->float {
-
+        if (!m_is_rendered) return 0;
+#ifdef FF_UI_LAZY_LAYOUT
+        if (!m_layoutUpdated) return m_border_box_size.OnAxis(axis) + m_margin.firstAndSecond(axis);
+#endif
         float totalChildSize = 0;
         float maxSize = 0;
 
@@ -117,6 +120,10 @@ namespace Funccia::UI {
 
     auto UIElement::CalculateGrowSizeOnAxis(Axis axis) -> void {
         if (!m_is_rendered) return;
+#ifdef FF_UI_LAZY_LAYOUT
+        if (!m_layoutUpdated) return;
+#endif
+
         std::vector<UIElement*> childToGrow {};
 
         float usedSpace = 0;
@@ -172,7 +179,9 @@ namespace Funccia::UI {
 
     auto UIElement::PositionOnAxis(Axis axis,  float parent_content_box_start) -> void {
         if (!m_is_rendered) return;
-
+#ifdef FF_UI_LAZY_LAYOUT
+        if (!m_layoutUpdated) return;
+#endif
         m_border_box_pos.Set(axis, parent_content_box_start + m_margin.first(axis));
         //this should be 0, since the origin is the start of the parent's content box IN THE PERSPECTIVE OF THE CHILDREN ELEMENTS
         float cursorPos = 0;
@@ -187,7 +196,15 @@ namespace Funccia::UI {
             }
         }
     }
-
+#ifdef FF_UI_LAZY_LAYOUT
+    auto UIElement::FlipLazyLayoutPass() -> void {
+        if (!m_is_rendered) return;
+        m_layoutUpdated = false;
+        for (auto& child : m_children) {
+            child->FlipLazyLayoutPass();
+        }
+    }
+#endif
     auto UIElement::GlobalPositionPass(float parent_content_box_x, float parent_content_box_y) -> void {
         if (!m_is_rendered) return;
         m_global_border_box = {

@@ -169,7 +169,9 @@ int main() {
     double fpsWindowStart = lastTime;
     char titleBuf[128];
 
-
+#ifdef FF_UI_LAZY_LAYOUT
+    uiWindow.InitLayout(0, 0, glm::vec2(winW, winH));
+#endif
     // Main render loop
     while (!glfwWindowShouldClose(window)) {
         double now = glfwGetTime();
@@ -200,18 +202,43 @@ int main() {
         // Clear and render 3D scene
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         mesh.Draw(&shader);
 
 
 
         glfwGetFramebufferSize(window, &winW, &winH);
 
-        renderer.BeginFrame();
-        text.clear();
-        //uiWindow.Render(renderer, (mesh.GetTransform().position().x + 0.5)* float(winW)/7 + 500, 500 - (mesh.GetTransform().position().y + 0.5)* float(winH)/7);
-        uiWindow.Render(renderer, text,0, 0, glm::vec2(winW, winH));
-        renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
+        auto frameStart = std::chrono::high_resolution_clock::now();
 
+        renderer.BeginFrame();
+
+        //text.clear();
+        for (int i = 0; i < 1; i++) {
+            uiWindow.RenderProfile(renderer, text, i * 10, i * 10, glm::vec2(winW, winH));
+        }
+
+        // Only time the GPU work for the actual rendering
+        GLuint query;
+        glGenQueries(1, &query);
+        glBeginQuery(GL_TIME_ELAPSED, query);
+
+        auto start = std::chrono::high_resolution_clock::now();
+        renderer.Render(glm::mat4(1.0f), glm::vec2(winW, winH));
+        auto end = std::chrono::high_resolution_clock::now();
+        double RendererRenderCPU = std::chrono::duration<double, std::milli>(end - start).count();
+
+        glEndQuery(GL_TIME_ELAPSED);
+
+        GLuint64 elapsedGPU;
+        glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsedGPU);
+        double gpuMs = elapsedGPU / 1000000.0;
+
+        auto frameEnd = std::chrono::high_resolution_clock::now();
+        double frameMs = std::chrono::duration<double, std::milli>(frameEnd - frameStart).count();
+
+        printf("Frame: %.3f ms | GPU draw: %.3f ms | CPU submit: %.3f ms\n",
+               frameMs, gpuMs, RendererRenderCPU);
 
         // text.queue("This is sample text", 225, 25, 1.0f, {0,0,0});
         // text.queue("(C) LearnOpenGL.com Lorem Ipsum is simply dummy text of the printing and typesetting industry. "
@@ -238,6 +265,7 @@ int main() {
             fpsWindowStart = now;
             framesSinceUpdate = 0;
         }
+
     }
 
 

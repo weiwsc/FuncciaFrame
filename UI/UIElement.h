@@ -4,6 +4,8 @@
 
 #ifndef FUNCCIAFRAME_UIELEMENT_H
 #define FUNCCIAFRAME_UIELEMENT_H
+
+#define FF_UI_LAZY_LAYOUT
 #include <memory>
 
 #include "../graphic/gl/MathTypes.h"
@@ -48,6 +50,10 @@ namespace Funccia::UI {
         auto CalculateGrowSizeOnAxis(Axis axis) -> void;
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
+#ifdef FF_UI_LAZY_LAYOUT
+        auto FlipLazyLayoutPass() -> void;
+#endif
+
         auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
         auto CullingPass(vec4 parent_clipping_box) -> void;
         auto RenderQueue(UIRender& render,Graphic::GL::TextRenderer& text_render, float parent_content_box_x, float parent_content_box_y) -> void;
@@ -85,7 +91,9 @@ namespace Funccia::UI {
 
         bool m_is_rendered {true};
         bool m_invisibleButOccupySpace {false};
-
+#ifdef FF_UI_LAZY_LAYOUT
+        bool m_layoutUpdated {true};
+#endif
 
         Shadow m_shadow {vec4(0,0,0,0), vec2(0,0), 0, 0};
 
