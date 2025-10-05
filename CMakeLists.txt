@@ -97,7 +97,12 @@ add_executable(FuncciaFrame main.cpp
         graphic/text/Glyph.cpp
         graphic/text/Glyph.h
         UI/UIHelper.cpp
-        UI/UIHelper.h)
+        UI/UIHelper.h
+        graphic/WindowInterface.h
+        graphic/gl/GLFWWindow.cpp
+        graphic/gl/GLFWWindow.h
+        graphic/gl/SDLWindow.cpp
+        graphic/gl/SDLWindow.h)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_IMAGE)

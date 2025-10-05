@@ -1298,7 +1298,7 @@ auto Window::UIStressTest() -> void {
     root->AddChild(std::move(mainContent));
 }
 
-    auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_render, float target_x, float target_y, const glm::vec2& screenSize) -> void {
+    auto Window::Render(Graphic::GL::UIRenderer& renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
         root->CalculateFitSizeOnAxis(Axis::Horizontal);
         root->CalculateGrowSizeOnAxis(Axis::Horizontal);
 
@@ -1312,7 +1312,7 @@ auto Window::UIStressTest() -> void {
 
         root->GlobalPositionPass(target_x, target_y);
         root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
-        root->RenderQueue(renderer,text_render, target_x, target_y);
+        root->RenderQueue(renderer, target_x, target_y);
 
         root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
         root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
@@ -1363,7 +1363,7 @@ auto Window::UIStressTest() -> void {
     double culling = std::chrono::duration<double, std::milli>(end - start).count();
 
     start = std::chrono::high_resolution_clock::now();
-    root->RenderQueue(renderer, text_render, target_x, target_y);
+    root->RenderQueue(renderer, target_x, target_y);
     end = std::chrono::high_resolution_clock::now();
     double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
 

@@ -56,7 +56,7 @@ namespace Funccia::UI {
 
         auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
         auto CullingPass(vec4 parent_clipping_box) -> void;
-        auto RenderQueue(UIRender& render,Graphic::GL::TextRenderer& text_render, float parent_content_box_x, float parent_content_box_y) -> void;
+        auto RenderQueue(UIRender& render, float parent_content_box_x, float parent_content_box_y) -> void;
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
 
