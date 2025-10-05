@@ -310,10 +310,10 @@ namespace Funccia::UI {
             m_sizing.y_value *= size;
         }
         m_border_radius *= size;
-        //m_border_widths.SetTop(m_border_widths.top() * size);
-        //m_border_widths.SetRight(m_border_widths.right() * size);
-        //m_border_widths.SetBottom(m_border_widths.bottom() * size);
-        //m_border_widths.SetLeft(m_border_widths.left() * size);
+        m_border_widths.SetTop(m_border_widths.top() * size);
+        m_border_widths.SetRight(m_border_widths.right() * size);
+        m_border_widths.SetBottom(m_border_widths.bottom() * size);
+        m_border_widths.SetLeft(m_border_widths.left() * size);
         for (auto& child : m_children) {
             child->Scale(size);
         }

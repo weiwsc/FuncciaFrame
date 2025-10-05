@@ -98,7 +98,7 @@ void UIRenderer::CreateGeometry() {
     glVertexAttribDivisor(8, 1);
 }
 
-void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screenSize) {
+    void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screenSize) {
     if (instanceData.empty()) return;
 
     const size_t floatsPerInstance = 32;
@@ -110,17 +110,21 @@ void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screen
     }
 
     m_shader.use();
-
-    // This shader uses u_viewSize, not u_viewProjection
     glUniform2f(glGetUniformLocation(m_shader.getID(), "u_viewSize"),
                 screenSize.x, screenSize.y);
 
-    // Upload instance data
     glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
-    glBufferData(GL_ARRAY_BUFFER,
-                 instanceData.size() * sizeof(float),
-                 instanceData.data(),
-                 GL_DYNAMIC_DRAW);
+
+    // Orphan the buffer to avoid stalls
+    size_t bufferSize = instanceData.size() * sizeof(float);
+    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_STREAM_DRAW); // Orphan
+    glBufferSubData(GL_ARRAY_BUFFER, 0, bufferSize, instanceData.data()); // Upload
+
+    //without orphaning
+//    glBufferData(GL_ARRAY_BUFFER,
+ //            instanceData.size() * sizeof(float),
+ //            instanceData.data(),
+   //          GL_DYNAMIC_DRAW);
 
     glBindVertexArray(m_VAO);
     glDisable(GL_CULL_FACE);
@@ -131,7 +135,6 @@ void UIRenderer::Render(const glm::mat4& viewProjection, const glm::vec2& screen
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, instanceCount);
 
-    // Restore state
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

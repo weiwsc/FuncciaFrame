@@ -169,6 +169,7 @@ int main() {
     double fpsWindowStart = lastTime;
     char titleBuf[128];
 
+
 #ifdef FF_UI_LAZY_LAYOUT
     uiWindow.InitLayout(0, 0, glm::vec2(winW, winH));
 #endif
@@ -208,14 +209,14 @@ int main() {
 
 
         glfwGetFramebufferSize(window, &winW, &winH);
-
+        // =================window ui===============================
         auto frameStart = std::chrono::high_resolution_clock::now();
 
         renderer.BeginFrame();
 
         //text.clear();
         for (int i = 0; i < 1; i++) {
-            uiWindow.RenderProfile(renderer, text, i * 10, i * 10, glm::vec2(winW, winH));
+            uiWindow.Render(renderer, text, 0, 200, glm::vec2(winW, winH));
         }
 
         // Only time the GPU work for the actual rendering

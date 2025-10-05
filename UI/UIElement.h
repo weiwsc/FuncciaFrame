@@ -5,7 +5,7 @@
 #ifndef FUNCCIAFRAME_UIELEMENT_H
 #define FUNCCIAFRAME_UIELEMENT_H
 
-#define FF_UI_LAZY_LAYOUT
+//#define FF_UI_LAZY_LAYOUT
 #include <memory>
 
 #include "../graphic/gl/MathTypes.h"
