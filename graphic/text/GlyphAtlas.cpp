@@ -5,6 +5,8 @@
 #include "GlyphAtlas.h"
 
 #include <iostream>
+#include <ranges>
+#include <unordered_set>
 #include <vector>
 #include <freetype/freetype.h>
 
@@ -13,118 +15,222 @@
 #include "stb_image_write.h"
 
 namespace Funccia::Graphic::GL {
+    GlyphAtlas::~GlyphAtlas() {
+        for (auto &val: FontDictionary | std::views::values) {
+            FT_Done_Face(val);
+        }
+        if (m_ft) {
+            FT_Done_FreeType(m_ft);
+        }
+        if (m_atlasTextureArray) {
+            glDeleteTextures(1, &m_atlasTextureArray);
+        }
+    }
 
-    void GlyphAtlas::CreateAtlas(const std::string &fontPath, int width, int height) {
-        initFreeType();
+    void GlyphAtlas::CreateAtlas(int width, int height, int maxLayers) {
+        if (m_ft == nullptr) {
+            initFreeType();
+        }
 
         m_atlasHeight = height;
         m_atlasWidth = width;
+        m_maxAtlasLayers = maxLayers;
 
-        // All functions return a value different than 0 whenever an error occurred
-        glGenTextures(1, &m_atlasTexture);
-        glBindTexture(GL_TEXTURE_2D, m_atlasTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0,GL_RED, GL_UNSIGNED_BYTE, nullptr); // 8-bit alpha
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glGenTextures(1, &m_atlasTextureArray);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
 
-        FT_Face face = loadFreeTypeFace(fontPath);
+        glTexImage3D(GL_TEXTURE_2D_ARRAY,
+            0,
+            GL_R8,
+            width, height, maxLayers,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            nullptr);
 
-        HBShaper* shaper = new HBShaper();
-        shaper->init(face);
-        std::vector<HBTextInfo> results;
-        shaper->Shape("Hello World!", results);
 
-        int cursorX = 10;
-        int cursorY = 10;
-        for (auto& result : results) {
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        m_atlasCurrentLayerIndex = 0;
+        m_cursorX = m_pad;
+        m_cursorY = m_pad;
+        m_maxRowHeight = 0;
+    }
+
+
+    void GlyphAtlas::BindAtlasLayer(int layerIndex) const {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
+    }
+
+    void GlyphAtlas::BindCurrentAtlasLayer() const {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
+    }
+
+    auto GlyphAtlas::GlyphExists(hb_codepoint_t codepoint) const -> bool {
+        return GlyphDictionary.contains(codepoint);
+    }
+
+
+    void GlyphAtlas::CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t>& glyphToAdd) {
+
+        for (auto& result : glyphToAdd) {
             //Glyph glyph = Glyph();
             FT_Int32 flags =  FT_LOAD_DEFAULT;
-            FT_Load_Glyph(face, result.glyph_id, flags);
+            FT_Load_Glyph(face, result, flags);
             FT_Error err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF);
             if (err) continue;
             const FT_Bitmap& bm = face->glyph->bitmap;
             if (bm.width == 0 || bm.rows == 0 || bm.buffer == nullptr) continue;
-            glBindTexture(GL_TEXTURE_2D, m_atlasTexture);
+
+            BindCurrentAtlasLayer();
+
+            glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             // Handle row stride (pitch)
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, bm.pitch > 0 ? bm.pitch : -bm.pitch);
+            //glPixelStorei(GL_UNPACK_ROW_LENGTH, bm.pitch > 0 ? bm.pitch : -bm.pitch);
+            glPixelStorei(GL_UNPACK_ROW_LENGTH, bm.pitch > 0 ? bm.pitch : 0);
+
             const uint8_t* src = bm.buffer;
             if (bm.pitch < 0) {
                 src = bm.buffer + (bm.rows - 1) * (-bm.pitch); // flip if top-down
             }
+            int w = bm.width;
+            int h = bm.rows;
 
-            glTexSubImage2D(GL_TEXTURE_2D,
+            int startX = 0;
+            int startY = 0;
+
+            if (!PackGlyph(w, h, startX, startY)) {
+                throw std::runtime_error("GlyphAtlas: Failed to pack glyph");
+            }
+
+
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
                             0,              // level
-                            cursorX, cursorY,           // dest offset in atlas
-                            bm.width, bm.rows,
+                            startX, startY, m_atlasCurrentLayerIndex,         // dest offset in atlas
+                            w, h, 1,
                             GL_RED, GL_UNSIGNED_BYTE,
                             src);
-            cursorX += bm.width + 2; // Small padding between glyphs
 
-            // Check if we need to move to next row
-            if (cursorX + 64 > width) { // Leave room for next glyph (assuming max 64px width)
-                cursorX = 10;
-                cursorY += 80; // Move down by max glyph height + padding
+            GlyphDictionary[result] = {
+                .uv = {startX, startY, startX + w, startY + h},
+                .size = {w, h},
+                .bearing = {face->glyph->bitmap_left, face->glyph->bitmap_top},
+                .layer = m_atlasCurrentLayerIndex,
+            };
             }
 
 
 
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
             glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // restore default
+
+    }
+
+    auto GlyphAtlas::PackGlyph(int width, int height, int &x, int &y) -> bool {
+        const int pw = width + 2*m_pad;
+        const int ph = height + 2*m_pad;
+
+        while (!PackGlyphInRow(pw, ph, x, y)) {
+            while (!AdvanceRow()) {
+                if (!AdvanceLayer()) {
+                    return false;
+                }
+            }
         }
-
+        x += m_pad;
+        y += m_pad;
+        return true;
+    }
+    auto GlyphAtlas::PackGlyphInRow(int paddedWidth, int paddedHeight, int& x, int& y)->bool {
+        if (m_cursorY + paddedHeight> m_atlasHeight) return false;
+        if (m_cursorX + paddedWidth <= m_atlasWidth) {
+            x = m_cursorX;
+            y = m_cursorY;
+            m_cursorX += paddedWidth;
+            m_maxRowHeight = std::max(m_maxRowHeight, paddedHeight);
+            return true;
+        }
+        return false;
     }
 
-    void GlyphAtlas::CopyBitmapToAtlas(const FT_Bitmap& bitmap, int x, int y, Glyph& g)
-    {
-
+    auto GlyphAtlas::AdvanceRow() -> bool {
+        if (m_cursorY + m_maxRowHeight < m_atlasHeight) {
+            m_cursorX = m_pad;
+            m_cursorY += m_maxRowHeight;
+            m_maxRowHeight = 0;
+            return true;
+        }
+        return false;
     }
 
-    void GlyphAtlas::WriteAtlasToDisk() {
-        GLuint fbo;
+    auto GlyphAtlas::AdvanceLayer() -> bool {
+        if (m_atlasCurrentLayerIndex + 1 >= m_maxAtlasLayers) {
+            return false; // no more pages available
+        }
+        m_atlasCurrentLayerIndex += 1;
+
+        m_cursorX = m_pad;
+        m_cursorY = m_pad;
+        m_maxRowHeight = 0;
+        return true;
+    }
+
+
+    void GlyphAtlas::WriteAtlasToDisk(int layer) {
+        GLuint fbo = 0;
         glGenFramebuffers(1, &fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                               GL_TEXTURE_2D, m_atlasTexture, 0);
 
-        // Read back
+        glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                  m_atlasTextureArray, /*level*/0, /*layer*/layer);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glDeleteFramebuffers(1, &fbo);
+            return;
+        }
+
         std::vector<uint8_t> pixels(m_atlasWidth * m_atlasHeight);
-        glReadPixels(0, 0, m_atlasWidth, m_atlasHeight,
-                     GL_RED, GL_UNSIGNED_BYTE, pixels.data());
+        glReadPixels(0, 0, m_atlasWidth, m_atlasHeight, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDeleteFramebuffers(1, &fbo);
 
-        // Save
-        stbi_write_png("atlas.png", m_atlasWidth, m_atlasHeight, 1, pixels.data(), m_atlasWidth);
+        stbi_write_png("atlas_layer.png", m_atlasWidth, m_atlasHeight, 1, pixels.data(), m_atlasWidth);
     }
 
+
+
+
     void GlyphAtlas::initFreeType() {
-        if (FT_Init_FreeType(&m_ft))
-        {
-            std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-            return;
+        if (FT_Init_FreeType(&m_ft)) {
+            throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
         }
     }
 
     auto GlyphAtlas::loadFreeTypeFace(const std::string &fontPath) -> FT_Face {
         FT_Face face;
-        if (FT_New_Face(m_ft, fontPath.c_str(), 0, &face))
-        {
-            std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
+        if (FT_New_Face(m_ft, fontPath.c_str(), 0, &face)) {
+            throw std::runtime_error("ERROR::FREETYPE: Failed to load font: " + fontPath);
         }
-        //FT_Set_Char_Size(face, 0, 1000, 0, 0);
         FT_Set_Pixel_Sizes(face, 96, 96);
         return face;
     }
 
-
-    void GlyphAtlas::Shape() {
-
+    auto GlyphAtlas::LoadFont(const std::string &fontPath) -> FT_Face {
+        if(FontDictionary.find(fontPath) == FontDictionary.end()) {
+            FontDictionary[fontPath] = loadFreeTypeFace(fontPath);
+        }
+        return FontDictionary[fontPath];
     }
+
+    auto GlyphAtlas::GetGlyph(hb_codepoint_t codepoint) -> AtlasCell {return GlyphDictionary[codepoint];}
 }
 

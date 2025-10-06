@@ -19,6 +19,7 @@
 #include "graphic/gl/TextRenderer.h"
 #include "graphic/gl/UIRender.h"
 #include "graphic/gl/WindowController.h"
+#include "graphic/text/GlyphAtlas.h"
 #include "UI/Window.h"
 
 using namespace std;
@@ -161,6 +162,13 @@ int main() {
 #ifdef FF_UI_LAZY_LAYOUT
     uiWindow.InitLayout(0, 0, glm::vec2(winW, winH));
 #endif
+
+
+    auto atlas = std::make_unique<Funccia::Graphic::GL::GlyphAtlas>();
+    atlas->CreateAtlas(2048, 2048, 4);
+    atlas->ProcessText("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                        "std::vector<uint8_t> pixels(m_atlasWidth * m_atlasHeight);");
+    atlas->WriteAtlasToDisk(0);
 
 
     // Main render loop

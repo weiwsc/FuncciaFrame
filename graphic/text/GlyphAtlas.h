@@ -1,13 +1,8 @@
 //
 // Created by Wangsicong Wei on 2025-09-25.
 //
-
-
-
 #ifndef FUNCCIAFRAME_GLYPHATLAS_H
 #define FUNCCIAFRAME_GLYPHATLAS_H
-
-
 // FreeType / HarfBuzz
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -20,34 +15,66 @@
 // OpenGL
 #include <map>
 #include <string>
+#include <unordered_set>
 #include <glad/glad.h>
 
 #include "../gl/MathTypes.h"
 #include "Glyph.h"
+#include "HBShaper.h"
+
 namespace Funccia::Graphic::GL {
+    struct AtlasCell;
 
     class GlyphAtlas {
     public:
         GlyphAtlas() = default;
-        ~GlyphAtlas() = default;
-        void CreateAtlas(const std::string& fontPath, int width, int height);
-        void CopyBitmapToAtlas(const FT_Bitmap& bitmap, int x, int y, Glyph& g);
-        void WriteAtlasToDisk();
+        ~GlyphAtlas();
+        void CreateAtlas(int width, int height, int maxLayers);
+        void BindAtlasLayer(int layerIndex) const;
+        void BindCurrentAtlasLayer() const;
+
+        auto GlyphExists(hb_codepoint_t codepoint) const -> bool;
+
+        void CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t>& glyphToAdd);
+        void WriteAtlasToDisk(int layer);
+
+
 
         void initFreeType();
         auto loadFreeTypeFace(const std::string &fontPath) -> FT_Face;
-        void Shape();
+
+        FT_Face LoadFont(const std::string& fontPath);
+
+        auto GetGlyph(hb_codepoint_t codepoint) -> AtlasCell ;
+
     private:
-        std::map<unsigned char, Glyph> m_glyphs;
+        auto PackGlyph(int width, int height, int& x, int& y) -> bool;
+        auto PackGlyphInRow(int paddedWidth, int paddedHeight, int& x, int& y) -> bool;
+        auto AdvanceRow()->bool;
+        auto AdvanceLayer()->bool;
+        FT_Library m_ft {nullptr};
 
-        FT_Library m_ft {0};
-        FT_Face m_face {0};
-
-
-
-        GLuint m_atlasTexture {0};
+        GLuint m_atlasTextureArray {0};
         int m_atlasWidth {0};
         int m_atlasHeight {0};
+        int m_maxAtlasLayers {0};
+        int m_atlasCurrentLayerIndex {0};
+
+
+        int m_cursorX {10};
+        int m_cursorY {10};
+        int m_maxRowHeight {0};
+        int m_pad {10};
+
+        std::map<hb_codepoint_t, AtlasCell> GlyphDictionary {};
+        std::map<std::string, FT_Face> FontDictionary {};
+    };
+
+    struct AtlasCell {
+        vec4 uv;
+        vec2 size;
+        vec2 bearing;
+        int layer;
     };
 
 }

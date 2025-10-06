@@ -74,8 +74,6 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/MathTypes.h
         UI/UIElement.cpp
         UI/UIElement.h
-        graphic/gl/FontAtlas.cpp
-        graphic/gl/FontAtlas.h
         graphic/gl/TextRenderer.cpp
         graphic/gl/TextRenderer.h
         external/std_image/include/stb_image_write.cpp
