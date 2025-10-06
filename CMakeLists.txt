@@ -15,8 +15,6 @@ endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
-pkg_check_modules(SDL3_IMAGE REQUIRED IMPORTED_TARGET sdl3-image)
-pkg_check_modules(SDL3_TTF REQUIRED IMPORTED_TARGET sdl3-ttf)
 pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
 pkg_check_modules(FT2 REQUIRED freetype2)
 pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
@@ -105,8 +103,6 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/SDLWindow.h)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
-target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_IMAGE)
-target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_TTF)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)
 target_link_libraries(FuncciaFrame PRIVATE glfw)
 target_link_libraries(FuncciaFrame

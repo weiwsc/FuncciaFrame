@@ -6,6 +6,9 @@
 #define FUNCCIAFRAME_WINDOWCONTROLLER_H
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include "SDLWindow.h"
+#include "../WindowInterface.h"
 #include "../../core/Singleton.h"
 
 namespace Funccia::Graphic::GL {
@@ -14,13 +17,13 @@ namespace Funccia::Graphic::GL {
         WindowController();
         virtual ~WindowController();
 
-        auto GetWindow() -> GLFWwindow * {if (m_window == nullptr) NewWindow(); return m_window; }
+        auto GetWindow() -> WindowInterface* {if (m_window == nullptr) NewWindow(); return m_window; }
 
         void NewWindow();
 
 
     private:
-        GLFWwindow* m_window;
+        WindowInterface *m_window;
     };
 }
 
