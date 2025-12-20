@@ -22,12 +22,131 @@ namespace Funccia::UI {
 
 
     Window::Window() {
-        //UIStressTest();
-        UI3();
-        //UI1();
+
+        TextUI();
     }
 
 
+
+
+
+    auto Window::TextUI() -> void {
+        root = std::make_unique<UIElement>();
+        root->Padding(20);
+        root->Background({0.12f, 0.12f, 0.12f, 0.0f});
+        root->VerticalStack();
+        root->HorizontalFixed(2000);
+        root->VerticalFixed(1000);
+
+        auto textbox = std::make_unique<UIElement>();
+        textbox->Padding(0);
+        textbox->Background({1, 1, 1, 1.0f});
+        textbox->BorderWidth({3, 3, 3, 3});
+        textbox->BorderColor({0.2f, 0.2f, 0.22f, 1.0f});
+        textbox->VerticalStack();
+        textbox->HorizontalGrow();
+        textbox->VerticalFixed(200);
+        textbox->Text("Hello World!");
+
+        root->AddChild(std::move(textbox));
+    }
+
+
+
+    auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
+        root->CalculateFitSizeOnAxis(Axis::Horizontal);
+        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
+
+        root->CalculateFitSizeOnAxis(Axis::Vertical);
+        root->CalculateGrowSizeOnAxis(Axis::Vertical);
+
+        root->PositionOnAxis(Axis::Horizontal, 0);
+        root->PositionOnAxis(Axis::Vertical, 0);
+
+
+
+        root->GlobalPositionPass(target_x, target_y);
+        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
+        root->RenderQueue(renderer,text_renderer, target_x, target_y);
+
+        root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+
+    }
+
+    auto Window::RenderProfile(Graphic::GL::UIRenderer& renderer,Graphic::GL::TextRenderer& text_renderer,  Graphic::GL::TextRenderer& text_render,
+                    float target_x, float target_y, const glm::vec2& screenSize) -> void {
+
+    auto start = std::chrono::high_resolution_clock::now();
+    root->CalculateFitSizeOnAxis(Axis::Horizontal);
+    auto end = std::chrono::high_resolution_clock::now();
+    double fitX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateGrowSizeOnAxis(Axis::Horizontal);
+    end = std::chrono::high_resolution_clock::now();
+    double growX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateFitSizeOnAxis(Axis::Vertical);
+    end = std::chrono::high_resolution_clock::now();
+    double fitY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateGrowSizeOnAxis(Axis::Vertical);
+    end = std::chrono::high_resolution_clock::now();
+    double growY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->PositionOnAxis(Axis::Horizontal, 0);
+    end = std::chrono::high_resolution_clock::now();
+    double posX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->PositionOnAxis(Axis::Vertical, 0);
+    end = std::chrono::high_resolution_clock::now();
+    double posY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->GlobalPositionPass(target_x, target_y);
+    end = std::chrono::high_resolution_clock::now();
+    double globalPos = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CullingPass(vec4(0, 0, screenSize.x, screenSize.y));
+    end = std::chrono::high_resolution_clock::now();
+    double culling = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->RenderQueue(renderer,text_renderer, target_x, target_y);
+    end = std::chrono::high_resolution_clock::now();
+    double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
+
+    printf("FitX: %.3f | GrowX: %.3f | FitY: %.3f | GrowY: %.3f | PosX: %.3f | PosY: %.3f | Global: %.3f | Cull: %.3f | Queue: %.3f\n",
+           fitX, growX, fitY, growY, posX, posY, globalPos, culling, renderQueue);
+
+    //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+    //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+}
+
+    auto Window::InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void {
+        //root->Scale(2);
+        root->GlobalPositionPass(target_x, target_y);
+        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
+        //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        root->CalculateFitSizeOnAxis(Axis::Horizontal);
+        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
+
+        root->CalculateFitSizeOnAxis(Axis::Vertical);
+        root->CalculateGrowSizeOnAxis(Axis::Vertical);
+
+        root->PositionOnAxis(Axis::Horizontal, 0);
+        root->PositionOnAxis(Axis::Vertical, 0);
+#ifdef FF_UI_LAZY_LAYOUT
+        root->FlipLazyLayoutPass();
+#endif
+    }
 
     auto Window::UI1() -> void {
         root = std::make_unique<UIElement>();
@@ -1048,7 +1167,7 @@ root->AddChild(std::move(bottomPanel));
     root->AddChild(std::move(statusBar));
 }
 
-auto Window::UIStressTest() -> void {
+    auto Window::UIStressTest() -> void {
     root = std::make_unique<UIElement>();
     root->Padding(20);
     root->Background({0.12f, 0.12f, 0.12f, 1.0f});
@@ -1298,98 +1417,4 @@ auto Window::UIStressTest() -> void {
     root->AddChild(std::move(mainContent));
 }
 
-    auto Window::Render(Graphic::GL::UIRenderer& renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
-        root->CalculateFitSizeOnAxis(Axis::Horizontal);
-        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-
-        root->CalculateFitSizeOnAxis(Axis::Vertical);
-        root->CalculateGrowSizeOnAxis(Axis::Vertical);
-
-        root->PositionOnAxis(Axis::Horizontal, 0);
-        root->PositionOnAxis(Axis::Vertical, 0);
-
-
-
-        root->GlobalPositionPass(target_x, target_y);
-        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
-        root->RenderQueue(renderer, target_x, target_y);
-
-        root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-
-    }
-
-    auto Window::RenderProfile(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_render,
-                    float target_x, float target_y, const glm::vec2& screenSize) -> void {
-
-    auto start = std::chrono::high_resolution_clock::now();
-    root->CalculateFitSizeOnAxis(Axis::Horizontal);
-    auto end = std::chrono::high_resolution_clock::now();
-    double fitX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-    end = std::chrono::high_resolution_clock::now();
-    double growX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateFitSizeOnAxis(Axis::Vertical);
-    end = std::chrono::high_resolution_clock::now();
-    double fitY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateGrowSizeOnAxis(Axis::Vertical);
-    end = std::chrono::high_resolution_clock::now();
-    double growY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->PositionOnAxis(Axis::Horizontal, 0);
-    end = std::chrono::high_resolution_clock::now();
-    double posX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->PositionOnAxis(Axis::Vertical, 0);
-    end = std::chrono::high_resolution_clock::now();
-    double posY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->GlobalPositionPass(target_x, target_y);
-    end = std::chrono::high_resolution_clock::now();
-    double globalPos = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CullingPass(vec4(0, 0, screenSize.x, screenSize.y));
-    end = std::chrono::high_resolution_clock::now();
-    double culling = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->RenderQueue(renderer, target_x, target_y);
-    end = std::chrono::high_resolution_clock::now();
-    double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
-
-    printf("FitX: %.3f | GrowX: %.3f | FitY: %.3f | GrowY: %.3f | PosX: %.3f | PosY: %.3f | Global: %.3f | Cull: %.3f | Queue: %.3f\n",
-           fitX, growX, fitY, growY, posX, posY, globalPos, culling, renderQueue);
-
-    //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-    //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-}
-
-    auto Window::InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void {
-        //root->Scale(2);
-        root->GlobalPositionPass(target_x, target_y);
-        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
-        //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        root->CalculateFitSizeOnAxis(Axis::Horizontal);
-        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-
-        root->CalculateFitSizeOnAxis(Axis::Vertical);
-        root->CalculateGrowSizeOnAxis(Axis::Vertical);
-
-        root->PositionOnAxis(Axis::Horizontal, 0);
-        root->PositionOnAxis(Axis::Vertical, 0);
-#ifdef FF_UI_LAZY_LAYOUT
-        root->FlipLazyLayoutPass();
-#endif
-    }
 }

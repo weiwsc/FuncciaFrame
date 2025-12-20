@@ -28,46 +28,56 @@ namespace Funccia::Graphic::GL {
     class GlyphAtlas {
     public:
         GlyphAtlas() = default;
+
         ~GlyphAtlas();
+
         void CreateAtlas(int width, int height, int maxLayers);
+
         void BindAtlasLayer(int layerIndex) const;
+
         void BindCurrentAtlasLayer() const;
 
-        auto GlyphExists(hb_codepoint_t codepoint) const -> bool;
+        [[nodiscard]] auto GlyphExists(hb_codepoint_t codepoint) const -> bool;
 
-        void CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t>& glyphToAdd);
+        void CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t> &glyphToAdd);
+
         void WriteAtlasToDisk(int layer);
 
 
-
         void initFreeType();
+
         auto loadFreeTypeFace(const std::string &fontPath) -> FT_Face;
 
-        FT_Face LoadFont(const std::string& fontPath);
+        FT_Face LoadFont(const std::string &fontPath);
 
-        auto GetGlyph(hb_codepoint_t codepoint) -> AtlasCell ;
+        auto GetGlyph(hb_codepoint_t codepoint) -> AtlasCell;
 
+        [[nodiscard]] auto GetAtlasTextureArray() const -> GLuint {return m_atlasTextureArray;};
     private:
-        auto PackGlyph(int width, int height, int& x, int& y) -> bool;
-        auto PackGlyphInRow(int paddedWidth, int paddedHeight, int& x, int& y) -> bool;
-        auto AdvanceRow()->bool;
-        auto AdvanceLayer()->bool;
-        FT_Library m_ft {nullptr};
+        auto PackGlyph(int width, int height, int &x, int &y) -> bool;
 
-        GLuint m_atlasTextureArray {0};
-        int m_atlasWidth {0};
-        int m_atlasHeight {0};
-        int m_maxAtlasLayers {0};
-        int m_atlasCurrentLayerIndex {0};
+        auto PackGlyphInRow(int paddedWidth, int paddedHeight, int &x, int &y) -> bool;
+
+        auto AdvanceRow() -> bool;
+
+        auto AdvanceLayer() -> bool;
+
+        FT_Library m_ft{nullptr};
+
+        GLuint m_atlasTextureArray{0};
+        int m_atlasWidth{0};
+        int m_atlasHeight{0};
+        int m_maxAtlasLayers{0};
+        int m_atlasCurrentLayerIndex{0};
 
 
-        int m_cursorX {10};
-        int m_cursorY {10};
-        int m_maxRowHeight {0};
-        int m_pad {10};
+        int m_cursorX{10};
+        int m_cursorY{10};
+        int m_maxRowHeight{0};
+        int m_pad{10};
 
-        std::map<hb_codepoint_t, AtlasCell> GlyphDictionary {};
-        std::map<std::string, FT_Face> FontDictionary {};
+        std::map<hb_codepoint_t, AtlasCell> GlyphDictionary{};
+        std::map<std::string, FT_Face> FontDictionary{};
     };
 
     struct AtlasCell {
@@ -76,9 +86,6 @@ namespace Funccia::Graphic::GL {
         vec2 bearing;
         int layer;
     };
-
 }
 
 #endif //FUNCCIAFRAME_GLYPHATLAS_H
-
-

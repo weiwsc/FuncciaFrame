@@ -9,7 +9,7 @@
 #include "SDLWindow.h"
 #include "../../core/util.h"
 
-namespace Funccia::Graphic::GL{
+namespace Funccia::Graphic::GL {
     WindowController::WindowController() {
         m_window = nullptr;
     }

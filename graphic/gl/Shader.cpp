@@ -13,21 +13,19 @@ namespace Funccia::Graphic::GL {
     Shader::Shader() {
         m_fragmentShaderSource = nullptr;
         m_vertexShaderSource = nullptr;
-
     }
 
     Shader::~Shader() {
         glDeleteProgram(ID);
     }
 
-    void Shader::initialize(const std::string& vertexPath, const std::string& fragmentPath) {
+    void Shader::initialize(const std::string &vertexPath, const std::string &fragmentPath) {
         m_vertexShaderSource = Core::AssetController::Instance().GetAsset(vertexPath);
         m_fragmentShaderSource = Core::AssetController::Instance().GetAsset(fragmentPath);
         ID = ShaderUtil::CreateShaderProgram(m_vertexShaderSource, m_fragmentShaderSource);
     }
 
-    void Shader::use()
-    {
+    void Shader::use() {
         glUseProgram(ID);
     }
 
@@ -42,16 +40,16 @@ namespace Funccia::Graphic::GL {
         deserializer.read(m_fragmentShaderSource);
         Resource::Deserialize(deserializer);
     }
-    void Shader::setBool(const std::string &name, bool value) const
-    {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+
+    void Shader::setBool(const std::string &name, bool value) const {
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int) value);
     }
-    void Shader::setInt(const std::string &name, int value) const
-    {
+
+    void Shader::setInt(const std::string &name, int value) const {
         glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
     }
-    void Shader::setFloat(const std::string &name, float value) const
-    {
+
+    void Shader::setFloat(const std::string &name, float value) const {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
 }

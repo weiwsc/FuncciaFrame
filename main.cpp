@@ -164,11 +164,11 @@ int main() {
 #endif
 
 
-    auto atlas = std::make_unique<Funccia::Graphic::GL::GlyphAtlas>();
-    atlas->CreateAtlas(2048, 2048, 4);
-    atlas->ProcessText("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
-                        "std::vector<uint8_t> pixels(m_atlasWidth * m_atlasHeight);");
-    atlas->WriteAtlasToDisk(0);
+    auto textRender = std::make_unique<Funccia::Graphic::GL::TextRenderer>();
+    textRender->Initialize("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/FontShader1-ver.glsl",
+        "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/FontShader1-fag.glsl");
+
+
 
 
     // Main render loop
@@ -218,8 +218,9 @@ int main() {
         auto frameStart = std::chrono::high_resolution_clock::now();
 
         renderer.BeginFrame();
+        textRender->BeginFrame();
         for (int i = 0; i < 1; i++) {
-            uiWindow.Render(renderer, 0, 200, glm::vec2(winW, winH));
+            uiWindow.Render(renderer,*textRender, 0, 200, glm::vec2(winW, winH));
         }
         // TODO: REVIEW THIS - UIRenderer.Render() may need platform-independent window
         // 🔍 STATIC_CAST LOCATION - Check if UIRenderer needs platform-specific window
@@ -227,6 +228,14 @@ int main() {
 
         auto frameEnd = std::chrono::high_resolution_clock::now();
         double frameMs = std::chrono::duration<double, std::milli>(frameEnd - frameStart).count();
+
+
+
+        // textRender->ProcessText(1000, 100,1000, "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+        //                     "hi; this is a text render test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", {0,0,0,1}, 90);
+        // textRender->ProcessText(1000, 150,1000, "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+        //                     "std::snprintf(titleBuf, sizeof(titleBuf), \"FuncciaFrame | %.1f FPS (%.2f ms)\", fps, ms);", {0,0.2,0.5,1}, 40);
+        textRender->Render(glm::vec2(winW, winH));
 
         window->SwapBuffers();
 
@@ -242,7 +251,7 @@ int main() {
             framesSinceUpdate = 0;
         }
     }
-
+    textRender->DebugDrawAtlasToDisk();
     // Clean shutdown
     window->Close();
 

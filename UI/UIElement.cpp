@@ -249,7 +249,7 @@ namespace Funccia::UI {
     }
 
 
-    auto UIElement::RenderQueue(UIRender &render,float parent_content_box_x, float parent_content_box_y) -> void {
+    auto UIElement::RenderQueue(UIRender &render, Graphic::GL::TextRenderer &text_renderer,float parent_content_box_x, float parent_content_box_y) -> void {
         if (m_invisibleButOccupySpace || !m_is_rendered || m_culled) {return;}
         // vec4 borderBox = {
         //     parent_content_box_x + m_border_box_pos.GetX(),
@@ -288,16 +288,18 @@ namespace Funccia::UI {
         });
 
         if (!m_text.empty()) {
-            // text_render.queue(m_text,
-            //     borderBox.x + contentBoxStartOnAxis(Axis::Horizontal),
-            //     borderBox.y + contentBoxStartOnAxis(Axis::Vertical),
-            //     1,
-            //     m_color,
-            //     contentBoxOnAxis(Axis::Horizontal));
+            text_renderer.ProcessText(m_global_border_box.x + contentBoxStartOnAxis(Axis::Horizontal),
+                m_global_border_box.y + contentBoxStartOnAxis(Axis::Vertical),
+                m_global_border_box.z - m_global_border_box.x,
+                m_text_wrap_mode,
+                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                m_color,
+                static_cast<float>(m_font_size),
+                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf");
         }
 
         for (auto& child : m_children) {
-            child->RenderQueue(render, parent_content_box_x+ contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
+            child->RenderQueue(render,text_renderer, parent_content_box_x+ contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
         }
     }
 

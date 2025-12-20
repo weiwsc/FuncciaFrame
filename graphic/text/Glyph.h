@@ -18,11 +18,12 @@
 
 namespace Funccia::Graphic::GL {
     using vec2 = glm::vec2;
+
     struct Glyph {
-        vec2 uv0 {}; //bottom left
-        vec2 uv1 {}; //upper right
-        vec2 size {};
-        vec2 bearing {};
+        vec2 uv0{}; //bottom left
+        vec2 uv1{}; //upper right
+        vec2 size{};
+        vec2 bearing{};
     };
 }
 #endif //FUNCCIAFRAME_GLYPH_H

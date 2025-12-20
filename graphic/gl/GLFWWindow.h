@@ -7,10 +7,12 @@
 #include "../WindowInterface.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 namespace Funccia::Graphic::GL {
     class GLFWWindow : public WindowInterface {
     public:
         GLFWWindow() = default;
+
         ~GLFWWindow() override;
 
         auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame") -> bool override;
@@ -33,11 +35,12 @@ namespace Funccia::Graphic::GL {
 
         auto GetCursorPos(double &x, double &y) const -> void override;
 
-        void * GetNativeWindow() override;
+        void *GetNativeWindow() override;
 
     private:
         static auto KeyMap(Key key) -> int;
-        GLFWwindow* m_window {nullptr};
+
+        GLFWwindow *m_window{nullptr};
     };
 }
 

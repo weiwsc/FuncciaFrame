@@ -36,12 +36,11 @@ namespace Funccia::Graphic::GL {
         int success;
         char infoLog[512];
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
+        if (!success) {
             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            const char* shaderTypeName = (glShaderType == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
+            const char *shaderTypeName = (glShaderType == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT");
             std::cout << "ERROR::SHADER::" << shaderTypeName
-                      << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+                    << "::COMPILATION_FAILED\n" << infoLog << std::endl;
         }
 
         return shader;
@@ -66,10 +65,11 @@ namespace Funccia::Graphic::GL {
         return shaderProgram;
     }
 
-    auto ShaderUtil::CreateShaderProgram(Core::Asset* vertexShaderSource, Core::Asset* fragmentShaderSource) -> unsigned int {
-        return LinkProgram(CompileShader(reinterpret_cast<char *>(vertexShaderSource->GetData()), ShaderType::Vertex, (vertexShaderSource->GetDataSize())),
-                        CompileShader(reinterpret_cast<char *>(fragmentShaderSource->GetData()), ShaderType::Fragment, (fragmentShaderSource->GetDataSize())));
+    auto ShaderUtil::CreateShaderProgram(Core::Asset *vertexShaderSource,
+                                         Core::Asset *fragmentShaderSource) -> unsigned int {
+        return LinkProgram(CompileShader(reinterpret_cast<char *>(vertexShaderSource->GetData()), ShaderType::Vertex,
+                                         (vertexShaderSource->GetDataSize())),
+                           CompileShader(reinterpret_cast<char *>(fragmentShaderSource->GetData()),
+                                         ShaderType::Fragment, (fragmentShaderSource->GetDataSize())));
     }
-
-
 }

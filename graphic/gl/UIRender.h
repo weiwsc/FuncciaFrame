@@ -11,6 +11,7 @@
 
 #include "Shader.h"
 #include "glm/glm.hpp"
+
 namespace Funccia::Graphic::GL {
     class UIRenderer {
     private:
@@ -22,12 +23,17 @@ namespace Funccia::Graphic::GL {
 
     public:
         UIRenderer();
+
         ~UIRenderer();
 
-        bool Initialize(const std::string& vertexShaderPath, const std::string& fragmentShaderPath);
+        bool Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath);
+
         void Cleanup();
-        void Render(const glm::mat4& viewProjection, const glm::vec2& screenSize);
+
+        void Render(const glm::mat4 &viewProjection, const glm::vec2 &screenSize);
+
         void Collect(std::initializer_list<float> values);
+
         void BeginFrame();
     };
 }

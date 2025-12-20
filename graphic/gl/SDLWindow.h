@@ -6,11 +6,14 @@
 #define FUNCCIAFRAME_SDLWINDOW_H
 #include <SDL3/SDL.h>
 #include "../WindowInterface.h"
+
 namespace Funccia::Graphic::GL {
     class SDLWindow : WindowInterface {
     public:
         SDLWindow() = default;
+
         ~SDLWindow() override;
+
         auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame") -> bool override;
 
         auto Close() -> void override;
@@ -31,15 +34,17 @@ namespace Funccia::Graphic::GL {
 
         auto GetCursorPos(double &x, double &y) const -> void override;
 
-        void * GetNativeWindow() override;
+        void *GetNativeWindow() override;
+
     private:
-        SDL_Window* m_window {nullptr};
-        const bool* m_keyboardState {nullptr};
-        SDL_GLContext m_glContext {nullptr};
-        bool m_shouldClose {false};
+        SDL_Window *m_window{nullptr};
+        const bool *m_keyboardState{nullptr};
+        SDL_GLContext m_glContext{nullptr};
+        bool m_shouldClose{false};
 
 
         static auto MapKey(Key key) -> SDL_Scancode;
+
         static inline int s_instanceCount = 0;
     };
 }

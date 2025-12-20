@@ -16,6 +16,7 @@
 
 
 namespace Funccia::Graphic::GL {
+    enum class TextWrap;
     class TextRenderer;
     class UIRenderer;
 }
@@ -56,7 +57,7 @@ namespace Funccia::UI {
 
         auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
         auto CullingPass(vec4 parent_clipping_box) -> void;
-        auto RenderQueue(UIRender& render, float parent_content_box_x, float parent_content_box_y) -> void;
+        auto RenderQueue(UIRender& render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y) -> void;
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
 
@@ -79,7 +80,7 @@ namespace Funccia::UI {
         //SideOffset m_absoluteOffset {0,0,0,0}; //used for absolute positioning, right/up/left/buttom
 
         vec4 m_background {0,0,0,0}; //color
-        vec4 m_color {0,0,0,0}; //text color, no text rendering yet tho
+        vec4 m_color {0,0,0,1}; //text color, no text rendering yet tho
 
         SideOffset m_border_widths {0,0,0,0};
         vec4 m_border_radius {0,0,0,0};
@@ -107,6 +108,7 @@ namespace Funccia::UI {
 
         std::string m_text {};
         int m_font_size {30};
+        Graphic::GL::TextWrap m_text_wrap_mode;
 
 
 

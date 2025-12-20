@@ -12,15 +12,18 @@
 #include "../../core/Singleton.h"
 
 namespace Funccia::Graphic::GL {
-    class WindowController : public Core::Singleton<WindowController>{
+    class WindowController : public Core::Singleton<WindowController> {
     public:
         WindowController();
+
         virtual ~WindowController();
 
-        auto GetWindow() -> WindowInterface* {if (m_window == nullptr) NewWindow(); return m_window; }
+        auto GetWindow() -> WindowInterface * {
+            if (m_window == nullptr) NewWindow();
+            return m_window;
+        }
 
         void NewWindow();
-
 
     private:
         WindowInterface *m_window;

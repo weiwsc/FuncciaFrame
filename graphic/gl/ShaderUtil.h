@@ -13,7 +13,6 @@ namespace Funccia::Core {
 }
 
 namespace Funccia::Graphic::GL {
-
     enum class ShaderType {
         Vertex,
         Fragment
@@ -22,10 +21,15 @@ namespace Funccia::Graphic::GL {
     class ShaderUtil {
     public:
         static auto CompileVertexShader(const char *source) -> unsigned int;
+
         static auto CompileFragmentShader(const char *source) -> unsigned int;
+
         static auto CompileShader(const char *source, ShaderType type, std::size_t length = NULL) -> unsigned int;
+
         static auto LinkProgram(unsigned int vertexShader, unsigned int fragmentShader) -> unsigned int;
-        static auto CreateShaderProgram(Core::Asset* vertexShaderSource, Core::Asset* fragmentShaderSource) -> unsigned int;
+
+        static auto CreateShaderProgram(Core::Asset *vertexShaderSource,
+                                        Core::Asset *fragmentShaderSource) -> unsigned int;
     };
 }
 

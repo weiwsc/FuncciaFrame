@@ -5,6 +5,7 @@
 #include "GLFWWindow.h"
 
 #include <iostream>
+
 namespace Funccia::Graphic::GL {
     GLFWWindow::~GLFWWindow() {
     }
@@ -25,22 +26,20 @@ namespace Funccia::Graphic::GL {
         // glfw window creation
         // --------------------
         m_window = glfwCreateWindow(_width, _height, _title.c_str(), nullptr, nullptr);
-        if (m_window == nullptr)
-        {
+        if (m_window == nullptr) {
             std::cout << "Failed to create GLFW window" << std::endl;
             glfwTerminate();
             return false;
         }
         glfwMakeContextCurrent(m_window);
         glfwSwapInterval(0);
-        glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow*, int w, int h){
+        glfwSetFramebufferSizeCallback(m_window, [](GLFWwindow *, int w, int h) {
             glViewport(0, 0, w, h);
         });
 
         // glad: load all OpenGL function pointers
         // ---------------------------------------
-        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-        {
+        if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
             std::cout << "Failed to initialize GLAD" << std::endl;
             return false;
         }
@@ -108,13 +107,13 @@ namespace Funccia::Graphic::GL {
         }
     }
 
-    void * GLFWWindow::GetNativeWindow() {
+    void *GLFWWindow::GetNativeWindow() {
         return m_window;
     }
 
     auto GLFWWindow::KeyMap(Key key) -> int {
         using Key = Funccia::Graphic::Key;
-    
+
         switch (key) {
             // Alphanumeric
             case Key::A: return GLFW_KEY_A;
@@ -143,8 +142,8 @@ namespace Funccia::Graphic::GL {
             case Key::X: return GLFW_KEY_X;
             case Key::Y: return GLFW_KEY_Y;
             case Key::Z: return GLFW_KEY_Z;
-        
-                // Numbers
+
+            // Numbers
             case Key::Num0: return GLFW_KEY_0;
             case Key::Num1: return GLFW_KEY_1;
             case Key::Num2: return GLFW_KEY_2;
@@ -155,8 +154,8 @@ namespace Funccia::Graphic::GL {
             case Key::Num7: return GLFW_KEY_7;
             case Key::Num8: return GLFW_KEY_8;
             case Key::Num9: return GLFW_KEY_9;
-        
-                // Function keys
+
+            // Function keys
             case Key::F1: return GLFW_KEY_F1;
             case Key::F2: return GLFW_KEY_F2;
             case Key::F3: return GLFW_KEY_F3;
@@ -169,14 +168,14 @@ namespace Funccia::Graphic::GL {
             case Key::F10: return GLFW_KEY_F10;
             case Key::F11: return GLFW_KEY_F11;
             case Key::F12: return GLFW_KEY_F12;
-        
-                // Arrow keys
+
+            // Arrow keys
             case Key::Up: return GLFW_KEY_UP;
             case Key::Down: return GLFW_KEY_DOWN;
             case Key::Left: return GLFW_KEY_LEFT;
             case Key::Right: return GLFW_KEY_RIGHT;
-        
-                // Special keys
+
+            // Special keys
             case Key::Space: return GLFW_KEY_SPACE;
             case Key::Enter: return GLFW_KEY_ENTER;
             case Key::Escape: return GLFW_KEY_ESCAPE;
@@ -188,8 +187,8 @@ namespace Funccia::Graphic::GL {
             case Key::End: return GLFW_KEY_END;
             case Key::PageUp: return GLFW_KEY_PAGE_UP;
             case Key::PageDown: return GLFW_KEY_PAGE_DOWN;
-        
-                // Modifiers
+
+            // Modifiers
             case Key::LeftShift: return GLFW_KEY_LEFT_SHIFT;
             case Key::RightShift: return GLFW_KEY_RIGHT_SHIFT;
             case Key::LeftControl: return GLFW_KEY_LEFT_CONTROL;
@@ -198,7 +197,7 @@ namespace Funccia::Graphic::GL {
             case Key::RightAlt: return GLFW_KEY_RIGHT_ALT;
             case Key::LeftSuper: return GLFW_KEY_LEFT_SUPER;
             case Key::RightSuper: return GLFW_KEY_RIGHT_SUPER;
-        
+
             default: return GLFW_KEY_UNKNOWN;
         }
     }

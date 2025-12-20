@@ -38,18 +38,18 @@ namespace Funccia::Graphic::GL {
     }
 
     void Transform::LookAt(const Transform &target, const vec3 &up) {
-    #ifdef FF_FORWARD_NEG_Z
+#ifdef FF_FORWARD_NEG_Z
         vec3 forward = target.position() - m_position;
         forward = glm::normalize(forward);
         vec3 right = glm::normalize(glm::cross(up, forward));
         vec3 newUp = glm::normalize(glm::cross(forward, right));
         m_rotation = glm::quatLookAt(-forward, newUp);
-    #else
+#else
         vec3 forward = glm::normalize(target.position() - m_position);
         vec3 right = glm::normalize(glm::cross(up, forward));
         vec3 newUp = glm::normalize(glm::cross(forward, right));
         m_rotation = glm::quatLookAt(forward, newUp);
-    #endif
+#endif
     }
 
     void Transform::LookAt(const vec3 &worldPosition, const vec3 &up) {
@@ -57,8 +57,8 @@ namespace Funccia::Graphic::GL {
 
     auto Transform::getModelMatrix() const -> mat4 {
         return glm::translate(mat4(1), m_position) *
-       glm::mat4_cast(m_rotation) *
-       glm::scale(mat4(1), m_scale);
+               glm::mat4_cast(m_rotation) *
+               glm::scale(mat4(1), m_scale);
     }
 
     auto Transform::TransformDirection(const vec3 &_direction) const -> vec3 {
@@ -71,7 +71,7 @@ namespace Funccia::Graphic::GL {
 
     void Transform::InverseTransformDirections(std::vector<vec3> &_direction) const {
         glm::quat inverseRotation = glm::inverse(m_rotation);
-        for (auto& dir : _direction) {
+        for (auto &dir: _direction) {
             dir = inverseRotation * dir;
         }
     }

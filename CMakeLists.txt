@@ -98,7 +98,10 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/GLFWWindow.cpp
         graphic/gl/GLFWWindow.h
         graphic/gl/SDLWindow.cpp
-        graphic/gl/SDLWindow.h)
+        graphic/gl/SDLWindow.h
+        graphic/text/IRectPacker.h
+        graphic/text/GridRectPacker.cpp
+        graphic/text/GridRectPacker.h)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)

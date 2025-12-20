@@ -40,13 +40,13 @@ namespace Funccia::Graphic::GL {
         glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
 
         glTexImage3D(GL_TEXTURE_2D_ARRAY,
-            0,
-            GL_R8,
-            width, height, maxLayers,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            nullptr);
+                     0,
+                     GL_R8,
+                     width, height, maxLayers,
+                     0,
+                     GL_RED,
+                     GL_UNSIGNED_BYTE,
+                     nullptr);
 
 
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -76,15 +76,14 @@ namespace Funccia::Graphic::GL {
     }
 
 
-    void GlyphAtlas::CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t>& glyphToAdd) {
-
-        for (auto& result : glyphToAdd) {
+    void GlyphAtlas::CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t> &glyphToAdd) {
+        for (auto &result: glyphToAdd) {
             //Glyph glyph = Glyph();
-            FT_Int32 flags =  FT_LOAD_DEFAULT;
+            FT_Int32 flags = FT_LOAD_DEFAULT;
             FT_Load_Glyph(face, result, flags);
             FT_Error err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_SDF);
             if (err) continue;
-            const FT_Bitmap& bm = face->glyph->bitmap;
+            const FT_Bitmap &bm = face->glyph->bitmap;
             if (bm.width == 0 || bm.rows == 0 || bm.buffer == nullptr) continue;
 
             BindCurrentAtlasLayer();
@@ -96,7 +95,7 @@ namespace Funccia::Graphic::GL {
             //glPixelStorei(GL_UNPACK_ROW_LENGTH, bm.pitch > 0 ? bm.pitch : -bm.pitch);
             glPixelStorei(GL_UNPACK_ROW_LENGTH, bm.pitch > 0 ? bm.pitch : 0);
 
-            const uint8_t* src = bm.buffer;
+            const uint8_t *src = bm.buffer;
             if (bm.pitch < 0) {
                 src = bm.buffer + (bm.rows - 1) * (-bm.pitch); // flip if top-down
             }
@@ -112,30 +111,34 @@ namespace Funccia::Graphic::GL {
 
 
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY,
-                            0,              // level
-                            startX, startY, m_atlasCurrentLayerIndex,         // dest offset in atlas
+                            0, // level
+                            startX, startY, m_atlasCurrentLayerIndex, // dest offset in atlas
                             w, h, 1,
                             GL_RED, GL_UNSIGNED_BYTE,
                             src);
 
             GlyphDictionary[result] = {
-                .uv = {startX, startY, startX + w, startY + h},
-                .size = {w, h},
-                .bearing = {face->glyph->bitmap_left, face->glyph->bitmap_top},
+                .uv = {
+                    static_cast<float>(startX) / static_cast<float>(m_atlasWidth),
+                    static_cast<float>(startY) / static_cast<float>(m_atlasHeight),
+                    static_cast<float>(startX + w) / static_cast<float>(m_atlasWidth),
+                    static_cast<float>(startY + h) / static_cast<float>(m_atlasHeight)
+                },
+                .size = {static_cast<float>(w), static_cast<float>(h)},
+                .bearing = {static_cast<float>(face->glyph->bitmap_left),
+                            static_cast<float>(face->glyph->bitmap_top)},
                 .layer = m_atlasCurrentLayerIndex,
             };
-            }
+        }
 
 
-
-            glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // restore default
-
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // restore default
     }
 
     auto GlyphAtlas::PackGlyph(int width, int height, int &x, int &y) -> bool {
-        const int pw = width + 2*m_pad;
-        const int ph = height + 2*m_pad;
+        const int pw = width + 2 * m_pad;
+        const int ph = height + 2 * m_pad;
 
         while (!PackGlyphInRow(pw, ph, x, y)) {
             while (!AdvanceRow()) {
@@ -148,8 +151,9 @@ namespace Funccia::Graphic::GL {
         y += m_pad;
         return true;
     }
-    auto GlyphAtlas::PackGlyphInRow(int paddedWidth, int paddedHeight, int& x, int& y)->bool {
-        if (m_cursorY + paddedHeight> m_atlasHeight) return false;
+
+    auto GlyphAtlas::PackGlyphInRow(int paddedWidth, int paddedHeight, int &x, int &y) -> bool {
+        if (m_cursorY + paddedHeight > m_atlasHeight) return false;
         if (m_cursorX + paddedWidth <= m_atlasWidth) {
             x = m_cursorX;
             y = m_cursorY;
@@ -207,8 +211,6 @@ namespace Funccia::Graphic::GL {
     }
 
 
-
-
     void GlyphAtlas::initFreeType() {
         if (FT_Init_FreeType(&m_ft)) {
             throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
@@ -225,12 +227,11 @@ namespace Funccia::Graphic::GL {
     }
 
     auto GlyphAtlas::LoadFont(const std::string &fontPath) -> FT_Face {
-        if(FontDictionary.find(fontPath) == FontDictionary.end()) {
+        if (FontDictionary.find(fontPath) == FontDictionary.end()) {
             FontDictionary[fontPath] = loadFreeTypeFace(fontPath);
         }
         return FontDictionary[fontPath];
     }
 
-    auto GlyphAtlas::GetGlyph(hb_codepoint_t codepoint) -> AtlasCell {return GlyphDictionary[codepoint];}
+    auto GlyphAtlas::GetGlyph(hb_codepoint_t codepoint) -> AtlasCell { return GlyphDictionary[codepoint]; }
 }
-

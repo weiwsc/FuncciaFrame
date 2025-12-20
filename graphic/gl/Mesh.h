@@ -16,17 +16,25 @@ namespace Funccia::Graphic::GL {
     class Mesh {
     public:
         Mesh(std::vector<float> vertices, std::vector<int> indices);
+
         virtual ~Mesh();
 
         void Create();
+
         void Cleanup();
-        void Draw(Shader* shader);
+
+        void Draw(Shader *shader);
+
         void MoveUp(float amount);
+
         void MoveRight(float amount);
+
         void MoveForward(float amount);
 
         void Rotate(float x, float y, float z);
-        Transform& GetTransform() {return m_transform;}
+
+        Transform &GetTransform() { return m_transform; }
+
     private:
         std::vector<float> m_verticesData;
         std::vector<int> m_indicesData;
