@@ -5,6 +5,9 @@
 #include "Window.h"
 #include "UIElement.h"
 #include <chrono>
+
+#include "../graphic/gl/TextRenderer.h"
+
 struct Timer {
     std::chrono::high_resolution_clock::time_point start;
     const char* name;
@@ -23,7 +26,8 @@ namespace Funccia::UI {
 
     Window::Window() {
 
-        TextUI();
+        TestUI();
+        //MockUI();
     }
 
 
@@ -31,26 +35,1453 @@ namespace Funccia::UI {
 
 
     auto Window::TextUI() -> void {
-        root = std::make_unique<UIElement>();
-        root->Padding(20);
-        root->Background({0.12f, 0.12f, 0.12f, 0.0f});
-        root->VerticalStack();
-        root->HorizontalFixed(2000);
-        root->VerticalFixed(1000);
+            root = std::make_unique<UIElement>();
+    root->Padding(24);
+    root->Background({0.11f, 0.11f, 0.12f, 1.0f});
+    root->VerticalStack();
+    root->HorizontalFixed(2000);
+    root->VerticalFixed(1000);
 
-        auto textbox = std::make_unique<UIElement>();
-        textbox->Padding(0);
-        textbox->Background({1, 1, 1, 1.0f});
-        textbox->BorderWidth({3, 3, 3, 3});
-        textbox->BorderColor({0.2f, 0.2f, 0.22f, 1.0f});
-        textbox->VerticalStack();
-        textbox->HorizontalGrow();
-        textbox->VerticalFixed(200);
-        textbox->Text("Hello World!");
 
-        root->AddChild(std::move(textbox));
+    // ================= TITLE BAR =================
+    auto titleBar = std::make_unique<UIElement>();
+    titleBar->Padding(16, 24, 16, 24);
+    titleBar->Background({0.14f, 0.14f, 0.15f, 1.0f});
+    titleBar->HorizontalStack();
+    titleBar->HorizontalGrow();
+    titleBar->VerticalFixed(96);
+
+    auto titleText = std::make_unique<UIElement>();
+    titleText->Text("Funccia Editor");
+    titleText->FontSize(44);
+    titleText->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
+    titleText->HorizontalGrow();
+    titleText->VerticalGrow();
+    titleBar->AddChild(std::move(titleText));
+
+    root->AddChild(std::move(titleBar));
+
+    // ================= MAIN AREA =================
+    auto mainArea = std::make_unique<UIElement>();
+    mainArea->HorizontalStack();
+    mainArea->HorizontalGrow();
+    mainArea->VerticalGrow();
+
+    // -------- Sidebar --------
+    auto sidebar = std::make_unique<UIElement>();
+    sidebar->Padding(12);
+    sidebar->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    sidebar->VerticalStack();
+    sidebar->HorizontalFixed(360);
+    sidebar->VerticalGrow();
+
+    auto sidebarHeader = std::make_unique<UIElement>();
+    sidebarHeader->Text("Project");
+    sidebarHeader->FontSize(42);
+    sidebarHeader->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    sidebarHeader->MarginBottom(12);
+    sidebar->AddChild(std::move(sidebarHeader));
+
+    for (int i = 0; i < 6; ++i) {
+        auto item = std::make_unique<UIElement>();
+        item->Padding(12, 16, 12, 16);
+        item->Background(i == 2
+            ? vec4{0.3f, 0.4f, 0.9f, 0.2f}
+            : vec4{0.18f, 0.18f, 0.19f, 1.0f});
+        item->BorderRadius({6, 6, 6, 6});
+        item->VerticalFixed(64);
+
+        auto label = std::make_unique<UIElement>();
+        label->Text(i == 2 ? "main.cpp" : "file.cpp");
+        label->FontSize(42);
+        label->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
+        item->AddChild(std::move(label));
+
+        sidebar->AddChild(std::move(item));
     }
 
+    mainArea->AddChild(std::move(sidebar));
+
+    // -------- Editor --------
+    auto editor = std::make_unique<UIElement>();
+    editor->Padding(24);
+    editor->Background({0.15f, 0.15f, 0.16f, 1.0f});
+    editor->VerticalStack();
+    editor->HorizontalGrow();
+    editor->VerticalGrow();
+
+    auto editorTitle = std::make_unique<UIElement>();
+    editorTitle->Text("main.cpp");
+    editorTitle->FontSize(44);
+    editorTitle->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
+    editorTitle->MarginBottom(16);
+    editor->AddChild(std::move(editorTitle));
+
+    for (int i = 0; i < 8; ++i) {
+        auto line = std::make_unique<UIElement>();
+        line->Padding(8, 12, 8, 12);
+        line->Background(i == 3
+            ? vec4{0.3f, 0.4f, 0.9f, 0.12f}
+            : vec4{0, 0, 0, 0});
+        line->HorizontalGrow();
+        line->VerticalFixed(64);
+
+        auto code = std::make_unique<UIElement>();
+        code->Text("auto value = ComputeSomething();");
+        code->FontSize(40); // slightly smaller for code
+        code->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+        line->AddChild(std::move(code));
+
+        editor->AddChild(std::move(line));
+    }
+
+    mainArea->AddChild(std::move(editor));
+    root->AddChild(std::move(mainArea));
+
+    // ================= STATUS BAR =================
+    auto statusBar = std::make_unique<UIElement>();
+    statusBar->Padding(12, 20, 12, 20);
+    statusBar->Background({0.13f, 0.13f, 0.14f, 1.0f});
+    statusBar->HorizontalStack();
+    statusBar->HorizontalGrow();
+    statusBar->VerticalFixed(72);
+
+    auto statusText = std::make_unique<UIElement>();
+    statusText->Text("Build succeeded");
+    statusText->FontSize(42);
+    statusText->TextColor({0.6f, 0.9f, 0.6f, 1.0f});
+    statusText->HorizontalGrow();
+    statusBar->AddChild(std::move(statusText));
+
+    root->AddChild(std::move(statusBar));
+    }
+
+    auto Window::MockUI() -> void {
+    root = std::make_unique<UIElement>();
+    root->Padding(0);
+    root->Background({0.09f, 0.09f, 0.10f, 1.0f});
+    root->VerticalStack();
+    root->HorizontalFixed(2400);
+    root->VerticalFixed(1800);
+
+    // ========== TOP NAVIGATION BAR ==========
+    auto navBar = std::make_unique<UIElement>();
+    navBar->Padding(24, 40, 24, 40);
+    navBar->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    navBar->BorderWidth({0, 0, 2, 0});
+    navBar->BorderColor({0.18f, 0.18f, 0.20f, 1.0f});
+    navBar->HorizontalStack();
+    navBar->HorizontalGrow();
+    navBar->VerticalFixed(100);
+
+    // Logo/Brand
+    auto logo = std::make_unique<UIElement>();
+    logo->Background({0.4f, 0.6f, 1.0f, 1.0f});
+    logo->BorderRadius({12, 12, 12, 12});
+    logo->HorizontalFixed(52);
+    logo->VerticalFixed(52);
+    navBar->AddChild(std::move(logo));
+
+    auto brandName = std::make_unique<UIElement>();
+    brandName->MarginLeft(20);
+    brandName->Padding(10, 0, 10, 0);
+    brandName->Text("Dashboard");
+    brandName->FontSize(44);
+    brandName->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+    brandName->HorizontalFixed(220);
+    brandName->VerticalGrow();
+    navBar->AddChild(std::move(brandName));
+
+    auto navSpacer = std::make_unique<UIElement>();
+    navSpacer->HorizontalGrow();
+    navBar->AddChild(std::move(navSpacer));
+
+    // Nav Links
+    const char* navItems[] = {"Overview", "Analytics", "Projects", "Settings"};
+    for (int i = 0; i < 4; i++) {
+        auto navItem = std::make_unique<UIElement>();
+        navItem->Margin(0, 16, 0, 16);
+        navItem->Padding(16, 28, 16, 28);
+        navItem->BorderRadius({10, 10, 10, 10});
+
+        if (i == 0) {
+            navItem->Background({0.4f, 0.6f, 1.0f, 0.15f});
+            navItem->TextColor({0.5f, 0.7f, 1.0f, 1.0f});
+        } else {
+            navItem->TextColor({0.6f, 0.6f, 0.65f, 1.0f});
+        }
+
+        navItem->Text(navItems[i]);
+        navItem->FontSize(38);
+        navItem->HorizontalFit();
+        navItem->VerticalGrow();
+        navBar->AddChild(std::move(navItem));
+    }
+
+    auto navSpacer2 = std::make_unique<UIElement>();
+    navSpacer2->HorizontalGrow();
+    navBar->AddChild(std::move(navSpacer2));
+
+    // Search Bar
+    auto searchContainer = std::make_unique<UIElement>();
+    searchContainer->Padding(16, 24, 16, 24);
+    searchContainer->Background({0.16f, 0.16f, 0.18f, 1.0f});
+    searchContainer->BorderRadius({12, 12, 12, 12});
+    searchContainer->BorderWidth({2, 2, 2, 2});
+    searchContainer->BorderColor({0.22f, 0.22f, 0.25f, 1.0f});
+    searchContainer->HorizontalStack();
+    searchContainer->HorizontalFixed(380);
+    searchContainer->VerticalGrow();
+
+    auto searchIcon = std::make_unique<UIElement>();
+    searchIcon->Background({0.45f, 0.45f, 0.50f, 1.0f});
+    searchIcon->BorderRadius({6, 6, 6, 6});
+    searchIcon->HorizontalFixed(28);
+    searchIcon->VerticalFixed(28);
+    searchContainer->AddChild(std::move(searchIcon));
+
+    auto searchText = std::make_unique<UIElement>();
+    searchText->MarginLeft(16);
+    searchText->Padding(4, 0, 4, 0);
+    searchText->Text("Search...");
+    searchText->FontSize(36);
+    searchText->TextColor({0.45f, 0.45f, 0.50f, 1.0f});
+    searchText->HorizontalGrow();
+    searchText->VerticalGrow();
+    searchContainer->AddChild(std::move(searchText));
+
+    navBar->AddChild(std::move(searchContainer));
+
+    // User Avatar
+    auto userAvatar = std::make_unique<UIElement>();
+    userAvatar->MarginLeft(28);
+    userAvatar->Background({0.9f, 0.5f, 0.6f, 1.0f});
+    userAvatar->BorderRadius({26, 26, 26, 26});
+    userAvatar->BorderWidth({3, 3, 3, 3});
+    userAvatar->BorderColor({0.95f, 0.6f, 0.7f, 0.4f});
+    userAvatar->HorizontalFixed(52);
+    userAvatar->VerticalFixed(52);
+    navBar->AddChild(std::move(userAvatar));
+
+    root->AddChild(std::move(navBar));
+
+    // ========== MAIN CONTENT AREA ==========
+    auto mainContent = std::make_unique<UIElement>();
+    mainContent->Padding(40);
+    mainContent->HorizontalStack();
+    mainContent->HorizontalGrow();
+    mainContent->VerticalGrow();
+
+    // ========== LEFT SIDEBAR ==========
+    auto sidebar = std::make_unique<UIElement>();
+    sidebar->Padding(28);
+    sidebar->Background({0.11f, 0.11f, 0.12f, 1.0f});
+    sidebar->BorderRadius({20, 20, 20, 20});
+    sidebar->VerticalStack();
+    sidebar->HorizontalFixed(340);
+    sidebar->VerticalGrow();
+
+    // Sidebar Title
+    auto sidebarTitle = std::make_unique<UIElement>();
+    sidebarTitle->Padding(12, 8, 20, 8);
+    sidebarTitle->Text("Quick Actions");
+    sidebarTitle->FontSize(34);
+    sidebarTitle->TextColor({0.5f, 0.5f, 0.55f, 1.0f});
+    sidebarTitle->HorizontalGrow();
+    sidebarTitle->VerticalFixed(70);
+    sidebar->AddChild(std::move(sidebarTitle));
+
+    // Sidebar Menu Items
+    const char* menuItems[] = {"New Project", "Import Data", "Export Report", "Team Chat", "Calendar", "Documents"};
+    vec4 menuColors[] = {
+        {0.4f, 0.8f, 0.6f, 1.0f},
+        {0.5f, 0.6f, 1.0f, 1.0f},
+        {1.0f, 0.6f, 0.4f, 1.0f},
+        {0.9f, 0.5f, 0.8f, 1.0f},
+        {0.4f, 0.8f, 0.9f, 1.0f},
+        {0.9f, 0.8f, 0.4f, 1.0f}
+    };
+
+    for (int i = 0; i < 6; i++) {
+        auto menuItem = std::make_unique<UIElement>();
+        menuItem->Margin(6, 0, 6, 0);
+        menuItem->Padding(20, 24, 20, 24);
+        menuItem->BorderRadius({14, 14, 14, 14});
+        menuItem->HorizontalStack();
+
+        if (i == 0) {
+            menuItem->Background({0.4f, 0.8f, 0.6f, 0.12f});
+            menuItem->BorderWidth({2, 2, 2, 2});
+            menuItem->BorderColor({0.4f, 0.8f, 0.6f, 0.3f});
+        }
+
+        menuItem->HorizontalGrow();
+        menuItem->VerticalFixed(80);
+
+        auto menuIcon = std::make_unique<UIElement>();
+        menuIcon->Background(menuColors[i]);
+        menuIcon->BorderRadius({10, 10, 10, 10});
+        menuIcon->HorizontalFixed(36);
+        menuIcon->VerticalFixed(36);
+        menuItem->AddChild(std::move(menuIcon));
+
+        auto menuText = std::make_unique<UIElement>();
+        menuText->MarginLeft(20);
+        menuText->Padding(8, 0, 8, 0);
+        menuText->Text(menuItems[i]);
+        menuText->FontSize(38);
+        menuText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+        menuText->HorizontalGrow();
+        menuText->VerticalGrow();
+        menuItem->AddChild(std::move(menuText));
+
+        sidebar->AddChild(std::move(menuItem));
+    }
+
+    // Sidebar spacer
+    auto sidebarSpacer = std::make_unique<UIElement>();
+    sidebarSpacer->VerticalGrow();
+    sidebar->AddChild(std::move(sidebarSpacer));
+
+    // Storage indicator
+    auto storageCard = std::make_unique<UIElement>();
+    storageCard->Padding(24);
+    storageCard->Background({0.14f, 0.14f, 0.16f, 1.0f});
+    storageCard->BorderRadius({16, 16, 16, 16});
+    storageCard->VerticalStack();
+    storageCard->HorizontalGrow();
+    storageCard->VerticalFixed(180);
+
+    auto storageTitle = std::make_unique<UIElement>();
+    storageTitle->Padding(4, 0, 12, 0);
+    storageTitle->Text("Storage Used");
+    storageTitle->FontSize(34);
+    storageTitle->TextColor({0.6f, 0.6f, 0.65f, 1.0f});
+    storageTitle->HorizontalGrow();
+    storageTitle->VerticalFixed(56);
+    storageCard->AddChild(std::move(storageTitle));
+
+    auto storageBarBg = std::make_unique<UIElement>();
+    storageBarBg->Background({0.2f, 0.2f, 0.22f, 1.0f});
+    storageBarBg->BorderRadius({10, 10, 10, 10});
+    storageBarBg->HorizontalGrow();
+    storageBarBg->VerticalFixed(20);
+    storageCard->AddChild(std::move(storageBarBg));
+
+    auto storageFill = std::make_unique<UIElement>();
+    storageFill->MarginTop(12);
+    storageFill->Background({0.4f, 0.6f, 1.0f, 1.0f});
+    storageFill->BorderRadius({10, 10, 10, 10});
+    storageFill->HorizontalFixed(180);
+    storageFill->VerticalFixed(20);
+    storageCard->AddChild(std::move(storageFill));
+
+    auto storageText = std::make_unique<UIElement>();
+    storageText->MarginTop(16);
+    storageText->Padding(4, 0, 4, 0);
+    storageText->Text("6.4 GB of 10 GB");
+    storageText->FontSize(32);
+    storageText->TextColor({0.5f, 0.5f, 0.55f, 1.0f});
+    storageText->HorizontalGrow();
+    storageText->VerticalGrow();
+    storageCard->AddChild(std::move(storageText));
+
+    sidebar->AddChild(std::move(storageCard));
+
+    mainContent->AddChild(std::move(sidebar));
+
+    // ========== CENTER CONTENT ==========
+    auto centerContent = std::make_unique<UIElement>();
+    centerContent->MarginLeft(40);
+    centerContent->VerticalStack();
+    centerContent->HorizontalGrow();
+    centerContent->VerticalGrow();
+
+    // Welcome Header
+    auto welcomeSection = std::make_unique<UIElement>();
+    welcomeSection->Padding(36);
+    welcomeSection->Background({0.11f, 0.11f, 0.12f, 1.0f});
+    welcomeSection->BorderRadius({20, 20, 20, 20});
+    welcomeSection->HorizontalStack();
+    welcomeSection->HorizontalGrow();
+    welcomeSection->VerticalFixed(200);
+
+    auto welcomeText = std::make_unique<UIElement>();
+    welcomeText->VerticalStack();
+    welcomeText->HorizontalGrow();
+    welcomeText->VerticalGrow();
+
+    auto welcomeTitle = std::make_unique<UIElement>();
+    welcomeTitle->Padding(8, 0, 12, 0);
+    welcomeTitle->Text("Welcome back, Alex!");
+    welcomeTitle->FontSize(48);
+    welcomeTitle->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+    welcomeTitle->HorizontalGrow();
+    welcomeTitle->VerticalFixed(80);
+    welcomeText->AddChild(std::move(welcomeTitle));
+
+    auto welcomeSubtitle = std::make_unique<UIElement>();
+    welcomeSubtitle->Padding(8, 0, 8, 0);
+    welcomeSubtitle->Text("You have 4 tasks pending and 2 meetings today.");
+    welcomeSubtitle->FontSize(36);
+    welcomeSubtitle->TextColor({0.55f, 0.55f, 0.60f, 1.0f});
+    welcomeSubtitle->HorizontalGrow();
+    welcomeSubtitle->VerticalGrow();
+    welcomeText->AddChild(std::move(welcomeSubtitle));
+
+    welcomeSection->AddChild(std::move(welcomeText));
+
+    // Action Button
+    auto actionBtn = std::make_unique<UIElement>();
+    actionBtn->Padding(24, 40, 24, 40);
+    actionBtn->Background({0.4f, 0.6f, 1.0f, 1.0f});
+    actionBtn->BorderRadius({14, 14, 14, 14});
+    actionBtn->BoxShadow({0, 8}, 24, 0, {0.4f, 0.6f, 1.0f, 0.3f});
+    actionBtn->Text("View Tasks");
+    actionBtn->FontSize(38);
+    actionBtn->TextColor({1.0f, 1.0f, 1.0f, 1.0f});
+    actionBtn->HorizontalFixed(220);
+    actionBtn->VerticalFixed(80);
+    welcomeSection->AddChild(std::move(actionBtn));
+
+    centerContent->AddChild(std::move(welcomeSection));
+
+    // ========== STATS CARDS ROW ==========
+    auto statsRow = std::make_unique<UIElement>();
+    statsRow->MarginTop(32);
+    statsRow->HorizontalStack();
+    statsRow->HorizontalGrow();
+    statsRow->VerticalFixed(220);
+
+    struct StatCard {
+        const char* title;
+        const char* value;
+        const char* change;
+        vec4 accentColor;
+        bool positive;
+    };
+
+    StatCard stats[] = {
+        {"Total Projects", "24", "+3 this week", {0.4f, 0.8f, 0.6f, 1.0f}, true},
+        {"Active Tasks", "156", "+12 pending", {0.5f, 0.6f, 1.0f, 1.0f}, true},
+        {"Team Members", "18", "+2 joined", {0.9f, 0.5f, 0.8f, 1.0f}, true},
+        {"Hours Logged", "847", "-5% vs last", {1.0f, 0.6f, 0.4f, 1.0f}, false}
+    };
+
+    for (int i = 0; i < 4; i++) {
+        auto statCard = std::make_unique<UIElement>();
+        if (i > 0) statCard->MarginLeft(24);
+        statCard->Padding(28);
+        statCard->Background({0.11f, 0.11f, 0.12f, 1.0f});
+        statCard->BorderRadius({20, 20, 20, 20});
+        statCard->BorderWidth({0, 0, 0, 4});
+        statCard->BorderColor(stats[i].accentColor);
+        statCard->VerticalStack();
+        statCard->HorizontalGrow();
+        statCard->VerticalGrow();
+
+        auto statTitle = std::make_unique<UIElement>();
+        statTitle->Padding(4, 0, 8, 0);
+        statTitle->Text(stats[i].title);
+        statTitle->FontSize(32);
+        statTitle->TextColor({0.55f, 0.55f, 0.60f, 1.0f});
+        statTitle->HorizontalGrow();
+        statTitle->VerticalFixed(52);
+        statCard->AddChild(std::move(statTitle));
+
+        auto statValue = std::make_unique<UIElement>();
+        statValue->Padding(4, 0, 4, 0);
+        statValue->Text(stats[i].value);
+        statValue->FontSize(56);
+        statValue->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+        statValue->HorizontalGrow();
+        statValue->VerticalFixed(80);
+        statCard->AddChild(std::move(statValue));
+
+        auto statChange = std::make_unique<UIElement>();
+        statChange->Padding(4, 0, 4, 0);
+        statChange->Text(stats[i].change);
+        statChange->FontSize(30);
+        statChange->TextColor(stats[i].positive ? vec4{0.4f, 0.8f, 0.6f, 1.0f} : vec4{1.0f, 0.5f, 0.4f, 1.0f});
+        statChange->HorizontalGrow();
+        statChange->VerticalGrow();
+        statCard->AddChild(std::move(statChange));
+
+        statsRow->AddChild(std::move(statCard));
+    }
+
+    centerContent->AddChild(std::move(statsRow));
+
+    // ========== RECENT ACTIVITY SECTION ==========
+    auto activitySection = std::make_unique<UIElement>();
+    activitySection->MarginTop(32);
+    activitySection->Padding(32);
+    activitySection->Background({0.11f, 0.11f, 0.12f, 1.0f});
+    activitySection->BorderRadius({20, 20, 20, 20});
+    activitySection->VerticalStack();
+    activitySection->HorizontalGrow();
+    activitySection->VerticalGrow();
+
+    // Section Header
+    auto activityHeader = std::make_unique<UIElement>();
+    activityHeader->HorizontalStack();
+    activityHeader->HorizontalGrow();
+    activityHeader->VerticalFixed(80);
+
+    auto activityTitle = std::make_unique<UIElement>();
+    activityTitle->Padding(8, 0, 8, 0);
+    activityTitle->Text("Recent Activity");
+    activityTitle->FontSize(44);
+    activityTitle->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+    activityTitle->HorizontalGrow();
+    activityTitle->VerticalGrow();
+    activityHeader->AddChild(std::move(activityTitle));
+
+    auto viewAllBtn = std::make_unique<UIElement>();
+    viewAllBtn->Padding(16, 28, 16, 28);
+    viewAllBtn->Background({0.16f, 0.16f, 0.18f, 1.0f});
+    viewAllBtn->BorderRadius({12, 12, 12, 12});
+    viewAllBtn->Text("View All");
+    viewAllBtn->FontSize(34);
+    viewAllBtn->TextColor({0.5f, 0.7f, 1.0f, 1.0f});
+    viewAllBtn->HorizontalFixed(180);
+    viewAllBtn->VerticalFixed(64);
+    activityHeader->AddChild(std::move(viewAllBtn));
+
+    activitySection->AddChild(std::move(activityHeader));
+
+    // Activity Items
+    struct ActivityItem {
+        const char* user;
+        const char* action;
+        const char* time;
+        vec4 avatarColor;
+    };
+
+    ActivityItem activities[] = {
+        {"Sarah Chen", "completed 'API Integration'", "2 min ago", {0.9f, 0.5f, 0.6f, 1.0f}},
+        {"Mike Johnson", "commented on 'Dashboard'", "15 min ago", {0.4f, 0.7f, 0.9f, 1.0f}},
+        {"Emily Davis", "created project 'Mobile App'", "1 hour ago", {0.6f, 0.9f, 0.5f, 1.0f}},
+        {"Alex Wong", "uploaded 3 files to 'Assets'", "2 hours ago", {0.9f, 0.7f, 0.4f, 1.0f}}
+    };
+
+    for (int i = 0; i < 4; i++) {
+        auto activityItem = std::make_unique<UIElement>();
+        activityItem->MarginTop(16);
+        activityItem->Padding(24, 28, 24, 28);
+        activityItem->Background({0.13f, 0.13f, 0.14f, 1.0f});
+        activityItem->BorderRadius({14, 14, 14, 14});
+        activityItem->HorizontalStack();
+        activityItem->HorizontalGrow();
+        activityItem->VerticalFixed(100);
+
+        // User Avatar
+        auto avatar = std::make_unique<UIElement>();
+        avatar->Background(activities[i].avatarColor);
+        avatar->BorderRadius({24, 24, 24, 24});
+        avatar->HorizontalFixed(52);
+        avatar->VerticalFixed(52);
+        activityItem->AddChild(std::move(avatar));
+
+        // Activity Details
+        auto details = std::make_unique<UIElement>();
+        details->MarginLeft(24);
+        details->VerticalStack();
+        details->HorizontalGrow();
+        details->VerticalGrow();
+
+        auto userName = std::make_unique<UIElement>();
+        userName->Padding(4, 0, 4, 0);
+        userName->Text(activities[i].user);
+        userName->FontSize(38);
+        userName->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
+        userName->HorizontalGrow();
+        userName->VerticalFixed(52);
+        details->AddChild(std::move(userName));
+
+        auto actionText = std::make_unique<UIElement>();
+        actionText->Padding(4, 0, 4, 0);
+        actionText->Text(activities[i].action);
+        actionText->FontSize(32);
+        actionText->TextColor({0.55f, 0.55f, 0.60f, 1.0f});
+        actionText->HorizontalGrow();
+        actionText->VerticalGrow();
+        details->AddChild(std::move(actionText));
+
+        activityItem->AddChild(std::move(details));
+
+        // Timestamp
+        auto timestamp = std::make_unique<UIElement>();
+        timestamp->Padding(8, 16, 8, 16);
+        timestamp->Text(activities[i].time);
+        timestamp->FontSize(30);
+        timestamp->TextColor({0.45f, 0.45f, 0.50f, 1.0f});
+        timestamp->HorizontalFixed(180);
+        timestamp->VerticalFixed(52);
+        activityItem->AddChild(std::move(timestamp));
+
+        activitySection->AddChild(std::move(activityItem));
+    }
+
+    centerContent->AddChild(std::move(activitySection));
+    mainContent->AddChild(std::move(centerContent));
+
+    // ========== RIGHT PANEL ==========
+    auto rightPanel = std::make_unique<UIElement>();
+    rightPanel->MarginLeft(40);
+    rightPanel->Padding(32);
+    rightPanel->Background({0.11f, 0.11f, 0.12f, 1.0f});
+    rightPanel->BorderRadius({20, 20, 20, 20});
+    rightPanel->VerticalStack();
+    rightPanel->HorizontalFixed(420);
+    rightPanel->VerticalGrow();
+
+    // Calendar Widget Title
+    auto calendarTitle = std::make_unique<UIElement>();
+    calendarTitle->Padding(8, 0, 12, 0);
+    calendarTitle->Text("Today's Schedule");
+    calendarTitle->FontSize(42);
+    calendarTitle->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+    calendarTitle->HorizontalGrow();
+    calendarTitle->VerticalFixed(72);
+    rightPanel->AddChild(std::move(calendarTitle));
+
+    auto calendarDate = std::make_unique<UIElement>();
+    calendarDate->Padding(8, 0, 20, 0);
+    calendarDate->Text("Friday, December 19");
+    calendarDate->FontSize(34);
+    calendarDate->TextColor({0.5f, 0.5f, 0.55f, 1.0f});
+    calendarDate->HorizontalGrow();
+    calendarDate->VerticalFixed(60);
+    rightPanel->AddChild(std::move(calendarDate));
+
+    // Meeting Items
+    struct Meeting {
+        const char* time;
+        const char* title;
+        const char* duration;
+        vec4 color;
+    };
+
+    Meeting meetings[] = {
+        {"9:00 AM", "Team Standup", "30 min", {0.4f, 0.8f, 0.6f, 1.0f}},
+        {"11:00 AM", "Design Review", "1 hour", {0.5f, 0.6f, 1.0f, 1.0f}},
+        {"2:00 PM", "Client Call", "45 min", {0.9f, 0.5f, 0.8f, 1.0f}},
+        {"4:30 PM", "Sprint Planning", "1.5 hours", {1.0f, 0.6f, 0.4f, 1.0f}}
+    };
+
+    for (int i = 0; i < 4; i++) {
+        auto meetingCard = std::make_unique<UIElement>();
+        meetingCard->MarginTop(16);
+        meetingCard->Padding(24);
+        meetingCard->Background({0.14f, 0.14f, 0.16f, 1.0f});
+        meetingCard->BorderRadius({14, 14, 14, 14});
+        meetingCard->BorderWidth({4, 0, 0, 0});
+        meetingCard->BorderColor(meetings[i].color);
+        meetingCard->VerticalStack();
+        meetingCard->HorizontalGrow();
+        meetingCard->VerticalFixed(160);
+
+        auto meetingTime = std::make_unique<UIElement>();
+        meetingTime->Padding(4, 0, 6, 0);
+        meetingTime->Text(meetings[i].time);
+        meetingTime->FontSize(32);
+        meetingTime->TextColor(meetings[i].color);
+        meetingTime->HorizontalGrow();
+        meetingTime->VerticalFixed(48);
+        meetingCard->AddChild(std::move(meetingTime));
+
+        auto meetingTitle = std::make_unique<UIElement>();
+        meetingTitle->Padding(4, 0, 6, 0);
+        meetingTitle->Text(meetings[i].title);
+        meetingTitle->FontSize(40);
+        meetingTitle->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
+        meetingTitle->HorizontalGrow();
+        meetingTitle->VerticalFixed(60);
+        meetingCard->AddChild(std::move(meetingTitle));
+
+        auto meetingDuration = std::make_unique<UIElement>();
+        meetingDuration->Padding(4, 0, 4, 0);
+        meetingDuration->Text(meetings[i].duration);
+        meetingDuration->FontSize(30);
+        meetingDuration->TextColor({0.5f, 0.5f, 0.55f, 1.0f});
+        meetingDuration->HorizontalGrow();
+        meetingDuration->VerticalGrow();
+        meetingCard->AddChild(std::move(meetingDuration));
+
+        rightPanel->AddChild(std::move(meetingCard));
+    }
+
+    // Spacer
+    auto panelSpacer = std::make_unique<UIElement>();
+    panelSpacer->VerticalGrow();
+    rightPanel->AddChild(std::move(panelSpacer));
+
+    // Team Online Section
+    auto teamTitle = std::make_unique<UIElement>();
+    teamTitle->Padding(8, 0, 16, 0);
+    teamTitle->Text("Team Online");
+    teamTitle->FontSize(38);
+    teamTitle->TextColor({0.95f, 0.95f, 0.97f, 1.0f});
+    teamTitle->HorizontalGrow();
+    teamTitle->VerticalFixed(68);
+    rightPanel->AddChild(std::move(teamTitle));
+
+    auto teamAvatars = std::make_unique<UIElement>();
+    teamAvatars->HorizontalStack();
+    teamAvatars->HorizontalGrow();
+    teamAvatars->VerticalFixed(64);
+
+    vec4 teamColors[] = {
+        {0.9f, 0.5f, 0.6f, 1.0f},
+        {0.4f, 0.7f, 0.9f, 1.0f},
+        {0.6f, 0.9f, 0.5f, 1.0f},
+        {0.9f, 0.7f, 0.4f, 1.0f},
+        {0.7f, 0.5f, 0.9f, 1.0f}
+    };
+
+    for (int i = 0; i < 5; i++) {
+        auto teamAvatar = std::make_unique<UIElement>();
+        if (i > 0) teamAvatar->MarginLeft(-14);
+        teamAvatar->Background(teamColors[i]);
+        teamAvatar->BorderRadius({26, 26, 26, 26});
+        teamAvatar->BorderWidth({4, 4, 4, 4});
+        teamAvatar->BorderColor({0.11f, 0.11f, 0.12f, 1.0f});
+        teamAvatar->HorizontalFixed(52);
+        teamAvatar->VerticalFixed(52);
+        teamAvatars->AddChild(std::move(teamAvatar));
+    }
+
+    auto moreTeam = std::make_unique<UIElement>();
+    moreTeam->MarginLeft(-14);
+    moreTeam->Padding(12, 16, 12, 16);
+    moreTeam->Background({0.2f, 0.2f, 0.22f, 1.0f});
+    moreTeam->BorderRadius({26, 26, 26, 26});
+    moreTeam->BorderWidth({4, 4, 4, 4});
+    moreTeam->BorderColor({0.11f, 0.11f, 0.12f, 1.0f});
+    moreTeam->Text("+8");
+    moreTeam->FontSize(28);
+    moreTeam->TextColor({0.6f, 0.6f, 0.65f, 1.0f});
+    moreTeam->HorizontalFixed(52);
+    moreTeam->VerticalFixed(52);
+    teamAvatars->AddChild(std::move(moreTeam));
+
+    rightPanel->AddChild(std::move(teamAvatars));
+
+    mainContent->AddChild(std::move(rightPanel));
+    root->AddChild(std::move(mainContent));
+}
+
+    auto Window::TestUI() -> void {
+    root = std::make_unique<UIElement>();
+    root->Padding(40);
+    root->Background({0.08f, 0.08f, 0.09f, 1.0f});
+    root->VerticalStack();
+    root->HorizontalFixed(2800);
+    root->VerticalFixed(2400);
+
+    // ========== HEADER ==========
+    auto header = std::make_unique<UIElement>();
+    header->Padding(20);
+    header->Background({0.15f, 0.15f, 0.17f, 1.0f});
+    header->BorderRadius({12, 12, 12, 12});
+    header->Text("TEXT LAYOUT DEBUG TEST");
+    header->FontSize(48);
+    header->TextColor({1.0f, 0.8f, 0.2f, 1.0f});
+    header->HorizontalGrow();
+    header->VerticalFixed(100);
+    root->AddChild(std::move(header));
+
+    // ========== SECTION 1: FONT SIZE VS CONTAINER HEIGHT ==========
+    auto section1 = std::make_unique<UIElement>();
+    section1->MarginTop(30);
+    section1->Padding(24);
+    section1->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    section1->BorderRadius({16, 16, 16, 16});
+    section1->VerticalStack();
+    section1->HorizontalGrow();
+    section1->VerticalFixed(500);
+
+    auto section1Title = std::make_unique<UIElement>();
+    section1Title->Padding(8);
+    section1Title->Text("TEST 1: Font Size vs Container Height (No Wrap)");
+    section1Title->FontSize(36);
+    section1Title->TextColor({0.5f, 0.8f, 1.0f, 1.0f});
+    section1Title->HorizontalGrow();
+    section1Title->VerticalFixed(60);
+    section1->AddChild(std::move(section1Title));
+
+    // Test rows: FontSize / Container Height combinations
+    int fontSizes[] = {24, 32, 40, 48, 56};
+    int containerHeights[] = {30, 40, 60, 80, 100};
+
+    for (int row = 0; row < 5; row++) {
+        auto testRow = std::make_unique<UIElement>();
+        testRow->MarginTop(12);
+        testRow->HorizontalStack();
+        testRow->HorizontalGrow();
+        testRow->VerticalFixed(containerHeights[row]);
+
+        // Label
+        auto label = std::make_unique<UIElement>();
+        label->Padding(8);
+        label->Background({0.2f, 0.2f, 0.22f, 1.0f});
+        label->BorderRadius({6, 6, 6, 6});
+        label->Text(("H:" + std::to_string(containerHeights[row])).c_str());
+        label->FontSize(24);
+        label->TextColor({0.7f, 0.7f, 0.7f, 1.0f});
+        label->TextWrap(Graphic::GL::TextWrap::None);
+        label->HorizontalFixed(80);
+        label->VerticalGrow();
+        testRow->AddChild(std::move(label));
+
+        for (int col = 0; col < 5; col++) {
+            auto testBox = std::make_unique<UIElement>();
+            testBox->MarginLeft(12);
+            testBox->Padding(4);
+            testBox->Background({0.18f, 0.18f, 0.20f, 1.0f});
+            testBox->BorderRadius({8, 8, 8, 8});
+            testBox->BorderWidth({2, 2, 2, 2});
+
+            // Color code: green if fontSize <= containerHeight, red if overflow likely
+            if (fontSizes[col] <= containerHeights[row]) {
+                testBox->BorderColor({0.3f, 0.8f, 0.4f, 1.0f});
+            } else {
+                testBox->BorderColor({1.0f, 0.4f, 0.3f, 1.0f});
+            }
+
+            testBox->Text(("F" + std::to_string(fontSizes[col])).c_str());
+            testBox->FontSize(fontSizes[col]);
+            testBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+            testBox->TextWrap(Graphic::GL::TextWrap::None);
+            testBox->HorizontalFixed(160);
+            testBox->VerticalGrow();
+            testRow->AddChild(std::move(testBox));
+        }
+
+        section1->AddChild(std::move(testRow));
+    }
+
+    root->AddChild(std::move(section1));
+
+    // ========== SECTION 2: TEXT WRAP MODES ==========
+    auto section2 = std::make_unique<UIElement>();
+    section2->MarginTop(30);
+    section2->Padding(24);
+    section2->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    section2->BorderRadius({16, 16, 16, 16});
+    section2->VerticalStack();
+    section2->HorizontalGrow();
+    section2->VerticalFixed(450);
+
+    auto section2Title = std::make_unique<UIElement>();
+    section2Title->Padding(8);
+    section2Title->Text("TEST 2: Text Wrap Modes Comparison");
+    section2Title->FontSize(36);
+    section2Title->TextColor({0.5f, 0.8f, 1.0f, 1.0f});
+    section2Title->HorizontalGrow();
+    section2Title->VerticalFixed(60);
+    section2->AddChild(std::move(section2Title));
+
+    auto wrapRow = std::make_unique<UIElement>();
+    wrapRow->MarginTop(16);
+    wrapRow->HorizontalStack();
+    wrapRow->HorizontalGrow();
+    wrapRow->VerticalGrow();
+
+    // None wrap test
+    auto wrapNoneContainer = std::make_unique<UIElement>();
+    wrapNoneContainer->Padding(16);
+    wrapNoneContainer->Background({0.16f, 0.16f, 0.18f, 1.0f});
+    wrapNoneContainer->BorderRadius({12, 12, 12, 12});
+    wrapNoneContainer->BorderWidth({3, 3, 3, 3});
+    wrapNoneContainer->BorderColor({1.0f, 0.5f, 0.3f, 1.0f});
+    wrapNoneContainer->VerticalStack();
+    wrapNoneContainer->HorizontalFixed(400);
+    wrapNoneContainer->VerticalGrow();
+
+    auto wrapNoneLabel = std::make_unique<UIElement>();
+    wrapNoneLabel->Padding(8);
+    wrapNoneLabel->Text("TextWrap::None");
+    wrapNoneLabel->FontSize(32);
+    wrapNoneLabel->TextColor({1.0f, 0.5f, 0.3f, 1.0f});
+    wrapNoneLabel->HorizontalGrow();
+    wrapNoneLabel->VerticalFixed(50);
+    wrapNoneContainer->AddChild(std::move(wrapNoneLabel));
+
+    auto wrapNoneText = std::make_unique<UIElement>();
+    wrapNoneText->Padding(12);
+    wrapNoneText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    wrapNoneText->BorderRadius({8, 8, 8, 8});
+    wrapNoneText->Text("This is a long text that should NOT wrap to the next line when using None mode");
+    wrapNoneText->FontSize(36);
+    wrapNoneText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    wrapNoneText->TextWrap(Graphic::GL::TextWrap::None);
+    wrapNoneText->HorizontalGrow();
+    wrapNoneText->VerticalGrow();
+    wrapNoneContainer->AddChild(std::move(wrapNoneText));
+
+    wrapRow->AddChild(std::move(wrapNoneContainer));
+
+    // Character wrap test
+    auto wrapCharContainer = std::make_unique<UIElement>();
+    wrapCharContainer->MarginLeft(24);
+    wrapCharContainer->Padding(16);
+    wrapCharContainer->Background({0.16f, 0.16f, 0.18f, 1.0f});
+    wrapCharContainer->BorderRadius({12, 12, 12, 12});
+    wrapCharContainer->BorderWidth({3, 3, 3, 3});
+    wrapCharContainer->BorderColor({0.3f, 0.8f, 0.5f, 1.0f});
+    wrapCharContainer->VerticalStack();
+    wrapCharContainer->HorizontalFixed(400);
+    wrapCharContainer->VerticalGrow();
+
+    auto wrapCharLabel = std::make_unique<UIElement>();
+    wrapCharLabel->Padding(8);
+    wrapCharLabel->Text("TextWrap::Character");
+    wrapCharLabel->FontSize(32);
+    wrapCharLabel->TextColor({0.3f, 0.8f, 0.5f, 1.0f});
+    wrapCharLabel->HorizontalGrow();
+    wrapCharLabel->VerticalFixed(50);
+    wrapCharContainer->AddChild(std::move(wrapCharLabel));
+
+    auto wrapCharText = std::make_unique<UIElement>();
+    wrapCharText->Padding(12);
+    wrapCharText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    wrapCharText->BorderRadius({8, 8, 8, 8});
+    wrapCharText->Text("This is a long text that SHOULD wrap to the next line when using Character mode");
+    wrapCharText->FontSize(36);
+    wrapCharText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    wrapCharText->TextWrap(Graphic::GL::TextWrap::Character);
+    wrapCharText->HorizontalGrow();
+    wrapCharText->VerticalGrow();
+    wrapCharContainer->AddChild(std::move(wrapCharText));
+
+    wrapRow->AddChild(std::move(wrapCharContainer));
+
+    // Side by side same width different content
+    auto wrapCompareContainer = std::make_unique<UIElement>();
+    wrapCompareContainer->MarginLeft(24);
+    wrapCompareContainer->Padding(16);
+    wrapCompareContainer->Background({0.16f, 0.16f, 0.18f, 1.0f});
+    wrapCompareContainer->BorderRadius({12, 12, 12, 12});
+    wrapCompareContainer->BorderWidth({3, 3, 3, 3});
+    wrapCompareContainer->BorderColor({0.8f, 0.6f, 1.0f, 1.0f});
+    wrapCompareContainer->VerticalStack();
+    wrapCompareContainer->HorizontalGrow();
+    wrapCompareContainer->VerticalGrow();
+
+    auto wrapCompareLabel = std::make_unique<UIElement>();
+    wrapCompareLabel->Padding(8);
+    wrapCompareLabel->Text("Narrow Container (200px) + Character Wrap");
+    wrapCompareLabel->FontSize(32);
+    wrapCompareLabel->TextColor({0.8f, 0.6f, 1.0f, 1.0f});
+    wrapCompareLabel->HorizontalGrow();
+    wrapCompareLabel->VerticalFixed(50);
+    wrapCompareContainer->AddChild(std::move(wrapCompareLabel));
+
+    auto narrowWrapText = std::make_unique<UIElement>();
+    narrowWrapText->Padding(12);
+    narrowWrapText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    narrowWrapText->BorderRadius({8, 8, 8, 8});
+    narrowWrapText->Text("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+    narrowWrapText->FontSize(40);
+    narrowWrapText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    narrowWrapText->TextWrap(Graphic::GL::TextWrap::Character);
+    narrowWrapText->HorizontalFixed(200);
+    narrowWrapText->VerticalGrow();
+    wrapCompareContainer->AddChild(std::move(narrowWrapText));
+
+    wrapRow->AddChild(std::move(wrapCompareContainer));
+
+    section2->AddChild(std::move(wrapRow));
+    root->AddChild(std::move(section2));
+
+    // ========== SECTION 3: HORIZONTAL SIZING MODES ==========
+    auto section3 = std::make_unique<UIElement>();
+    section3->MarginTop(30);
+    section3->Padding(24);
+    section3->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    section3->BorderRadius({16, 16, 16, 16});
+    section3->VerticalStack();
+    section3->HorizontalGrow();
+    section3->VerticalFixed(350);
+
+    auto section3Title = std::make_unique<UIElement>();
+    section3Title->Padding(8);
+    section3Title->Text("TEST 3: Horizontal Sizing Modes with Text");
+    section3Title->FontSize(36);
+    section3Title->TextColor({0.5f, 0.8f, 1.0f, 1.0f});
+    section3Title->HorizontalGrow();
+    section3Title->VerticalFixed(60);
+    section3->AddChild(std::move(section3Title));
+
+    // HorizontalFixed
+    auto hFixedRow = std::make_unique<UIElement>();
+    hFixedRow->MarginTop(12);
+    hFixedRow->HorizontalStack();
+    hFixedRow->HorizontalGrow();
+    hFixedRow->VerticalFixed(80);
+
+    auto hFixedLabel = std::make_unique<UIElement>();
+    hFixedLabel->Padding(12);
+    hFixedLabel->Background({0.2f, 0.2f, 0.22f, 1.0f});
+    hFixedLabel->BorderRadius({8, 8, 8, 8});
+    hFixedLabel->Text("HorizontalFixed(300):");
+    hFixedLabel->FontSize(32);
+    hFixedLabel->TextColor({0.7f, 0.7f, 0.75f, 1.0f});
+    hFixedLabel->HorizontalFixed(320);
+    hFixedLabel->VerticalGrow();
+    hFixedRow->AddChild(std::move(hFixedLabel));
+
+    auto hFixedBox = std::make_unique<UIElement>();
+    hFixedBox->MarginLeft(16);
+    hFixedBox->Padding(12);
+    hFixedBox->Background({0.25f, 0.15f, 0.15f, 0.2f});
+    hFixedBox->BorderRadius({8, 8, 8, 8});
+    hFixedBox->BorderWidth({2, 2, 2, 2});
+    hFixedBox->BorderColor({1.0f, 0.4f, 0.4f, 1.0f});
+    hFixedBox->Text("Fixed width text box");
+    hFixedBox->FontSize(40);
+    hFixedBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    hFixedBox->TextWrap(Graphic::GL::TextWrap::None);
+    hFixedBox->HorizontalFixed(300);
+    hFixedBox->VerticalGrow();
+    hFixedRow->AddChild(std::move(hFixedBox));
+
+    section3->AddChild(std::move(hFixedRow));
+
+    // HorizontalGrow
+    auto hGrowRow = std::make_unique<UIElement>();
+    hGrowRow->MarginTop(12);
+    hGrowRow->HorizontalStack();
+    hGrowRow->HorizontalGrow();
+    hGrowRow->VerticalFixed(80);
+
+    auto hGrowLabel = std::make_unique<UIElement>();
+    hGrowLabel->Padding(12);
+    hGrowLabel->Background({0.2f, 0.2f, 0.22f, 1.0f});
+    hGrowLabel->BorderRadius({8, 8, 8, 8});
+    hGrowLabel->Text("HorizontalGrow():");
+    hGrowLabel->FontSize(32);
+    hGrowLabel->TextColor({0.7f, 0.7f, 0.75f, 1.0f});
+    hGrowLabel->HorizontalFixed(320);
+    hGrowLabel->VerticalGrow();
+    hGrowRow->AddChild(std::move(hGrowLabel));
+
+    auto hGrowBox = std::make_unique<UIElement>();
+    hGrowBox->MarginLeft(16);
+    hGrowBox->Padding(12);
+    hGrowBox->Background({0.15f, 0.25f, 0.15f, 1.0f});
+    hGrowBox->BorderRadius({8, 8, 8, 8});
+    hGrowBox->BorderWidth({2, 2, 2, 2});
+    hGrowBox->BorderColor({0.4f, 1.0f, 0.4f, 1.0f});
+    hGrowBox->Text("Growing width text box - should expand");
+    hGrowBox->FontSize(40);
+    hGrowBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    hGrowBox->TextWrap(Graphic::GL::TextWrap::None);
+    hGrowBox->HorizontalGrow();
+    hGrowBox->VerticalGrow();
+    hGrowRow->AddChild(std::move(hGrowBox));
+
+    section3->AddChild(std::move(hGrowRow));
+
+    // HorizontalFit
+    auto hFitRow = std::make_unique<UIElement>();
+    hFitRow->MarginTop(12);
+    hFitRow->HorizontalStack();
+    hFitRow->HorizontalGrow();
+    hFitRow->VerticalFixed(80);
+
+    auto hFitLabel = std::make_unique<UIElement>();
+    hFitLabel->Padding(12);
+    hFitLabel->Background({0.2f, 0.2f, 0.22f, 1.0f});
+    hFitLabel->BorderRadius({8, 8, 8, 8});
+    hFitLabel->Text("HorizontalFit():");
+    hFitLabel->FontSize(32);
+    hFitLabel->TextColor({0.7f, 0.7f, 0.75f, 1.0f});
+    hFitLabel->HorizontalFixed(320);
+    hFitLabel->VerticalGrow();
+    hFitRow->AddChild(std::move(hFitLabel));
+
+    auto hFitBox = std::make_unique<UIElement>();
+    hFitBox->MarginLeft(16);
+    hFitBox->Padding(12);
+    hFitBox->Background({0.15f, 0.15f, 0.25f, 1.0f});
+    hFitBox->BorderRadius({8, 8, 8, 8});
+    hFitBox->BorderWidth({2, 2, 2, 2});
+    hFitBox->BorderColor({0.4f, 0.4f, 1.0f, 1.0f});
+    hFitBox->Text("Fit to content");
+    hFitBox->FontSize(40);
+    hFitBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    hFitBox->TextWrap(Graphic::GL::TextWrap::None);
+    hFitBox->HorizontalFit();
+    hFitBox->VerticalGrow();
+    hFitRow->AddChild(std::move(hFitBox));
+
+    auto hFitBox2 = std::make_unique<UIElement>();
+    hFitBox2->MarginLeft(16);
+    hFitBox2->Padding(12);
+    hFitBox2->Background({0.15f, 0.15f, 0.25f, 1.0f});
+    hFitBox2->BorderRadius({8, 8, 8, 8});
+    hFitBox2->BorderWidth({2, 2, 2, 2});
+    hFitBox2->BorderColor({0.4f, 0.4f, 1.0f, 1.0f});
+    hFitBox2->Text("Short");
+    hFitBox2->FontSize(40);
+    hFitBox2->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    hFitBox2->TextWrap(Graphic::GL::TextWrap::None);
+    hFitBox2->HorizontalFit();
+    hFitBox2->VerticalGrow();
+    hFitRow->AddChild(std::move(hFitBox2));
+
+    auto hFitBox3 = std::make_unique<UIElement>();
+    hFitBox3->MarginLeft(16);
+    hFitBox3->Padding(12);
+    hFitBox3->Background({0.15f, 0.15f, 0.25f, 1.0f});
+    hFitBox3->BorderRadius({8, 8, 8, 8});
+    hFitBox3->BorderWidth({2, 2, 2, 2});
+    hFitBox3->BorderColor({0.4f, 0.4f, 1.0f, 1.0f});
+    hFitBox3->Text("A much longer piece of text here");
+    hFitBox3->FontSize(40);
+    hFitBox3->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    hFitBox3->TextWrap(Graphic::GL::TextWrap::None);
+    hFitBox3->HorizontalFit();
+    hFitBox3->VerticalGrow();
+    hFitRow->AddChild(std::move(hFitBox3));
+
+    section3->AddChild(std::move(hFitRow));
+    root->AddChild(std::move(section3));
+
+    // ========== SECTION 4: VERTICAL SIZING WITH WRAPPED TEXT ==========
+    auto section4 = std::make_unique<UIElement>();
+    section4->MarginTop(30);
+    section4->Padding(24);
+    section4->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    section4->BorderRadius({16, 16, 16, 16});
+    section4->VerticalStack();
+    section4->HorizontalGrow();
+    section4->VerticalFixed(400);
+
+    auto section4Title = std::make_unique<UIElement>();
+    section4Title->Padding(8);
+    section4Title->Text("TEST 4: Vertical Sizing with Wrapped Text");
+    section4Title->FontSize(36);
+    section4Title->TextColor({0.5f, 0.8f, 1.0f, 1.0f});
+    section4Title->HorizontalGrow();
+    section4Title->VerticalFixed(60);
+    section4->AddChild(std::move(section4Title));
+
+    auto vTestRow = std::make_unique<UIElement>();
+    vTestRow->MarginTop(16);
+    vTestRow->HorizontalStack();
+    vTestRow->HorizontalGrow();
+    vTestRow->VerticalGrow();
+
+    // VerticalFixed with Character wrap
+    auto vFixedWrap = std::make_unique<UIElement>();
+    vFixedWrap->Padding(16);
+    vFixedWrap->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    vFixedWrap->BorderRadius({12, 12, 12, 12});
+    vFixedWrap->BorderWidth({2, 2, 2, 2});
+    vFixedWrap->BorderColor({1.0f, 0.6f, 0.2f, 1.0f});
+    vFixedWrap->VerticalStack();
+    vFixedWrap->HorizontalFixed(350);
+    vFixedWrap->VerticalGrow();
+
+    auto vFixedLabel = std::make_unique<UIElement>();
+    vFixedLabel->Padding(8);
+    vFixedLabel->Text("VerticalFixed(100) + Wrap");
+    vFixedLabel->FontSize(28);
+    vFixedLabel->TextColor({1.0f, 0.6f, 0.2f, 1.0f});
+    vFixedLabel->HorizontalGrow();
+    vFixedLabel->VerticalFixed(44);
+    vFixedWrap->AddChild(std::move(vFixedLabel));
+
+    auto vFixedText = std::make_unique<UIElement>();
+    vFixedText->Padding(12);
+    vFixedText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    vFixedText->BorderRadius({8, 8, 8, 8});
+    vFixedText->Text("This text should wrap and be clipped at 100px height. Lorem ipsum dolor sit amet.");
+    vFixedText->FontSize(36);
+    vFixedText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    vFixedText->TextWrap(Graphic::GL::TextWrap::Character);
+    vFixedText->HorizontalGrow();
+    vFixedText->VerticalFixed(100);
+    vFixedWrap->AddChild(std::move(vFixedText));
+
+    vTestRow->AddChild(std::move(vFixedWrap));
+
+    // VerticalGrow with Character wrap
+    auto vGrowWrap = std::make_unique<UIElement>();
+    vGrowWrap->MarginLeft(24);
+    vGrowWrap->Padding(16);
+    vGrowWrap->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    vGrowWrap->BorderRadius({12, 12, 12, 12});
+    vGrowWrap->BorderWidth({2, 2, 2, 2});
+    vGrowWrap->BorderColor({0.2f, 0.8f, 0.6f, 1.0f});
+    vGrowWrap->VerticalStack();
+    vGrowWrap->HorizontalFixed(350);
+    vGrowWrap->VerticalGrow();
+
+    auto vGrowLabel = std::make_unique<UIElement>();
+    vGrowLabel->Padding(8);
+    vGrowLabel->Text("VerticalGrow() + Wrap");
+    vGrowLabel->FontSize(28);
+    vGrowLabel->TextColor({0.2f, 0.8f, 0.6f, 1.0f});
+    vGrowLabel->HorizontalGrow();
+    vGrowLabel->VerticalFixed(44);
+    vGrowWrap->AddChild(std::move(vGrowLabel));
+
+    auto vGrowText = std::make_unique<UIElement>();
+    vGrowText->Padding(12);
+    vGrowText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    vGrowText->BorderRadius({8, 8, 8, 8});
+    vGrowText->Text("This text should wrap and grow to fill available space. The container should expand.");
+    vGrowText->FontSize(36);
+    vGrowText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    vGrowText->TextWrap(Graphic::GL::TextWrap::Character);
+    vGrowText->HorizontalGrow();
+    vGrowText->VerticalGrow();
+    vGrowWrap->AddChild(std::move(vGrowText));
+
+    vTestRow->AddChild(std::move(vGrowWrap));
+
+    // VerticalFit with Character wrap (if supported)
+    auto vFitWrap = std::make_unique<UIElement>();
+    vFitWrap->MarginLeft(24);
+    vFitWrap->Padding(16);
+    vFitWrap->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    vFitWrap->BorderRadius({12, 12, 12, 12});
+    vFitWrap->BorderWidth({2, 2, 2, 2});
+    vFitWrap->BorderColor({0.6f, 0.4f, 1.0f, 1.0f});
+    vFitWrap->VerticalStack();
+    vFitWrap->HorizontalFixed(350);
+    vFitWrap->VerticalGrow();
+
+    auto vFitLabel = std::make_unique<UIElement>();
+    vFitLabel->Padding(8);
+    vFitLabel->Text("VerticalFit() + Wrap");
+    vFitLabel->FontSize(28);
+    vFitLabel->TextColor({0.6f, 0.4f, 1.0f, 1.0f});
+    vFitLabel->HorizontalGrow();
+    vFitLabel->VerticalFixed(44);
+    vFitWrap->AddChild(std::move(vFitLabel));
+
+    auto vFitText = std::make_unique<UIElement>();
+    vFitText->Padding(12);
+    vFitText->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    vFitText->BorderRadius({8, 8, 8, 8});
+    vFitText->Text("VerticalFit should size to wrapped content height if supported.");
+    vFitText->FontSize(36);
+    vFitText->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
+    vFitText->TextWrap(Graphic::GL::TextWrap::Character);
+    vFitText->HorizontalGrow();
+    vFitText->VerticalFit();
+    vFitWrap->AddChild(std::move(vFitText));
+
+    vTestRow->AddChild(std::move(vFitWrap));
+
+    section4->AddChild(std::move(vTestRow));
+    root->AddChild(std::move(section4));
+
+    // ========== SECTION 5: EDGE CASES ==========
+    auto section5 = std::make_unique<UIElement>();
+    section5->MarginTop(30);
+    section5->Padding(24);
+    section5->Background({0.12f, 0.12f, 0.13f, 1.0f});
+    section5->BorderRadius({16, 16, 16, 16});
+    section5->VerticalStack();
+    section5->HorizontalGrow();
+    section5->VerticalFixed(350);
+
+    auto section5Title = std::make_unique<UIElement>();
+    section5Title->Padding(8);
+    section5Title->Text("TEST 5: Edge Cases");
+    section5Title->FontSize(36);
+    section5Title->TextColor({0.5f, 0.8f, 1.0f, 1.0f});
+    section5Title->HorizontalGrow();
+    section5Title->VerticalFixed(60);
+    section5->AddChild(std::move(section5Title));
+
+    auto edgeRow = std::make_unique<UIElement>();
+    edgeRow->MarginTop(16);
+    edgeRow->HorizontalStack();
+    edgeRow->HorizontalGrow();
+    edgeRow->VerticalGrow();
+
+    // Empty text
+    auto emptyText = std::make_unique<UIElement>();
+    emptyText->Padding(16);
+    emptyText->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    emptyText->BorderRadius({12, 12, 12, 12});
+    emptyText->BorderWidth({2, 2, 2, 2});
+    emptyText->BorderColor({0.5f, 0.5f, 0.5f, 1.0f});
+    emptyText->VerticalStack();
+    emptyText->HorizontalFixed(250);
+    emptyText->VerticalGrow();
+
+    auto emptyLabel = std::make_unique<UIElement>();
+    emptyLabel->Padding(8);
+    emptyLabel->Text("Empty String");
+    emptyLabel->FontSize(28);
+    emptyLabel->TextColor({0.7f, 0.7f, 0.7f, 1.0f});
+    emptyLabel->HorizontalGrow();
+    emptyLabel->VerticalFixed(44);
+    emptyText->AddChild(std::move(emptyLabel));
+
+    auto emptyBox = std::make_unique<UIElement>();
+    emptyBox->Padding(12);
+    emptyBox->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    emptyBox->BorderRadius({8, 8, 8, 8});
+    emptyBox->Text("");
+    emptyBox->FontSize(40);
+    emptyBox->HorizontalGrow();
+    emptyBox->VerticalFixed(80);
+    emptyText->AddChild(std::move(emptyBox));
+
+    edgeRow->AddChild(std::move(emptyText));
+
+    // Single character
+    auto singleChar = std::make_unique<UIElement>();
+    singleChar->MarginLeft(24);
+    singleChar->Padding(16);
+    singleChar->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    singleChar->BorderRadius({12, 12, 12, 12});
+    singleChar->BorderWidth({2, 2, 2, 2});
+    singleChar->BorderColor({0.5f, 0.5f, 0.5f, 1.0f});
+    singleChar->VerticalStack();
+    singleChar->HorizontalFixed(250);
+    singleChar->VerticalGrow();
+
+    auto singleLabel = std::make_unique<UIElement>();
+    singleLabel->Padding(8);
+    singleLabel->Text("Single Char");
+    singleLabel->FontSize(28);
+    singleLabel->TextColor({0.7f, 0.7f, 0.7f, 1.0f});
+    singleLabel->HorizontalGrow();
+    singleLabel->VerticalFixed(44);
+    singleChar->AddChild(std::move(singleLabel));
+
+    auto singleBox = std::make_unique<UIElement>();
+    singleBox->Padding(12);
+    singleBox->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    singleBox->BorderRadius({8, 8, 8, 8});
+    singleBox->Text("X");
+    singleBox->FontSize(40);
+    singleBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    singleBox->HorizontalGrow();
+    singleBox->VerticalFixed(80);
+    singleChar->AddChild(std::move(singleBox));
+
+    edgeRow->AddChild(std::move(singleChar));
+
+    // Very long word (no spaces)
+    auto longWord = std::make_unique<UIElement>();
+    longWord->MarginLeft(24);
+    longWord->Padding(16);
+    longWord->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    longWord->BorderRadius({12, 12, 12, 12});
+    longWord->BorderWidth({2, 2, 2, 2});
+    longWord->BorderColor({1.0f, 0.4f, 0.4f, 1.0f});
+    longWord->VerticalStack();
+    longWord->HorizontalFixed(250);
+    longWord->VerticalGrow();
+
+    auto longLabel = std::make_unique<UIElement>();
+    longLabel->Padding(8);
+    longLabel->Text("Long Word + Wrap");
+    longLabel->FontSize(28);
+    longLabel->TextColor({1.0f, 0.4f, 0.4f, 1.0f});
+    longLabel->HorizontalGrow();
+    longLabel->VerticalFixed(44);
+    longWord->AddChild(std::move(longLabel));
+
+    auto longBox = std::make_unique<UIElement>();
+    longBox->Padding(12);
+    longBox->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    longBox->BorderRadius({8, 8, 8, 8});
+    longBox->Text("Supercalifragilisticexpialidocious");
+    longBox->FontSize(36);
+    longBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    longBox->TextWrap(Graphic::GL::TextWrap::Character);
+    longBox->HorizontalGrow();
+    longBox->VerticalGrow();
+    longWord->AddChild(std::move(longBox));
+
+    edgeRow->AddChild(std::move(longWord));
+
+    // Special characters
+    auto specialChars = std::make_unique<UIElement>();
+    specialChars->MarginLeft(24);
+    specialChars->Padding(16);
+    specialChars->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    specialChars->BorderRadius({12, 12, 12, 12});
+    specialChars->BorderWidth({2, 2, 2, 2});
+    specialChars->BorderColor({0.5f, 0.5f, 0.5f, 1.0f});
+    specialChars->VerticalStack();
+    specialChars->HorizontalFixed(250);
+    specialChars->VerticalGrow();
+
+    auto specialLabel = std::make_unique<UIElement>();
+    specialLabel->Padding(8);
+    specialLabel->Text("Special Chars");
+    specialLabel->FontSize(28);
+    specialLabel->TextColor({0.7f, 0.7f, 0.7f, 1.0f});
+    specialLabel->HorizontalGrow();
+    specialLabel->VerticalFixed(44);
+    specialChars->AddChild(std::move(specialLabel));
+
+    auto specialBox = std::make_unique<UIElement>();
+    specialBox->Padding(12);
+    specialBox->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    specialBox->BorderRadius({8, 8, 8, 8});
+    specialBox->Text("!@#$%^&*()_+-=[]{}|;':\",./<>?");
+    specialBox->FontSize(32);
+    specialBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    specialBox->TextWrap(Graphic::GL::TextWrap::Character);
+    specialBox->HorizontalGrow();
+    specialBox->VerticalGrow();
+    specialChars->AddChild(std::move(specialBox));
+
+    edgeRow->AddChild(std::move(specialChars));
+
+    // Numbers only
+    auto numbersOnly = std::make_unique<UIElement>();
+    numbersOnly->MarginLeft(24);
+    numbersOnly->Padding(16);
+    numbersOnly->Background({0.18f, 0.18f, 0.20f, 1.0f});
+    numbersOnly->BorderRadius({12, 12, 12, 12});
+    numbersOnly->BorderWidth({2, 2, 2, 2});
+    numbersOnly->BorderColor({0.5f, 0.5f, 0.5f, 1.0f});
+    numbersOnly->VerticalStack();
+    numbersOnly->HorizontalGrow();
+    numbersOnly->VerticalGrow();
+
+    auto numbersLabel = std::make_unique<UIElement>();
+    numbersLabel->Padding(8);
+    numbersLabel->Text("Numbers / Newlines");
+    numbersLabel->FontSize(28);
+    numbersLabel->TextColor({0.7f, 0.7f, 0.7f, 1.0f});
+    numbersLabel->HorizontalGrow();
+    numbersLabel->VerticalFixed(44);
+    numbersOnly->AddChild(std::move(numbersLabel));
+
+    auto numbersBox = std::make_unique<UIElement>();
+    numbersBox->Padding(12);
+    numbersBox->Background({0.1f, 0.1f, 0.11f, 1.0f});
+    numbersBox->BorderRadius({8, 8, 8, 8});
+    numbersBox->Text("Line1\nLine2\nLine3\n12345.67890");
+    numbersBox->FontSize(36);
+    numbersBox->TextColor({0.9f, 0.9f, 0.9f, 1.0f});
+    numbersBox->TextWrap(Graphic::GL::TextWrap::Character);
+    numbersBox->HorizontalGrow();
+    numbersBox->VerticalGrow();
+    numbersOnly->AddChild(std::move(numbersBox));
+
+    edgeRow->AddChild(std::move(numbersOnly));
+
+    section5->AddChild(std::move(edgeRow));
+    root->AddChild(std::move(section5));
+}
 
 
     auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {

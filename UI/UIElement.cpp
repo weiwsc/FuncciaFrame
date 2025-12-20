@@ -258,7 +258,7 @@ namespace Funccia::UI {
         //     parent_content_box_y + m_border_box_pos.GetY() + m_border_box_size.GetY(),
         // };
         vec4 borderColor;
-        if (m_border_color.r == 0 ,m_border_color.g == 0, m_border_color.b == 0, m_border_color.a == 0) {
+        if (m_border_color.r == 0 && m_border_color.g == 0 && m_border_color.b == 0 && m_border_color.a == 0) {
             borderColor.r = m_background.r;
             borderColor.g = m_background.g;
             borderColor.b = m_background.b;
@@ -288,11 +288,18 @@ namespace Funccia::UI {
         });
 
         if (!m_text.empty()) {
-            text_renderer.ProcessText(m_global_border_box.x + contentBoxStartOnAxis(Axis::Horizontal),
-                m_global_border_box.y + contentBoxStartOnAxis(Axis::Vertical),
-                m_global_border_box.z - m_global_border_box.x,
+            // Calculate content box position from the global border box
+            float content_x = m_global_border_box.x + m_border_widths.left() + m_padding.left();
+            float content_y = m_global_border_box.y + m_border_widths.top() + m_padding.top();
+            float content_w = (m_global_border_box.z - m_global_border_box.x)
+                              - m_border_widths.left() - m_border_widths.right()
+                              - m_padding.left() - m_padding.right();
+
+            text_renderer.ProcessText(content_x,
+                content_y,
+                content_w,
                 m_text_wrap_mode,
-                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                m_text,
                 m_color,
                 static_cast<float>(m_font_size),
                 "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf");

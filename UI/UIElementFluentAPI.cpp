@@ -13,6 +13,16 @@ namespace Funccia::UI {
         return *this;
     }
 
+    auto UIElement::FontSize(int size) -> UIElement & {
+        m_font_size = size;
+        return *this;
+    }
+
+    auto UIElement::TextWrap(Graphic::GL::TextWrap wrap) -> UIElement & {
+        m_text_wrap_mode = wrap;
+        return *this;
+    }
+
     auto UIElement::InvisibleButOccupySpace(bool option) -> UIElement & {
         m_invisibleButOccupySpace = option;
         return *this;

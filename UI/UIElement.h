@@ -158,6 +158,8 @@ namespace Funccia::UI {
         auto SetTag(Tag tag) -> UIElement&;
 
         auto Text(const std::string& text) -> UIElement&;
+        auto FontSize(int size) -> UIElement&;
+        auto TextWrap(Graphic::GL::TextWrap wrap) -> UIElement&;
 
         auto InvisibleButOccupySpace(bool option) -> UIElement&;
 
