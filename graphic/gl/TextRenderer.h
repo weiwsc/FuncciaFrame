@@ -12,7 +12,7 @@ namespace Funccia::Graphic::GL {
     public:
         TextRenderer();
         ~TextRenderer();
-        void ProcessText(float x, float y,float w, TextWrap text_wrap, const std::string &text, vec4 color, float pixel, const std::string &fontPath);
+        float ProcessText(float x, float y,float w, TextWrap text_wrap,vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run = true);
 
         void ShapeText(const std::string &fontPath, const std::string &text, std::vector<ShapedGlyph> &shapedText);
 

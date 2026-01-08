@@ -86,9 +86,13 @@ namespace Funccia::UI {
 #ifdef FF_UI_LAZY_LAYOUT
         if (!m_layoutUpdated) return m_border_box_size.OnAxis(axis) + m_margin.firstAndSecond(axis);
 #endif
+
         float totalChildSize = 0;
         float maxSize = 0;
-
+        if (axis == Axis::Vertical && !m_text.empty()) {
+            totalChildSize = m_text_grow_size;
+            maxSize = m_text_grow_size;
+        }
         float padding = m_padding.firstAndSecond(axis) + m_border_widths.firstAndSecond(axis);
         float margin = m_margin.firstAndSecond(axis);
 
@@ -118,58 +122,52 @@ namespace Funccia::UI {
         return m_border_box_size.OnAxis(axis) + margin;
     }
 
-    auto UIElement::CalculateGrowSizeOnAxis(Axis axis) -> void {
+    auto UIElement::CalculateGrowSizeOnAxis(Axis axis, Graphic::GL::TextRenderer &text_renderer) -> void {
         if (!m_is_rendered) return;
 #ifdef FF_UI_LAZY_LAYOUT
         if (!m_layoutUpdated) return;
 #endif
 
-        std::vector<UIElement*> childToGrow {};
-
-        float usedSpace = 0;
-
-        for (auto& child : m_children) {
-            if (child->m_sizing.TypeOnAxis(axis) == SizingType::Grow) { childToGrow.push_back(child.get()); }
-            //usedSpace += child->marginBoxOnAxis(axis);
-            else{usedSpace += child->marginBoxOnAxis(axis);}
+        if (m_children.empty() && !m_text.empty() && axis == Axis::Horizontal) {
+            float w = m_border_box_size.GetX()
+                              - m_border_widths.left() - m_border_widths.right()
+                              - m_padding.left() - m_padding.right();
+            m_text_grow_size = text_renderer.ProcessText(0,0, w, m_text_wrap_mode, {0,0,0,0}, m_text, m_color, static_cast<float>(m_font_size), "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf" );
         }
 
-        float availableSpace = std::max(contentBoxOnAxis(axis) - usedSpace, 0.0f);
+        std::vector<UIElement*> childToGrow {};
+        float usedSpace = 0;
+
+        // Count ALL children's space, but track which ones can grow
+        for (auto& child : m_children) {
+            if (child->m_sizing.TypeOnAxis(axis) == SizingType::Grow) {
+                childToGrow.push_back(child.get());
+            }
+            // Always add to usedSpace - grow children have initial size from Fit pass
+            usedSpace += child->marginBoxOnAxis(axis);
+        }
+
+        float availableSpace = contentBoxOnAxis(axis) - usedSpace;
 
         if (m_displayAxis != axis) {
+            // Cross-axis: grow children fill the cross dimension
             for (auto& child : childToGrow) {
                 child->m_border_box_size.Set(axis, contentBoxOnAxis(axis) - child->m_margin.firstAndSecond(axis));
             }
         }
-        else if (availableSpace > 0){ // if we are going along the axis
-            if (childToGrow.size() == 1) {
-                //childToGrow[0]->m_border_box_size.Set(axis, contentBoxOnAxis(axis) - childToGrow[0]->m_margin.firstAndSecond(axis));
-                childToGrow[0]->m_border_box_size.Set(axis, availableSpace);
-            }
-            else if (!childToGrow.empty()) { //if there are multiple children to be resized
-                float totalWeight = 0;
-                std::vector<float> weights;
+        else if (availableSpace > 0 && !childToGrow.empty()) {
+            // Main axis: distribute extra space equally among grow children
+            float spacePerChild = availableSpace / static_cast<float>(childToGrow.size());
 
-                for (auto& child : childToGrow) {
-                    float currentSize = child->m_border_box_size.OnAxis(axis);
-                    // Smaller elements get higher weight (inverse relationship)
-                    float weight = 1.0f / std::max(currentSize, 1.0f); // Avoid division by zero
-                    weights.push_back(weight);
-                    totalWeight += weight;
-                }
-
-                // Distribute space based on weights
-                for (size_t i = 0; i < childToGrow.size(); ++i) {
-                    float weightRatio = weights[i] / totalWeight;
-                    float additionalSpace = availableSpace * weightRatio;
-                    float currentSize = childToGrow[i]->m_border_box_size.OnAxis(axis);
-                    childToGrow[i]->m_border_box_size.Set(axis, currentSize + additionalSpace);
-                }
+            for (auto& child : childToGrow) {
+                float currentSize = child->m_border_box_size.OnAxis(axis);
+                child->m_border_box_size.Set(axis, currentSize + spacePerChild);
             }
         }
 
+        // Recurse to children
         for (auto& child : m_children) {
-            child->CalculateGrowSizeOnAxis(axis);
+            child->CalculateGrowSizeOnAxis(axis, text_renderer);
         }
     }
 
@@ -299,10 +297,13 @@ namespace Funccia::UI {
                 content_y,
                 content_w,
                 m_text_wrap_mode,
+                m_clipping_box,
                 m_text,
                 m_color,
                 static_cast<float>(m_font_size),
-                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf");
+                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                false
+                );
         }
 
         for (auto& child : m_children) {

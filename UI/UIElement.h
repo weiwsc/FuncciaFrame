@@ -48,7 +48,7 @@ namespace Funccia::UI {
 
         // ==========> layout algorithms <==============
         auto CalculateFitSizeOnAxis(Axis axis) -> float;
-        auto CalculateGrowSizeOnAxis(Axis axis) -> void;
+        auto CalculateGrowSizeOnAxis(Axis axis, Graphic::GL::TextRenderer &text_renderer) -> void;
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
 #ifdef FF_UI_LAZY_LAYOUT
@@ -109,6 +109,7 @@ namespace Funccia::UI {
         std::string m_text {};
         int m_font_size {30};
         Graphic::GL::TextWrap m_text_wrap_mode;
+        float m_text_grow_size {};
 
 
 

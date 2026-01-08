@@ -6,11 +6,12 @@ layout(location=3) in vec2 iBearing;  // (left, top) — top is y-up
 layout(location=4) in vec4 iUVRect;
 layout(location=5) in vec4 iColor;
 layout(location=6) in float iLayer;
-
+layout(location=7) in vec4 a_clippingBox;
 uniform vec2 u_viewSize;
 
 out vec2 vUV;
 out vec4 vColor;
+out vec4 v_clippingBox;
 flat out float vLayer;
 
 void main() {
@@ -28,4 +29,5 @@ void main() {
     vUV    = mix(iUVRect.xy, iUVRect.zw, aUnit);
     vColor = iColor;
     vLayer = iLayer;
+    v_clippingBox = a_clippingBox;
 }

@@ -96,7 +96,7 @@ int main() {
     Funccia::Graphic::GL::UIRenderer renderer = Funccia::Graphic::GL::UIRenderer();
     renderer.Initialize("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/UIShader-ver.glsl",
         "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/UIShader-frag.glsl");
-    Funccia::UI::Window uiWindow = Funccia::UI::Window();
+    Funccia::UI::Window uiWindow = Funccia::UI::Window{window.get()};
 
     // Setup mouse picking context
     MousePickCtx ctx;

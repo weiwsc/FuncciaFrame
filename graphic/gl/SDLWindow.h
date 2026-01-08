@@ -8,7 +8,7 @@
 #include "../WindowInterface.h"
 
 namespace Funccia::Graphic::GL {
-    class SDLWindow : WindowInterface {
+    class SDLWindow : public WindowInterface {
     public:
         SDLWindow() = default;
 

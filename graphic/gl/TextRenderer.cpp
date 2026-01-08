@@ -16,7 +16,7 @@ namespace Funccia::Graphic::GL {
         Cleanup();
     }
 
-    void TextRenderer::ProcessText(float x, float y,float w, TextWrap text_wrap, const std::string &text, vec4 color, float pixel, const std::string &fontPath) {
+    float TextRenderer::ProcessText(float x, float y,float w, TextWrap text_wrap, vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run) {
         std::vector<ShapedGlyph> shapedText{};
         ShapeText(fontPath, text, shapedText);
 
@@ -37,17 +37,22 @@ namespace Funccia::Graphic::GL {
             float origin_x = cursor.x + cell.offset.x * scale;
             float origin_y = cursor.y + cell.offset.y * scale;
 
-            Collect({origin_x, origin_y,
-                cell.size.x * scale, cell.size.y * scale,      // Scale size
-                cell.bearing.x * scale, cell.bearing.y * scale, // Scale bearing
-                cell.uv.x, cell.uv.y, cell.uv.z, cell.uv.w,
-                color.r, color.g, color.b, color.a,
-                static_cast<float>(cell.layer)
-            });
+            if (!dry_run) {
+                Collect({origin_x, origin_y,
+                    cell.size.x * scale, cell.size.y * scale,      // Scale size
+                    cell.bearing.x * scale, cell.bearing.y * scale, // Scale bearing
+                    cell.uv.x, cell.uv.y, cell.uv.z, cell.uv.w,
+                    color.r, color.g, color.b, color.a,
+                    static_cast<float>(cell.layer),
+                    clippingBox.x, clippingBox.y, clippingBox.z, clippingBox.w
+                });
+            }
 
             cursor.x += cell.advance.x * scale;  // Scale advance
             cursor.y += cell.advance.y * scale;
         }
+        cursor.y += pixel/4; //makes the text looks more vertically centered in the text box
+        return cursor.y;
     }
 
     void TextRenderer::ShapeText(const std::string &fontPath, const std::string &text,
@@ -114,6 +119,7 @@ namespace Funccia::Graphic::GL {
 
 
         m_shader.use();
+
         GLint loc = glGetUniformLocation(m_shader.getID(), "uAtlas");
         glUniform1i(loc, 0);
 
@@ -126,7 +132,7 @@ namespace Funccia::Graphic::GL {
         // Instance data buffer setup - 12 floats per instance (3 vec4s)
         glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
 
-        const size_t instanceSize = 15 * sizeof(float); // 3 vec4s
+        const size_t instanceSize = 19 * sizeof(float); // 3 vec4s
         size_t offset = 0;
 
         // origin (location 1)
@@ -163,13 +169,19 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
         glEnableVertexAttribArray(6);
         glVertexAttribDivisor(6, 1);
+        offset += sizeof(float);
+
+        // clipping box (location 7)
+        glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
+        glEnableVertexAttribArray(7);
+        glVertexAttribDivisor(7, 1);
 
     }
 
     void TextRenderer::Render(const glm::vec2 &screenSize) {
         if (instanceData.empty()) return;
 
-        const size_t floatsPerInstance = 15;
+        const size_t floatsPerInstance = 19;
         const size_t instanceCount = instanceData.size() / floatsPerInstance;
 
         if (instanceData.size() % floatsPerInstance != 0) {
@@ -178,6 +190,8 @@ namespace Funccia::Graphic::GL {
         }
 
         m_shader.use();
+        glUniform2f(glGetUniformLocation(m_shader.getID(), "u_viewSize"),
+                    screenSize.x, screenSize.y);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlas->GetAtlasTextureArray());

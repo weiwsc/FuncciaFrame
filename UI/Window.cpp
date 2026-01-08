@@ -6,6 +6,7 @@
 #include "UIElement.h"
 #include <chrono>
 
+#include "../graphic/WindowInterface.h"
 #include "../graphic/gl/TextRenderer.h"
 
 struct Timer {
@@ -24,136 +25,158 @@ namespace Funccia::UI {
 
 
 
-    Window::Window() {
-
-        TestUI();
+    Window::Window(Graphic::WindowInterface *window) {
+        m_window = window;
+        TextUI();
+        //TestUI();
         //MockUI();
     }
 
 
+    auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
+        root->CalculateFitSizeOnAxis(Axis::Horizontal);
+        root->CalculateGrowSizeOnAxis(Axis::Horizontal, text_renderer);
+
+        root->CalculateFitSizeOnAxis(Axis::Vertical);
+        root->CalculateGrowSizeOnAxis(Axis::Vertical, text_renderer);
+
+        root->PositionOnAxis(Axis::Horizontal, m_offset.x);
+        root->PositionOnAxis(Axis::Vertical, m_offset.y);
+
+        double x,y;
+        m_window->GetCursorPos(x, y);
+        target_x = 2*x;
+        target_y = 2*y;
+        root->GlobalPositionPass(target_x, target_y);
+        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
+        root->RenderQueue(renderer,text_renderer, target_x, target_y);
+
+        //m_offset.y += 0.7;
+        //m_offset.y += 0.01;
+        //root->GlobalPositionPass(root->borderBoxEndOnAxis(Axis::Horizontal) + 0.01, root->borderBoxEndOnAxis(Axis::Vertical)+ 0.01);
+        //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
 
 
+    }
+
+    auto Window::RenderProfile(Graphic::GL::UIRenderer& renderer,Graphic::GL::TextRenderer& text_renderer,  Graphic::GL::TextRenderer& text_render,
+                    float target_x, float target_y, const glm::vec2& screenSize) -> void {
+
+    auto start = std::chrono::high_resolution_clock::now();
+    root->CalculateFitSizeOnAxis(Axis::Horizontal);
+    auto end = std::chrono::high_resolution_clock::now();
+    double fitX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateGrowSizeOnAxis(Axis::Horizontal, text_renderer);
+    end = std::chrono::high_resolution_clock::now();
+    double growX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateFitSizeOnAxis(Axis::Vertical);
+    end = std::chrono::high_resolution_clock::now();
+    double fitY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CalculateGrowSizeOnAxis(Axis::Vertical, text_renderer);
+    end = std::chrono::high_resolution_clock::now();
+    double growY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->PositionOnAxis(Axis::Horizontal, 0);
+    end = std::chrono::high_resolution_clock::now();
+    double posX = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->PositionOnAxis(Axis::Vertical, 0);
+    end = std::chrono::high_resolution_clock::now();
+    double posY = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->GlobalPositionPass(target_x, target_y);
+    end = std::chrono::high_resolution_clock::now();
+    double globalPos = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->CullingPass(vec4(0, 0, screenSize.x, screenSize.y));
+    end = std::chrono::high_resolution_clock::now();
+    double culling = std::chrono::duration<double, std::milli>(end - start).count();
+
+    start = std::chrono::high_resolution_clock::now();
+    root->RenderQueue(renderer,text_renderer, target_x, target_y);
+    end = std::chrono::high_resolution_clock::now();
+    double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
+
+    printf("FitX: %.3f | GrowX: %.3f | FitY: %.3f | GrowY: %.3f | PosX: %.3f | PosY: %.3f | Global: %.3f | Cull: %.3f | Queue: %.3f\n",
+           fitX, growX, fitY, growY, posX, posY, globalPos, culling, renderQueue);
+
+    //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+    //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+}
+
+
+
+    auto Window::InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void {
+        //root->Scale(2);
+        root->GlobalPositionPass(target_x, target_y);
+        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
+        //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
+        root->CalculateFitSizeOnAxis(Axis::Horizontal);
+        //root->CalculateGrowSizeOnAxis(Axis::Horizontal);
+
+        root->CalculateFitSizeOnAxis(Axis::Vertical);
+        //root->CalculateGrowSizeOnAxis(Axis::Vertical);
+
+        root->PositionOnAxis(Axis::Horizontal, 0);
+        root->PositionOnAxis(Axis::Vertical, 0);
+#ifdef FF_UI_LAZY_LAYOUT
+        root->FlipLazyLayoutPass();
+#endif
+    }
 
     auto Window::TextUI() -> void {
-            root = std::make_unique<UIElement>();
-    root->Padding(24);
-    root->Background({0.11f, 0.11f, 0.12f, 1.0f});
-    root->VerticalStack();
-    root->HorizontalFixed(2000);
-    root->VerticalFixed(1000);
+        root = std::make_unique<UIElement>();
+        root->Padding(24);
+        root->Background({1, 1, 1, 1.0f})
+            .BorderWidth({2,2,2,2})
+            .BorderColor({0,0,0,1});
+        root->VerticalStack();
+        root->HorizontalFixed(2000);
+        root->VerticalFixed(1000);
 
+        auto text = std::make_unique<UIElement>();
+        text->Text("Hello World! my lh-brackets plugin that is a little bit more ergonomic once we already are in visual mode (but definitively not more ergonomic when we start from normal mode and used to text-objects), or to surround the current word (/or line) -> we just hit ( to surround with parenthesis -- it provides visual mode mappings for all the auto-pairing insert-mode mappings registered")
+            .TextColor({0,0,0,1})
+            .HorizontalGrow()
+            .VerticalFit()
+            .TextWrap(Graphic::GL::TextWrap::Character)
+            .Padding(20)
+            .FontSize(54)
+            .BorderColor({1,0,0,1})
+            .BorderWidth({2,2,2,2});
+        root->AddChild(std::move(text));
 
-    // ================= TITLE BAR =================
-    auto titleBar = std::make_unique<UIElement>();
-    titleBar->Padding(16, 24, 16, 24);
-    titleBar->Background({0.14f, 0.14f, 0.15f, 1.0f});
-    titleBar->HorizontalStack();
-    titleBar->HorizontalGrow();
-    titleBar->VerticalFixed(96);
+        auto text2 = std::make_unique<UIElement>();
+        text2->Text("Hello World!")
+            .TextColor({0,0,0,1})
+            .HorizontalGrow()
+            .VerticalFit()
+            .Padding(20)
+            .BorderColor({1,0,0,1})
+            .BorderWidth({2,2,2,2});
+        root->AddChild(std::move(text2));
 
-    auto titleText = std::make_unique<UIElement>();
-    titleText->Text("Funccia Editor");
-    titleText->FontSize(44);
-    titleText->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
-    titleText->HorizontalGrow();
-    titleText->VerticalGrow();
-    titleBar->AddChild(std::move(titleText));
+        auto text3 = std::make_unique<UIElement>();
+        text3->Text("Hello World!")
+            .TextColor({0,0,0,1})
+            .HorizontalGrow()
+            .VerticalGrow()
+            .BorderColor({1,0,0,1})
+            .BorderWidth({2,2,2,2});
+        root->AddChild(std::move(text3));
 
-    root->AddChild(std::move(titleBar));
-
-    // ================= MAIN AREA =================
-    auto mainArea = std::make_unique<UIElement>();
-    mainArea->HorizontalStack();
-    mainArea->HorizontalGrow();
-    mainArea->VerticalGrow();
-
-    // -------- Sidebar --------
-    auto sidebar = std::make_unique<UIElement>();
-    sidebar->Padding(12);
-    sidebar->Background({0.12f, 0.12f, 0.13f, 1.0f});
-    sidebar->VerticalStack();
-    sidebar->HorizontalFixed(360);
-    sidebar->VerticalGrow();
-
-    auto sidebarHeader = std::make_unique<UIElement>();
-    sidebarHeader->Text("Project");
-    sidebarHeader->FontSize(42);
-    sidebarHeader->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
-    sidebarHeader->MarginBottom(12);
-    sidebar->AddChild(std::move(sidebarHeader));
-
-    for (int i = 0; i < 6; ++i) {
-        auto item = std::make_unique<UIElement>();
-        item->Padding(12, 16, 12, 16);
-        item->Background(i == 2
-            ? vec4{0.3f, 0.4f, 0.9f, 0.2f}
-            : vec4{0.18f, 0.18f, 0.19f, 1.0f});
-        item->BorderRadius({6, 6, 6, 6});
-        item->VerticalFixed(64);
-
-        auto label = std::make_unique<UIElement>();
-        label->Text(i == 2 ? "main.cpp" : "file.cpp");
-        label->FontSize(42);
-        label->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
-        item->AddChild(std::move(label));
-
-        sidebar->AddChild(std::move(item));
-    }
-
-    mainArea->AddChild(std::move(sidebar));
-
-    // -------- Editor --------
-    auto editor = std::make_unique<UIElement>();
-    editor->Padding(24);
-    editor->Background({0.15f, 0.15f, 0.16f, 1.0f});
-    editor->VerticalStack();
-    editor->HorizontalGrow();
-    editor->VerticalGrow();
-
-    auto editorTitle = std::make_unique<UIElement>();
-    editorTitle->Text("main.cpp");
-    editorTitle->FontSize(44);
-    editorTitle->TextColor({0.9f, 0.9f, 0.92f, 1.0f});
-    editorTitle->MarginBottom(16);
-    editor->AddChild(std::move(editorTitle));
-
-    for (int i = 0; i < 8; ++i) {
-        auto line = std::make_unique<UIElement>();
-        line->Padding(8, 12, 8, 12);
-        line->Background(i == 3
-            ? vec4{0.3f, 0.4f, 0.9f, 0.12f}
-            : vec4{0, 0, 0, 0});
-        line->HorizontalGrow();
-        line->VerticalFixed(64);
-
-        auto code = std::make_unique<UIElement>();
-        code->Text("auto value = ComputeSomething();");
-        code->FontSize(40); // slightly smaller for code
-        code->TextColor({0.85f, 0.85f, 0.88f, 1.0f});
-        line->AddChild(std::move(code));
-
-        editor->AddChild(std::move(line));
-    }
-
-    mainArea->AddChild(std::move(editor));
-    root->AddChild(std::move(mainArea));
-
-    // ================= STATUS BAR =================
-    auto statusBar = std::make_unique<UIElement>();
-    statusBar->Padding(12, 20, 12, 20);
-    statusBar->Background({0.13f, 0.13f, 0.14f, 1.0f});
-    statusBar->HorizontalStack();
-    statusBar->HorizontalGrow();
-    statusBar->VerticalFixed(72);
-
-    auto statusText = std::make_unique<UIElement>();
-    statusText->Text("Build succeeded");
-    statusText->FontSize(42);
-    statusText->TextColor({0.6f, 0.9f, 0.6f, 1.0f});
-    statusText->HorizontalGrow();
-    statusBar->AddChild(std::move(statusText));
-
-    root->AddChild(std::move(statusBar));
     }
 
     auto Window::MockUI() -> void {
@@ -771,6 +794,7 @@ namespace Funccia::UI {
     mainContent->AddChild(std::move(rightPanel));
     root->AddChild(std::move(mainContent));
 }
+
 
     auto Window::TestUI() -> void {
     root = std::make_unique<UIElement>();
@@ -1482,102 +1506,6 @@ namespace Funccia::UI {
     section5->AddChild(std::move(edgeRow));
     root->AddChild(std::move(section5));
 }
-
-
-    auto Window::Render(Graphic::GL::UIRenderer& renderer, Graphic::GL::TextRenderer& text_renderer, float target_x, float target_y, const glm::vec2& screenSize) -> void {
-        root->CalculateFitSizeOnAxis(Axis::Horizontal);
-        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-
-        root->CalculateFitSizeOnAxis(Axis::Vertical);
-        root->CalculateGrowSizeOnAxis(Axis::Vertical);
-
-        root->PositionOnAxis(Axis::Horizontal, 0);
-        root->PositionOnAxis(Axis::Vertical, 0);
-
-
-
-        root->GlobalPositionPass(target_x, target_y);
-        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
-        root->RenderQueue(renderer,text_renderer, target_x, target_y);
-
-        root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-
-    }
-
-    auto Window::RenderProfile(Graphic::GL::UIRenderer& renderer,Graphic::GL::TextRenderer& text_renderer,  Graphic::GL::TextRenderer& text_render,
-                    float target_x, float target_y, const glm::vec2& screenSize) -> void {
-
-    auto start = std::chrono::high_resolution_clock::now();
-    root->CalculateFitSizeOnAxis(Axis::Horizontal);
-    auto end = std::chrono::high_resolution_clock::now();
-    double fitX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-    end = std::chrono::high_resolution_clock::now();
-    double growX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateFitSizeOnAxis(Axis::Vertical);
-    end = std::chrono::high_resolution_clock::now();
-    double fitY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CalculateGrowSizeOnAxis(Axis::Vertical);
-    end = std::chrono::high_resolution_clock::now();
-    double growY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->PositionOnAxis(Axis::Horizontal, 0);
-    end = std::chrono::high_resolution_clock::now();
-    double posX = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->PositionOnAxis(Axis::Vertical, 0);
-    end = std::chrono::high_resolution_clock::now();
-    double posY = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->GlobalPositionPass(target_x, target_y);
-    end = std::chrono::high_resolution_clock::now();
-    double globalPos = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->CullingPass(vec4(0, 0, screenSize.x, screenSize.y));
-    end = std::chrono::high_resolution_clock::now();
-    double culling = std::chrono::duration<double, std::milli>(end - start).count();
-
-    start = std::chrono::high_resolution_clock::now();
-    root->RenderQueue(renderer,text_renderer, target_x, target_y);
-    end = std::chrono::high_resolution_clock::now();
-    double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
-
-    printf("FitX: %.3f | GrowX: %.3f | FitY: %.3f | GrowY: %.3f | PosX: %.3f | PosY: %.3f | Global: %.3f | Cull: %.3f | Queue: %.3f\n",
-           fitX, growX, fitY, growY, posX, posY, globalPos, culling, renderQueue);
-
-    //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-    //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-}
-
-    auto Window::InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void {
-        //root->Scale(2);
-        root->GlobalPositionPass(target_x, target_y);
-        root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
-        //root->MarginLeft((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
-        root->CalculateFitSizeOnAxis(Axis::Horizontal);
-        root->CalculateGrowSizeOnAxis(Axis::Horizontal);
-
-        root->CalculateFitSizeOnAxis(Axis::Vertical);
-        root->CalculateGrowSizeOnAxis(Axis::Vertical);
-
-        root->PositionOnAxis(Axis::Horizontal, 0);
-        root->PositionOnAxis(Axis::Vertical, 0);
-#ifdef FF_UI_LAZY_LAYOUT
-        root->FlipLazyLayoutPass();
-#endif
-    }
 
     auto Window::UI1() -> void {
         root = std::make_unique<UIElement>();
