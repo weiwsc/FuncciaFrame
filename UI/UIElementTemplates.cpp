@@ -10,25 +10,6 @@ namespace Funccia::UI {
     }
 
     UIElement::UIElement(Tag tag) {
-        SetTag(tag);
-        switch (tag) {
-            case Tag::Paragraph:
-                HorizontalGrow();
-                VerticalGrow();
-                break;
-            case Tag::Label:
-                HorizontalGrow();
-                VerticalFit();   //?????
-                break;
-            case Tag::AutoMargin:
-                InvisibleButOccupySpace(true);
-                HorizontalGrow();
-                VerticalGrow();
-                break;
-            default:
-                this->SetTag(Tag::None)
-                ;
-        }
 
     }
 

@@ -12,7 +12,7 @@
 
 namespace Funccia::UI {
     using json = nlohmann::json;
-    using StyleHandler = std::function<void(UIElement*, const json&)>;
+    using StyleHandler = std::function<void(UIFluentAPI*, const json&)>;
 
     class JsonUiBuilder {
     public:

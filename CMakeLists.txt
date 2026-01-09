@@ -108,7 +108,13 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/Mouse.cpp
         graphic/gl/Mouse.h
         UI/JsonUiBuilder.cpp
-        UI/JsonUiBuilder.h)
+        UI/JsonUiBuilder.h
+        UI/UIStyle.cpp
+        UI/UIStyle.h
+        UI/UIFluentAPI.cpp
+        UI/UIFluentAPI.h
+        UI/UIStyleDef.cpp
+        UI/UIStyleDef.h)
 
 set(LLVM_ROOT "/opt/homebrew/opt/llvm")
 

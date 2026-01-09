@@ -21,14 +21,14 @@ namespace Funccia::UI {
         if (j.contains("style")) {
             for (auto &[key, value]: j["style"].items()) {
                 if (auto it = JsonUiBuilder::styleHandlers.find(key); it != JsonUiBuilder::styleHandlers.end()) {
-                    it->second(el, value);
+                    it->second(&(el->Style()), value);
                 }
             }
         }
 
         if (j.contains("content")) {
             if (auto it = JsonUiBuilder::styleHandlers.find("content"); it != JsonUiBuilder::styleHandlers.end()) {
-                it->second(el, j["content"]);
+                it->second(&(el->Style()), j["content"]);
             }
         }
 
@@ -152,104 +152,104 @@ namespace Funccia::UI {
 
     const std::unordered_map<std::string, StyleHandler> JsonUiBuilder::styleHandlers = {
         // Text
-        {"content", [](UIElement *el, const json &v) { el->Text(v.get<std::string>()); }},
-        {"font-size", [](UIElement *el, const json &v) { el->FontSize(v.get<int>()); }},
-        {"text-color", [](UIElement *el, const json &v) { el->TextColor(ParseColor(v)); }},
+        {"content", [](UIFluentAPI *elf, const json &v) { elf->Text(v.get<std::string>()); }},
+        {"font-size", [](UIFluentAPI *elf, const json &v) { elf->FontSize(v.get<int>()); }},
+        {"text-color", [](UIFluentAPI *elf, const json &v) { elf->TextColor(ParseColor(v)); }},
         {
-            "text-wrap", [](UIElement *el, const json &v) {
+            "text-wrap", [](UIFluentAPI *elf, const json &v) {
                 // assuming you have a string->enum mapping
-                el->TextWrap(v == "wrap" ? Graphic::GL::TextWrap::Character : Graphic::GL::TextWrap::None);
+                elf->TextWrap(v == "wrap" ? Graphic::GL::TextWrap::Character : Graphic::GL::TextWrap::None);
             }
         },
 
         // Margin
         {
-            "margin", [](UIElement *el, const json &v) {
-                if (v.is_number()) el->Margin(v.get<float>());
-                else if (v.is_array() && v.size() == 2) el->Margin(v[0], v[1]);
-                else if (v.is_array() && v.size() == 4) el->Margin(v[0], v[1], v[2], v[3]);
+            "margin", [](UIFluentAPI *elf, const json &v) {
+                if (v.is_number()) elf->Margin(v.get<float>());
+                else if (v.is_array() && v.size() == 2) elf->Margin(v[0], v[1]);
+                else if (v.is_array() && v.size() == 4) elf->Margin(v[0], v[1], v[2], v[3]);
             }
         },
-        {"margin-top", [](UIElement *el, const json &v) { el->MarginTop(v.get<float>()); }},
-        {"margin-right", [](UIElement *el, const json &v) { el->MarginRight(v.get<float>()); }},
-        {"margin-bottom", [](UIElement *el, const json &v) { el->MarginBottom(v.get<float>()); }},
-        {"margin-left", [](UIElement *el, const json &v) { el->MarginLeft(v.get<float>()); }},
+        {"margin-top", [](UIFluentAPI *elf, const json &v) { elf->MarginTop(v.get<float>()); }},
+        {"margin-right", [](UIFluentAPI *elf, const json &v) { elf->MarginRight(v.get<float>()); }},
+        {"margin-bottom", [](UIFluentAPI *elf, const json &v) { elf->MarginBottom(v.get<float>()); }},
+        {"margin-left", [](UIFluentAPI *elf, const json &v) { elf->MarginLeft(v.get<float>()); }},
 
         // Padding
         {
-            "padding", [](UIElement *el, const json &v) {
-                if (v.is_number()) el->Padding(v.get<float>());
-                else if (v.is_array() && v.size() == 2) el->Padding(v[0], v[1]);
-                else if (v.is_array() && v.size() == 4) el->Padding(v[0], v[1], v[2], v[3]);
+            "padding", [](UIFluentAPI *elf, const json &v) {
+                if (v.is_number()) elf->Padding(v.get<float>());
+                else if (v.is_array() && v.size() == 2) elf->Padding(v[0], v[1]);
+                else if (v.is_array() && v.size() == 4) elf->Padding(v[0], v[1], v[2], v[3]);
             }
         },
-        {"padding-top", [](UIElement *el, const json &v) { el->PaddingTop(v.get<float>()); }},
-        {"padding-right", [](UIElement *el, const json &v) { el->PaddingRight(v.get<float>()); }},
-        {"padding-bottom", [](UIElement *el, const json &v) { el->PaddingBottom(v.get<float>()); }},
-        {"padding-left", [](UIElement *el, const json &v) { el->PaddingLeft(v.get<float>()); }},
+        {"padding-top", [](UIFluentAPI *elf, const json &v) { elf->PaddingTop(v.get<float>()); }},
+        {"padding-right", [](UIFluentAPI *elf, const json &v) { elf->PaddingRight(v.get<float>()); }},
+        {"padding-bottom", [](UIFluentAPI *elf, const json &v) { elf->PaddingBottom(v.get<float>()); }},
+        {"padding-left", [](UIFluentAPI *elf, const json &v) { elf->PaddingLeft(v.get<float>()); }},
 
         // Background & Border
-        {"background-color", [](UIElement *el, const json &v) { el->Background(ParseColor(v)); }},
+        {"background-color", [](UIFluentAPI *elf, const json &v) { elf->Background(ParseColor(v)); }},
         {
-            "border-radius", [](UIElement *el, const json &v) {
+            "border-radius", [](UIFluentAPI *elf, const json &v) {
                 if (v.is_number()) {
                     float num = v.get<float>();
-                    el->BorderRadius({num, num, num, num});
+                    elf->BorderRadius({num, num, num, num});
                 } else if (v.is_array() && v.size() == 2) {
                     float topButton = v[0].get<float>();
                     float leftRight = v[1].get<float>();
-                    el->BorderRadius({topButton, leftRight, topButton, leftRight});
-                } else if (v.is_array() && v.size() == 4) el->BorderRadius({v[0], v[1], v[2], v[3]});
+                    elf->BorderRadius({topButton, leftRight, topButton, leftRight});
+                } else if (v.is_array() && v.size() == 4) elf->BorderRadius({v[0], v[1], v[2], v[3]});
             }
         },
-        {"border-color", [](UIElement *el, const json &v) { el->BorderColor(ParseColor(v)); }},
+        {"border-color", [](UIFluentAPI *elf, const json &v) { elf->BorderColor(ParseColor(v)); }},
         {
-            "border-width", [](UIElement *el, const json &v) {
+            "border-width", [](UIFluentAPI *elf, const json &v) {
                 if (v.is_number()) {
                     float num = v.get<float>();
-                    el->BorderWidth({num, num, num, num});
+                    elf->BorderWidth({num, num, num, num});
                 } else if (v.is_array() && v.size() == 2) {
                     float topButton = v[0].get<float>();
                     float leftRight = v[1].get<float>();
-                    el->BorderWidth({topButton, leftRight, topButton, leftRight});
-                } else if (v.is_array() && v.size() == 4) el->BorderWidth({v[0], v[1], v[2], v[3]});
+                    elf->BorderWidth({topButton, leftRight, topButton, leftRight});
+                } else if (v.is_array() && v.size() == 4) elf->BorderWidth({v[0], v[1], v[2], v[3]});
             }
         }, // vec4
 
         // Box Shadow
-        {"box-shadow-color", [](UIElement *el, const json &v) { el->BoxShadowColor(ParseColor(v)); }},
-        {"box-shadow-slur", [](UIElement *el, const json &v) { el->BoxShadowBlur(v.get<float>()); }},
-        {"box-shadow-spread", [](UIElement *el, const json &v) { el->BoxShadowSpread(v.get<float>()); }},
-        {"box-shadow-offset", [](UIElement *el, const json &v) { el->BoxShadowOffset(parseVec2(v)); }},
+        {"box-shadow-color", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowColor(ParseColor(v)); }},
+        {"box-shadow-slur", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowBlur(v.get<float>()); }},
+        {"box-shadow-spread", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowSpread(v.get<float>()); }},
+        {"box-shadow-offset", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowOffset(parseVec2(v)); }},
 
         // Sizing
-        {"width", [](UIElement *el, const json &v) { el->HorizontalFixed(v.get<float>()); }},
-        {"height", [](UIElement *el, const json &v) { el->VerticalFixed(v.get<float>()); }},
+        {"width", [](UIFluentAPI *elf, const json &v) { elf->HorizontalFixed(v.get<float>()); }},
+        {"height", [](UIFluentAPI *elf, const json &v) { elf->VerticalFixed(v.get<float>()); }},
         {
-            "horizontal-sizing", [](UIElement *el, const json &v) {
+            "horizontal-sizing", [](UIFluentAPI *elf, const json &v) {
                 auto s = v.get<std::string>();
-                if (s == "grow") el->HorizontalGrow();
-                else if (s == "fit") el->HorizontalFit();
+                if (s == "grow") elf->HorizontalGrow();
+                else if (s == "fit") elf->HorizontalFit();
             }
         },
         {
-            "vertical-sizing", [](UIElement *el, const json &v) {
+            "vertical-sizing", [](UIFluentAPI *elf, const json &v) {
                 auto s = v.get<std::string>();
-                if (s == "grow") el->VerticalGrow();
-                else if (s == "fit") el->VerticalFit();
+                if (s == "grow") elf->VerticalGrow();
+                else if (s == "fit") elf->VerticalFit();
             }
         },
 
         // Layout
         {
-            "stack", [](UIElement *el, const json &v) {
+            "stack", [](UIFluentAPI *elf, const json &v) {
                 auto s = v.get<std::string>();
-                if (s == "horizontal") el->HorizontalStack();
-                else if (s == "vertical") el->VerticalStack();
+                if (s == "horizontal") elf->HorizontalStack();
+                else if (s == "vertical") elf->VerticalStack();
             }
         },
 
         // Misc
-        {"invisible", [](UIElement *el, const json &v) { el->InvisibleButOccupySpace(v.get<bool>()); }},
+        {"invisible", [](UIFluentAPI *elf, const json &v) { elf->InvisibleButOccupySpace(v.get<bool>()); }},
     };
 }
