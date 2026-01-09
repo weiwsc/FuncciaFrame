@@ -9,6 +9,7 @@
 #include <numeric>
 
 #include "UIHelper.h"
+#include "Window.h"
 
 namespace Funccia::UI {
     float UIElement::borderBoxStartOnAxis(Axis axis) const {
@@ -132,7 +133,7 @@ namespace Funccia::UI {
             float w = m_border_box_size.GetX()
                               - m_border_widths.left() - m_border_widths.right()
                               - m_padding.left() - m_padding.right();
-            m_text_grow_size = text_renderer.ProcessText(0,0, w, m_text_wrap_mode, {0,0,0,0}, m_text, m_color, static_cast<float>(m_font_size), "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf" );
+            m_text_grow_size = text_renderer.ProcessText(0,0, w, m_text_wrap_mode, {0,0,0,0}, m_text, m_color, static_cast<float>(m_font_size), "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf" );
         }
 
         std::vector<UIElement*> childToGrow {};
@@ -301,7 +302,7 @@ namespace Funccia::UI {
                 m_text,
                 m_color,
                 static_cast<float>(m_font_size),
-                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/arial.ttf",
+                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf",
                 false
                 );
         }
@@ -309,6 +310,23 @@ namespace Funccia::UI {
         for (auto& child : m_children) {
             child->RenderQueue(render,text_renderer, parent_content_box_x+ contentBoxStartOnAxis(Axis::Horizontal), parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
         }
+    }
+
+    auto UIElement::HandlePick(vec2 mouse_pos, Window* parent_window) -> bool {
+        if (!m_is_rendered || m_culled) { return false; }
+
+        if (UIHelper::point_intersect(m_global_border_box, mouse_pos)) {
+            for (auto& child : m_children) {
+                if (child->HandlePick(mouse_pos, parent_window)) {
+                    return true;  // child handled it, we're done
+                }
+            }
+            // no child handled it
+            parent_window->selected_element = this;
+            return true;
+        }
+
+        return false;
     }
 
 

@@ -7,6 +7,10 @@
 #include <string>
 
 namespace Funccia::Graphic {
+    namespace GL {
+        class Mouse;
+    }
+
     enum class Key;
 
     class WindowInterface{
@@ -34,6 +38,8 @@ namespace Funccia::Graphic {
         //virtual void SetCursorPosCallback(void* userPtr, void(*callback)(void*, double, double)) = 0;
 
         virtual void* GetNativeWindow() = 0;
+
+        [[nodiscard]] virtual auto Mouse()-> GL::Mouse* = 0;
 
     };
 

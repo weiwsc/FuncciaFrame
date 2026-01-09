@@ -23,6 +23,8 @@ namespace Funccia::Graphic::GL {
 
     void WindowController::NewWindow() {
         m_window = reinterpret_cast<WindowInterface *>(new SDLWindow());
-        m_window->Initialize(1920, 1080, "Funccia");
+        if (!m_window->Initialize(1920, 1080, "FuncciaFrame")) {
+        std::cerr << "Failed to initialize window!" << std::endl;
+    }
     }
 }

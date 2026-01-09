@@ -13,6 +13,8 @@ if(APPLE)
     endif()
 endif()
 
+
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
 pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
@@ -24,6 +26,7 @@ include_directories(external/std_image/include)
 
 find_package(harfbuzz REQUIRED)
 find_package(glfw3 3.4 REQUIRED)
+find_package(nlohmann_json 3.12.0 REQUIRED)
 
 add_executable(FuncciaFrame main.cpp
         core/FileController.cpp
@@ -101,7 +104,28 @@ add_executable(FuncciaFrame main.cpp
         graphic/gl/SDLWindow.h
         graphic/text/IRectPacker.h
         graphic/text/GridRectPacker.cpp
-        graphic/text/GridRectPacker.h)
+        graphic/text/GridRectPacker.h
+        graphic/gl/Mouse.cpp
+        graphic/gl/Mouse.h
+        UI/JsonUiBuilder.cpp
+        UI/JsonUiBuilder.h)
+
+set(LLVM_ROOT "/opt/homebrew/opt/llvm")
+
+target_link_options(FuncciaFrame PRIVATE
+        "-nostdlib++"
+)
+
+target_link_libraries(FuncciaFrame PRIVATE
+        "${LLVM_ROOT}/lib/c++/libc++.dylib"
+        "${LLVM_ROOT}/lib/c++/libc++abi.dylib"
+)
+
+target_link_options(FuncciaFrame PRIVATE
+        "-Wl,-rpath,${LLVM_ROOT}/lib"
+)
+
+target_link_libraries(FuncciaFrame PRIVATE nlohmann_json::nlohmann_json)
 
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)

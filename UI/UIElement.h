@@ -13,6 +13,7 @@
 
 #include "SideOffset.h"
 #include "UITypes.h"
+#include "../graphic/gl/TextRenderer.h"
 
 
 namespace Funccia::Graphic::GL {
@@ -23,7 +24,7 @@ namespace Funccia::Graphic::GL {
 
 namespace Funccia::UI {
     using UIRender = Funccia::Graphic::GL::UIRenderer;
-
+    class Window;
 
     class UIElement {
         friend class Window;
@@ -60,7 +61,7 @@ namespace Funccia::UI {
         auto RenderQueue(UIRender& render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y) -> void;
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
-
+        auto HandlePick(vec2 mouse_pos, Window* parent_window) -> bool;
 
         auto Scale(float size) -> void;
     protected:
@@ -86,9 +87,9 @@ namespace Funccia::UI {
         vec4 m_border_radius {0,0,0,0};
         vec4 m_border_color {0,0,0,0};
 
-        Axis m_displayAxis {Axis::Horizontal};
+        Axis m_displayAxis {Axis::Vertical};
         Position m_position {Position::Absolute};
-        Sizing m_sizing {SizingType::Fit, SizingType::Fit, 0, 0};
+        Sizing m_sizing {SizingType::Grow, SizingType::Fit, 0, 0};
 
         bool m_is_rendered {true};
         bool m_invisibleButOccupySpace {false};
@@ -107,8 +108,8 @@ namespace Funccia::UI {
         Overflow m_overflow {Overflow::ClipByBorderBox};
 
         std::string m_text {};
-        int m_font_size {30};
-        Graphic::GL::TextWrap m_text_wrap_mode;
+        int m_font_size {35};
+        Graphic::GL::TextWrap m_text_wrap_mode {Graphic::GL::TextWrap::Character};
         float m_text_grow_size {};
 
 

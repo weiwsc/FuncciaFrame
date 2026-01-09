@@ -10,6 +10,7 @@
 
 namespace Funccia::Graphic::GL {
     SDLWindow::~SDLWindow() {
+        delete m_mouse;
     }
 
     auto SDLWindow::Initialize(int _width, int _height, std::string _title) -> bool {
@@ -20,6 +21,7 @@ namespace Funccia::Graphic::GL {
                 return false;
             }
         }
+        m_mouse = new GL::Mouse();
 
         // Set OpenGL attributes
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -123,6 +125,7 @@ namespace Funccia::Graphic::GL {
     auto SDLWindow::PollEvents() -> void {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
+            m_mouse->ProcessButtons(event);
             switch (event.type) {
                 case SDL_EVENT_QUIT:
                     m_shouldClose = true;
@@ -186,6 +189,10 @@ namespace Funccia::Graphic::GL {
 
     void *SDLWindow::GetNativeWindow() {
         return m_window;
+    }
+
+    auto SDLWindow::Mouse() -> GL::Mouse * {
+        return m_mouse;
     }
 
     auto SDLWindow::MapKey(Key key) -> SDL_Scancode {

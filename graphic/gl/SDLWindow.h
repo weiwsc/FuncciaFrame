@@ -6,6 +6,7 @@
 #define FUNCCIAFRAME_SDLWINDOW_H
 #include <SDL3/SDL.h>
 #include "../WindowInterface.h"
+#include "Mouse.h"
 
 namespace Funccia::Graphic::GL {
     class SDLWindow : public WindowInterface {
@@ -36,12 +37,14 @@ namespace Funccia::Graphic::GL {
 
         void *GetNativeWindow() override;
 
+        [[nodiscard]] auto Mouse() -> GL::Mouse * override;
+
     private:
         SDL_Window *m_window{nullptr};
         const bool *m_keyboardState{nullptr};
         SDL_GLContext m_glContext{nullptr};
         bool m_shouldClose{false};
-
+        GL::Mouse *m_mouse{nullptr};
 
         static auto MapKey(Key key) -> SDL_Scancode;
 

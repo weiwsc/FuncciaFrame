@@ -37,21 +37,34 @@ vec4 renderShadow(vec2 pix, vec2 center, vec2 halfSize, vec4 radius,
 vec2 offset, float blur, float spread,
 vec4 shadowColor, float excludeMask)
 {
-    if (blur <= 0.0) return vec4(0.0);
+    if (shadowColor.a <= 0.0 || blur <= 0.0) return vec4(0.0);
 
     vec2 shCenter = center + offset;
     vec2 shHalf   = halfSize + vec2(spread);
     vec4 shR      = clamp(radius + vec4(spread), 0.0, min(shHalf.x, shHalf.y));
-    float dSh     = sdRoundedBox(pix - shCenter, shHalf, shR);
 
-    // Soft penumbra controlled by blur; AA from derivatives keeps it crisp
-    float w = max(1e-4, fwidth(dSh));
-    float aSh = 1.0 - smoothstep(0.0, w + blur, dSh);
-    aSh *= excludeMask;
+    // Multi-sample for smoother corners
+    float alpha = 0.0;
+    float sigma = blur * 0.5;
 
-    if (aSh <= 1e-5) return vec4(0.0);
+    // 9-tap grid sample
+    for (float dx = -1.0; dx <= 1.0; dx += 1.0) {
+        for (float dy = -1.0; dy <= 1.0; dy += 1.0) {
+            vec2 samplePos = pix + vec2(dx, dy) * sigma * 0.5;
+            float d = sdRoundedBox(samplePos - shCenter, shHalf, shR);
+
+            // Gaussian weight based on distance
+            float g = exp(-(d * d) / (2.0 * sigma * sigma));
+            alpha += d < 0.0 ? 1.0 : g;
+        }
+    }
+    alpha /= 9.0;
+
+    alpha *= excludeMask;
+    if (alpha <= 1e-5) return vec4(0.0);
+
     vec4 sh = shadowColor;
-    sh.a *= aSh;
+    sh.a *= alpha;
     return sh;
 }
 

@@ -6,8 +6,10 @@
 #include "UIElement.h"
 #include <chrono>
 
+#include "JsonUiBuilder.h"
 #include "../graphic/WindowInterface.h"
 #include "../graphic/gl/TextRenderer.h"
+#include "../graphic/gl/WindowController.h"
 
 struct Timer {
     std::chrono::high_resolution_clock::time_point start;
@@ -27,9 +29,17 @@ namespace Funccia::UI {
 
     Window::Window(Graphic::WindowInterface *window) {
         m_window = window;
-        TextUI();
+        //TextUI();
         //TestUI();
         //MockUI();
+        root = std::make_unique<UIElement>();
+        root->Padding(24);
+        root->Background({1, 1, 1, 1.0f})
+            .BorderWidth({2,2,2,2})
+            .BorderColor({0,0,0,1});
+        root->VerticalStack();
+        root->HorizontalFixed(2000);
+        root->VerticalFixed(1000);
     }
 
 
@@ -45,10 +55,17 @@ namespace Funccia::UI {
 
         double x,y;
         m_window->GetCursorPos(x, y);
-        target_x = 2*x;
-        target_y = 2*y;
+        //target_x = 2*x;
+        //target_y = 2*y;
         root->GlobalPositionPass(target_x, target_y);
         root->CullingPass(vec4(0 , 0, screenSize.x, screenSize.y));
+
+        if (Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->GetButLDown()) {
+            root->HandlePick({x*2,y*2}, this);
+        }
+        if (selected_element) {
+            selected_element->Background({1,0,0,0.5f});
+        }
         root->RenderQueue(renderer,text_renderer, target_x, target_y);
 
         //m_offset.y += 0.7;
@@ -115,6 +132,14 @@ namespace Funccia::UI {
     //root->MarginRight((screenSize.x - root->borderBoxOnAxis(Axis::Horizontal))/2);
 }
 
+    auto Window::ReloadFromJSON(const std::string &json_path) const -> void {
+        std::ifstream file(json_path);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        root->m_children.clear();
+        Funccia::UI::JsonUiBuilder::ParseUI(content, root.get());
+    }
 
 
     auto Window::InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void {
@@ -154,7 +179,7 @@ namespace Funccia::UI {
             .TextWrap(Graphic::GL::TextWrap::Character)
             .Padding(20)
             .FontSize(54)
-            .BorderColor({1,0,0,1})
+            //.BorderColor({1,0,0,1})
             .BorderWidth({2,2,2,2});
         root->AddChild(std::move(text));
 
@@ -164,7 +189,7 @@ namespace Funccia::UI {
             .HorizontalGrow()
             .VerticalFit()
             .Padding(20)
-            .BorderColor({1,0,0,1})
+            //.BorderColor({1,0,0,1})
             .BorderWidth({2,2,2,2});
         root->AddChild(std::move(text2));
 
@@ -173,7 +198,7 @@ namespace Funccia::UI {
             .TextColor({0,0,0,1})
             .HorizontalGrow()
             .VerticalGrow()
-            .BorderColor({1,0,0,1})
+            //.BorderColor({1,0,0,1})
             .BorderWidth({2,2,2,2});
         root->AddChild(std::move(text3));
 

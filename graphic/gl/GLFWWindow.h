@@ -37,6 +37,8 @@ namespace Funccia::Graphic::GL {
 
         void *GetNativeWindow() override;
 
+
+        [[nodiscard]]  auto Mouse()-> GL::Mouse* override { return nullptr; };
     private:
         static auto KeyMap(Key key) -> int;
 
