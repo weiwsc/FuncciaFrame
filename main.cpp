@@ -98,6 +98,7 @@ int main() {
         "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/UIShader-frag.glsl");
     Funccia::UI::Window uiWindow = Funccia::UI::Window{window};
 
+    Funccia::UI::JsonUiBuilder::ReadComponentSchema("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json");
     uiWindow.ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
 
     // Setup mouse picking context
@@ -178,7 +179,7 @@ int main() {
     );
 
     watcher.Start();
-    Funccia::UI::JsonUiBuilder::ReadComponentSchema("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json");
+
     Funccia::FileWatcher watcher2(
      "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json",
      [&](const std::filesystem::path& path) {

@@ -5,7 +5,7 @@
 #include "JsonUiBuilder.h"
 
 #include <sstream>
-
+#include <re2/re2.h>
 #include "../graphic/gl/TextRenderer.h"
 
 namespace Funccia::UI {
@@ -50,9 +50,11 @@ namespace Funccia::UI {
         json props = j.value("property", json::object());  // copy props first
         std::string tag = j["tag"].get<std::string>();
         if (auto it = componentSchemas.find(tag); it != componentSchemas.end()) {
-            j = it->second["schema"];
+            std::string dump = it->second["schema"].dump();
+            j = json::parse(ExpandSchema(dump, props));
         }
-        ExpandElement(j, props);
+        //ExpandElement(j, props);
+
     }
 
     auto JsonUiBuilder::ReadComponentSchema(const std::string &path) -> void {
@@ -74,62 +76,25 @@ namespace Funccia::UI {
         }
     }
 
-    auto JsonUiBuilder::ExpandChildren(json &children, const json &props) -> void {
-        json result = json::array();
 
-        for (auto& child : children) {
-            if (child.is_string()) {
-                std::string s = child.get<std::string>();
+    auto JsonUiBuilder::ExpandSchema(std::string &schema, json &props) -> std::string {
+        std::string result = schema;
+        for (auto& [key, value] : props.items()) {
+            // $key -> value
+            if (value.is_string()) {
+                std::string pattern = "\"\\$" + key + "\"";
+                RE2::GlobalReplace(&result, pattern, value.dump());
+            }
 
-                if (s.starts_with('[') && s.ends_with(']')) {
-                    // splice array contents
-                    std::string slot = s.substr(1, s.size() - 2);
-                    if (props.contains(slot) && props[slot].is_array()) {
-                        for (const auto& item : props[slot]) {
-                            result.push_back(item);
-                        }
-                    }
-                } else if (s.starts_with('$')) {
-                    // text substitution—but in children array, probably an error?
-                    result.push_back(json{"content" , props[s.substr(1)]});
-                } else {
-                    result.push_back(json{"content" , s});
-                }
-            } else {
-                // recurse into nested objects
-                ExpandElement(child, props);
-                result.push_back(child);
+            // [key] -> array contents
+            if (value.is_array()) {
+                std::string slotPattern = "\"\\[" + key + "\\]\"";
+                std::string arr = value.dump();
+                //std::string contents = arr.substr(1, arr.size() - 2);
+                RE2::GlobalReplace(&result, slotPattern, arr);
             }
         }
-        children = result;
-    }
-
-    auto JsonUiBuilder::ExpandElement(json &node, const json &props) -> void {
-        // Handle nested component tags first
-        if (node.contains("tag") && componentSchemas.contains(node["tag"].get<std::string>())) {
-            json childProps = node.value("property", json::object());
-            // Merge parent props for passthrough like [anchor]
-            for (auto& [k, v] : props.items()) {
-                if (!childProps.contains(k)) {
-                    childProps[k] = v;
-                }
-            }
-            std::string tag = node["tag"].get<std::string>();
-            node = componentSchemas[tag]["schema"];
-            ExpandElement(node, childProps);
-            return;
-        }
-
-        if (node.contains("content") && node["content"].is_string()) {
-            std::string s = node["content"].get<std::string>();
-            if (s.starts_with('$')) {
-                node["content"] = props.value(s.substr(1), "");
-            }
-        }
-
-        if (node.contains("children")) {
-            ExpandChildren(node["children"], props);
-        }
+        return result;
     }
 
     auto JsonUiBuilder::HandleStyle(nlohmann::basic_json<> styles, UIElement *root) -> void {

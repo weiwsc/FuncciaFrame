@@ -22,8 +22,9 @@ namespace Funccia::UI {
         static auto ParseElement(json& j, UIElement* el)-> void;
         static auto ParseComponent(json& j)-> void;
         static auto ReadComponentSchema(const std::string& path)-> void;
-        static auto ExpandChildren(json& children, const json& props)-> void;
-        static auto ExpandElement(json& node, const json& props)-> void;
+
+        static auto ExpandSchema(std::string &schema, json &props) -> std::string;
+
         static auto HandleStyle(nlohmann::basic_json<> styles, UIElement *root) -> void;
         static auto ParseColor(const json& v) -> glm::vec4;
         static auto ParseUI(const std::string& jsonStr, UIElement* root) -> void;

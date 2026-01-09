@@ -20,6 +20,8 @@ pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
 pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
 pkg_check_modules(FT2 REQUIRED freetype2)
 pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
+set(re2_DIR "/opt/homebrew/lib/cmake/re2")
+find_package(re2 REQUIRED CONFIG)
 #pkg_check_modules(GLEW REQUIRED IMPORTED_TARGET glew)
 include_directories(external/glad/include)
 include_directories(external/std_image/include)
@@ -134,7 +136,7 @@ target_link_options(FuncciaFrame PRIVATE
 )
 
 target_link_libraries(FuncciaFrame PRIVATE nlohmann_json::nlohmann_json)
-
+target_link_libraries(FuncciaFrame PRIVATE re2::re2)
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
 target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)
 target_link_libraries(FuncciaFrame PRIVATE glfw)
