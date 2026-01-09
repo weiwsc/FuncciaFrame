@@ -21,6 +21,7 @@
 #include "graphic/gl/UIRender.h"
 #include "graphic/gl/WindowController.h"
 #include "graphic/text/GlyphAtlas.h"
+#include "UI/FileWatcher.h"
 #include "UI/JsonUiBuilder.h"
 #include "UI/Window.h"
 
@@ -42,7 +43,7 @@ int main() {
     // Create and initialize window properly
     auto window = Funccia::Graphic::GL::WindowController::Instance().GetWindow();
 
-    auto font_path = "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/Libre Baskerville - Regular.ttf";
+
 
     auto shader = Funccia::Graphic::GL::Shader();
     shader.initialize("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/basic2-ver.glsl",
@@ -169,23 +170,24 @@ int main() {
     textRender->Initialize("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/FontShader1-ver.glsl",
         "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/FontShader1-fag.glsl");
 
-    std::atomic<bool> fileChanged{false};
+    Funccia::FileWatcher watcher(
+     "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json",
+     [&](const std::filesystem::path& path) {
+         uiWindow.ReloadFromJSON(path.string());
+     }
+    );
 
-    auto path = "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json";
-    // Start watcher in background thread
-    std::thread watcher([&]() {
-        auto lastWrite = std::filesystem::last_write_time(path);
-        while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            auto current = std::filesystem::last_write_time(path);
-            if (current != lastWrite) {
-                lastWrite = current;
-                fileChanged = true;
-            }
-        }
-    });
-    watcher.detach();
-    auto onFileChange = [&]() { uiWindow.ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json"); };
+    watcher.Start();
+    Funccia::UI::JsonUiBuilder::ReadComponentSchema("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json");
+    Funccia::FileWatcher watcher2(
+     "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json",
+     [&](const std::filesystem::path& path) {
+         Funccia::UI::JsonUiBuilder::ReadComponentSchema(path.string());
+         uiWindow.ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
+     }
+    );
+
+    watcher2.Start();
 
     // Main render loop
     while (!window->ShouldClose()) {
@@ -193,10 +195,8 @@ int main() {
         float dt = std::chrono::duration<float>(now - lastTime).count();
         lastTime = now;
 
-        if (fileChanged) {
-            fileChanged = false;
-            onFileChange();
-        }
+        watcher.Poll();
+        watcher2.Poll();
 
         // Process input
         const float rotSpeed = 120.0f;

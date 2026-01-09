@@ -4,6 +4,8 @@
 
 #include "JsonUiBuilder.h"
 
+#include <sstream>
+
 #include "../graphic/gl/TextRenderer.h"
 
 namespace Funccia::UI {
@@ -11,13 +13,12 @@ namespace Funccia::UI {
         try {
             auto j = json::parse(jsonStr);
             JsonUiBuilder::ParseElement(j, root);
-        }
-        catch (const std::exception &e) {
+        } catch (const std::exception &e) {
             std::cout << "Error parsing JSON: " << e.what() << std::endl;
         }
     }
 
-    auto JsonUiBuilder::ParseElement(const json &j, UIElement *el) -> void {
+    auto JsonUiBuilder::ParseElement(json &j, UIElement *el) -> void {
         if (j.contains("style")) {
             for (auto &[key, value]: j["style"].items()) {
                 if (auto it = JsonUiBuilder::styleHandlers.find(key); it != JsonUiBuilder::styleHandlers.end()) {
@@ -33,11 +34,101 @@ namespace Funccia::UI {
         }
 
         if (j.contains("children")) {
-            for (const auto &child: j["children"]) {
+            for (auto &child: j["children"]) {
                 auto childEl = std::make_unique<UIElement>();
+
+                if (child.contains("tag") && componentSchemas.contains(child["tag"].get<std::string>())) {
+                    ParseComponent(child);
+                }
                 ParseElement(child, childEl.get());
                 el->AddChild(std::move(childEl));
             }
+        }
+    }
+
+    auto JsonUiBuilder::ParseComponent(json &j) -> void {
+        json props = j.value("property", json::object());  // copy props first
+        std::string tag = j["tag"].get<std::string>();
+        if (auto it = componentSchemas.find(tag); it != componentSchemas.end()) {
+            j = it->second["schema"];
+        }
+        ExpandElement(j, props);
+    }
+
+    auto JsonUiBuilder::ReadComponentSchema(const std::string &path) -> void {
+        std::ifstream file(path);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        json j = json::parse(content);
+
+        std::string name_space;
+        if (j.contains("namespace")) name_space = j["namespace"].get<std::string>();
+
+        if (j.contains("components")) {
+            for (auto &[key, value] : j["components"].items()) {
+                if (value.is_object() && value.contains("schema")) {
+                    componentSchemas[name_space + "::" + std::string(key)] = value;
+                }
+            }
+        }
+    }
+
+    auto JsonUiBuilder::ExpandChildren(json &children, const json &props) -> void {
+        json result = json::array();
+
+        for (auto& child : children) {
+            if (child.is_string()) {
+                std::string s = child.get<std::string>();
+
+                if (s.starts_with('[') && s.ends_with(']')) {
+                    // splice array contents
+                    std::string slot = s.substr(1, s.size() - 2);
+                    if (props.contains(slot) && props[slot].is_array()) {
+                        for (const auto& item : props[slot]) {
+                            result.push_back(item);
+                        }
+                    }
+                } else if (s.starts_with('$')) {
+                    // text substitution—but in children array, probably an error?
+                    result.push_back(json{"content" , props[s.substr(1)]});
+                } else {
+                    result.push_back(json{"content" , s});
+                }
+            } else {
+                // recurse into nested objects
+                ExpandElement(child, props);
+                result.push_back(child);
+            }
+        }
+        children = result;
+    }
+
+    auto JsonUiBuilder::ExpandElement(json &node, const json &props) -> void {
+        // Handle nested component tags first
+        if (node.contains("tag") && componentSchemas.contains(node["tag"].get<std::string>())) {
+            json childProps = node.value("property", json::object());
+            // Merge parent props for passthrough like [anchor]
+            for (auto& [k, v] : props.items()) {
+                if (!childProps.contains(k)) {
+                    childProps[k] = v;
+                }
+            }
+            std::string tag = node["tag"].get<std::string>();
+            node = componentSchemas[tag]["schema"];
+            ExpandElement(node, childProps);
+            return;
+        }
+
+        if (node.contains("content") && node["content"].is_string()) {
+            std::string s = node["content"].get<std::string>();
+            if (s.starts_with('$')) {
+                node["content"] = props.value(s.substr(1), "");
+            }
+        }
+
+        if (node.contains("children")) {
+            ExpandChildren(node["children"], props);
         }
     }
 
@@ -148,6 +239,13 @@ namespace Funccia::UI {
         }
 
         return {1, 1, 1, 1}; // default white
+    }
+
+    std::unordered_map<std::string, json> JsonUiBuilder::componentSchemas = {};
+
+    auto JsonUiBuilder::ReloadSchema(const std::string &path) -> void {
+        componentSchemas.clear();
+        ReadComponentSchema(path);
     }
 
     const std::unordered_map<std::string, StyleHandler> JsonUiBuilder::styleHandlers = {

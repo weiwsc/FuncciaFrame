@@ -53,6 +53,8 @@ namespace Funccia::UI {
         auto CalculateGrowSizeOnAxis(Axis axis, Graphic::GL::TextRenderer &text_renderer) -> void;
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
+
+        std::string componentName {};
 #ifdef FF_UI_LAZY_LAYOUT
         auto FlipLazyLayoutPass() -> void;
 #endif
