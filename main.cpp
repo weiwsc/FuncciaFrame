@@ -99,6 +99,7 @@ int main() {
     Funccia::UI::Window uiWindow = Funccia::UI::Window{window};
 
     Funccia::UI::JsonUiBuilder::ReadComponentSchema("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json");
+    Funccia::UI::JsonUiBuilder::ReadStyleSheet("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.style.json");
     uiWindow.ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
 
     // Setup mouse picking context
@@ -190,6 +191,15 @@ int main() {
 
     watcher2.Start();
 
+    Funccia::FileWatcher watcher3(
+        "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.style.json",
+        [&](const std::filesystem::path& path) {
+            Funccia::UI::JsonUiBuilder::ReadStyleSheet(path.string());
+            uiWindow.ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
+        }
+    );
+    watcher3.Start();
+
     // Main render loop
     while (!window->ShouldClose()) {
         auto now = std::chrono::high_resolution_clock::now();
@@ -198,6 +208,7 @@ int main() {
 
         watcher.Poll();
         watcher2.Poll();
+        watcher3.Poll();
 
         // Process input
         const float rotSpeed = 120.0f;

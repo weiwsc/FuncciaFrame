@@ -118,7 +118,11 @@ add_executable(FuncciaFrame main.cpp
         UI/UIStyleDef.cpp
         UI/UIStyleDef.h
         UI/FileWatcher.cpp
-        UI/FileWatcher.h)
+        UI/FileWatcher.h
+        UI/UIState.cpp
+        UI/UIState.h
+        UI/UIStyleSheets.cpp
+        UI/UIStyleSheets.h)
 
 set(LLVM_ROOT "/opt/homebrew/opt/llvm")
 

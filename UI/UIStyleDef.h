@@ -15,7 +15,16 @@
 namespace Funccia::UI {
     class UIStyleDef : public UIFluentAPI {
     public:
-        std::optional<UI::Tag> tag;
+        UIStyleDef() = default;
+        // Move OK
+        UIStyleDef(UIStyleDef&&) = default;
+        UIStyleDef& operator=(UIStyleDef&&) = default;
+
+        // Copy deleted
+        UIStyleDef(const UIStyleDef&) = delete;
+        UIStyleDef& operator=(const UIStyleDef&) = delete;
+
+        std::optional<std::string> tag;
 
         // Box model
         std::optional<SideOffset> margin;
@@ -44,7 +53,7 @@ namespace Funccia::UI {
         std::optional<Shadow> shadow;
 
         // Text
-        std::optional<std::string> text;
+        //std::optional<std::string> text;
         std::optional<int> font_size;
         std::optional<Graphic::GL::TextWrap> text_wrap_mode;
         std::optional<std::string> font_path;
@@ -95,9 +104,9 @@ namespace Funccia::UI {
         auto HorizontalStack() -> UIStyleDef& override;
         auto VerticalStack() -> UIStyleDef& override;
 
-        auto SetTag(Tag _tag) -> UIStyleDef& override;
+        auto SetTag(const std::string& _tag) -> UIStyleDef& override;
 
-        auto Text(const std::string& _text) -> UIStyleDef& override;
+        //auto Text(const std::string& _text) -> UIStyleDef& override;
         auto FontSize(int size) -> UIStyleDef& override;
         auto TextWrap(Graphic::GL::TextWrap wrap) -> UIStyleDef& override;
 

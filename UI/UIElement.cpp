@@ -90,7 +90,7 @@ namespace Funccia::UI {
 
         float totalChildSize = 0;
         float maxSize = 0;
-        if (axis == Axis::Vertical && !m_style.text.empty()) {
+        if (axis == Axis::Vertical && !m_text.empty()) {
             totalChildSize = m_text_grow_size;
             maxSize = m_text_grow_size;
         }
@@ -129,11 +129,11 @@ namespace Funccia::UI {
         if (!m_layoutUpdated) return;
 #endif
 
-        if (m_children.empty() && !m_style.text.empty() && axis == Axis::Horizontal) {
+        if (m_children.empty() && !m_text.empty() && axis == Axis::Horizontal) {
             float w = m_border_box_size.GetX()
                               - m_style.border_widths.left() - m_style.border_widths.right()
                               - m_style.padding.left() - m_style.padding.right();
-            m_text_grow_size = text_renderer.ProcessText(0,0, w, m_style.text_wrap_mode, {0,0,0,0}, m_style.text, m_style.color, static_cast<float>(m_style.font_size), m_style.font_path );
+            m_text_grow_size = text_renderer.ProcessText(0,0, w, m_style.text_wrap_mode, {0,0,0,0}, m_text, m_style.color, static_cast<float>(m_style.font_size), m_style.font_path );
         }
 
         std::vector<UIElement*> childToGrow {};
@@ -286,7 +286,7 @@ namespace Funccia::UI {
             m_clipping_box.x, m_clipping_box.y, m_clipping_box.z, m_clipping_box.w,
         });
 
-        if (!m_style.text.empty()) {
+        if (!m_text.empty()) {
             // Calculate content box position from the global border box
             float content_x = m_global_border_box.x + m_style.border_widths.left() + m_style.padding.left();
             float content_y = m_global_border_box.y + m_style.border_widths.top() + m_style.padding.top();
@@ -299,7 +299,7 @@ namespace Funccia::UI {
                 content_w,
                 m_style.text_wrap_mode,
                 m_clipping_box,
-                m_style.text,
+                m_text,
                 m_style.color,
                 static_cast<float>(m_style.font_size),
                 m_style.font_path,
@@ -323,6 +323,23 @@ namespace Funccia::UI {
             }
             // no child handled it
             parent_window->selected_element = this;
+            return true;
+        }
+
+        return false;
+    }
+
+    auto UIElement::HandleHover(vec2 mouse_pos, Window *parent_window) -> bool {
+        if (!m_style.is_rendered || m_culled) { return false;}
+
+        if (UIHelper::point_intersect(m_global_border_box, mouse_pos)) {
+            for (auto& child : m_children) {
+                if (child->HandleHover(mouse_pos, parent_window)) {
+                    return true;  // child handled it, we're done
+                }
+            }
+            // no child handled it
+            parent_window->SetHoveredElement(this);
             return true;
         }
 

@@ -28,19 +28,27 @@ namespace Funccia::UI {
         }
 
         if (j.contains("content")) {
-            if (auto it = JsonUiBuilder::styleHandlers.find("content"); it != JsonUiBuilder::styleHandlers.end()) {
-                it->second(&(el->Style()), j["content"]);
-            }
+            //if (auto it = JsonUiBuilder::styleHandlers.find("content"); it != JsonUiBuilder::styleHandlers.end()) {
+                //it->second(&(el->Style()), j["content"]);
+            //}
+            el->Text(j["content"].get<std::string>());
         }
 
         if (j.contains("children")) {
-            for (auto &child: j["children"]) {
+            for (auto &child : j["children"]) {
                 auto childEl = std::make_unique<UIElement>();
 
-                if (child.contains("tag") && componentSchemas.contains(child["tag"].get<std::string>())) {
-                    ParseComponent(child);
+                if (child.contains("tag")) {
+                    std::string tag = child["tag"].get<std::string>();
+                    childEl->Style().SetTag(tag);
+
+                    if (componentSchemas.contains(tag)) {
+                        ParseComponent(child);
+                    }
                 }
+
                 ParseElement(child, childEl.get());
+                childEl->GetState().OnChange(childEl->Style()); //trigger style recomputation to init the style
                 el->AddChild(std::move(childEl));
             }
         }
@@ -58,6 +66,7 @@ namespace Funccia::UI {
     }
 
     auto JsonUiBuilder::ReadComponentSchema(const std::string &path) -> void {
+        componentSchemas.clear();
         std::ifstream file(path);
         std::stringstream buffer;
         buffer << file.rdbuf();
@@ -97,9 +106,43 @@ namespace Funccia::UI {
         return result;
     }
 
-    auto JsonUiBuilder::HandleStyle(nlohmann::basic_json<> styles, UIElement *root) -> void {
+    auto JsonUiBuilder::ReadStyleSheet(const std::string &path) -> void {
+        styleSheets.clear();
+        std::ifstream file(path);
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+        json j = json::parse(content);
+
+        std::string name_space;
+        if (j.contains("namespace")) name_space = j["namespace"].get<std::string>();
+
+        if (j.contains("styles")) {
+            for (auto &[selector, state_list] : j["styles"].items()) {
+                UIStyleSheets styleSheet;
+                for (auto &[state_name, style_def] : state_list.items()) {
+                    if (state_name == "default") {
+                        UIStyleDef def;
+                        HandleStyle(style_def, &def);
+                        styleSheet.SetDefaultStyle(std::move(def));
+                    }
+                    else {
+                        UIStyleDef def;
+                        HandleStyle(style_def, &def);
+                        if (auto parsed = UIState::Parse(state_name)) {
+                            styleSheet.Append(*parsed, std::move(def));
+                        }
+                    }
+                }
+                styleSheets[name_space + "::" + std::string(selector)] = std::move(styleSheet);
+            }
+        }
+    }
+
+    auto JsonUiBuilder::HandleStyle(nlohmann::basic_json<> styles, UIFluentAPI* ui_style) -> void {
         for (auto &[key, value]: styles.items()) {
-            if (key == "font-size") {
+            if (auto it = JsonUiBuilder::styleHandlers.find(key); it != JsonUiBuilder::styleHandlers.end()) {
+                it->second(ui_style, value);
             }
         }
     }
@@ -207,6 +250,7 @@ namespace Funccia::UI {
     }
 
     std::unordered_map<std::string, json> JsonUiBuilder::componentSchemas = {};
+    std::unordered_map<std::string, UIStyleSheets> JsonUiBuilder::styleSheets = {};
 
     auto JsonUiBuilder::ReloadSchema(const std::string &path) -> void {
         componentSchemas.clear();
@@ -215,7 +259,7 @@ namespace Funccia::UI {
 
     const std::unordered_map<std::string, StyleHandler> JsonUiBuilder::styleHandlers = {
         // Text
-        {"content", [](UIFluentAPI *elf, const json &v) { elf->Text(v.get<std::string>()); }},
+        //{"content", [](UIFluentAPI *elf, const json &v) { elf->Text(v.get<std::string>()); }},
         {"font-size", [](UIFluentAPI *elf, const json &v) { elf->FontSize(v.get<int>()); }},
         {"text-color", [](UIFluentAPI *elf, const json &v) { elf->TextColor(ParseColor(v)); }},
         {
@@ -281,7 +325,7 @@ namespace Funccia::UI {
 
         // Box Shadow
         {"box-shadow-color", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowColor(ParseColor(v)); }},
-        {"box-shadow-slur", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowBlur(v.get<float>()); }},
+        {"box-shadow-blur", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowBlur(v.get<float>()); }},
         {"box-shadow-spread", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowSpread(v.get<float>()); }},
         {"box-shadow-offset", [](UIFluentAPI *elf, const json &v) { elf->BoxShadowOffset(parseVec2(v)); }},
 

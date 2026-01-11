@@ -4,15 +4,15 @@
 
 #include "UIStyle.h"
 namespace Funccia::UI {
-    auto UIStyle::SetTag(UI::Tag _tag) -> UIStyle & {
+    auto UIStyle::SetTag(const std::string& _tag) -> UIStyle & {
         tag = _tag;
         return *this;
     }
 
-    auto UIStyle::Text(const std::string &_text) -> UIStyle & {
-        text = _text;
-        return *this;
-    }
+    //auto UIStyle::Text(const std::string &_text) -> UIStyle & {
+    //    text = _text;
+    //    return *this;
+    //}
 
     auto UIStyle::FontSize(int size) -> UIStyle & {
         font_size = size;

@@ -23,7 +23,7 @@ namespace Funccia::UI {
         if (other.border_color) border_color = other.border_color;
         if (other.border_radius) border_radius = other.border_radius;
         if (other.shadow) shadow = other.shadow;
-        if (other.text) text = other.text;
+        //if (other.text) text = other.text;
         if (other.font_size) font_size = other.font_size;
         if (other.text_wrap_mode) text_wrap_mode = other.text_wrap_mode;
         if (other.font_path) font_path = other.font_path;
@@ -45,7 +45,7 @@ namespace Funccia::UI {
         if (border_color) style.border_color = *border_color;
         if (border_radius) style.border_radius = *border_radius;
         if (shadow) style.shadow = *shadow;
-        if (text) style.text = *text;
+        //if (text) style.text = *text;
         if (font_size) style.font_size = *font_size;
         if (text_wrap_mode) style.text_wrap_mode = *text_wrap_mode;
         if (font_path) style.font_path = *font_path;
@@ -247,17 +247,17 @@ namespace Funccia::UI {
 
     // --- Tag ---
 
-    auto UIStyleDef::SetTag(Tag _tag) -> UIStyleDef& {
+    auto UIStyleDef::SetTag(const std::string& _tag) -> UIStyleDef& {
         tag = _tag;
         return *this;
     }
 
     // --- Text ---
 
-    auto UIStyleDef::Text(const std::string& _text) -> UIStyleDef& {
-        text = _text;
-        return *this;
-    }
+    //auto UIStyleDef::Text(const std::string& _text) -> UIStyleDef& {
+    //    text = _text;
+    //    return *this;
+    //}
 
     auto UIStyleDef::FontSize(int size) -> UIStyleDef& {
         font_size = size;

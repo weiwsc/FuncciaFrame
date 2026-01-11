@@ -11,7 +11,7 @@
 namespace Funccia::UI {
     class UIStyle : public UIFluentAPI{
     public:
-        UI::Tag tag {};
+        std::string tag {};
 
         // Box model
         SideOffset margin {0,0,0,0};
@@ -40,7 +40,7 @@ namespace Funccia::UI {
         Shadow shadow {vec4(0,0,0,0), vec2(0,0), 0, 0};
     
         // Text
-        std::string text {};
+        //std::string text {};
         int font_size {35};
         Graphic::GL::TextWrap text_wrap_mode {Graphic::GL::TextWrap::Character};
         std::string font_path {"/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/Libre Baskerville - Regular.ttf"};
@@ -86,9 +86,9 @@ namespace Funccia::UI {
         auto HorizontalStack() -> UIStyle& override;
         auto VerticalStack() -> UIStyle& override;
 
-        auto SetTag(Tag _tag) -> UIStyle& override;
+        auto SetTag(const std::string& _tag) -> UIStyle& override;
 
-        auto Text(const std::string& _text) -> UIStyle& override;
+        //auto Text(const std::string& _text) -> UIStyle& override;
         auto FontSize(int size) -> UIStyle& override;
         auto TextWrap(Graphic::GL::TextWrap wrap) -> UIStyle& override;
 

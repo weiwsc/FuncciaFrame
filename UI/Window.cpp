@@ -57,9 +57,12 @@ namespace Funccia::UI {
         if (Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->GetButLDown()) {
             root->HandlePick({x*2,y*2}, this);
         }
+        //SetHoveredElement(nullptr);
+        if (!root->HandleHover({x*2, y*2}, this)) {SetHoveredElement(nullptr);};
         if (selected_element) {
-            selected_element->Style().Background({1,0,0,0.5f});
+            selected_element->GetState().Set(UIFlag::Selected, selected_element->Style());
         }
+
         root->RenderQueue(renderer,text_renderer, target_x, target_y);
 
         //m_offset.y += 0.7;
@@ -133,6 +136,23 @@ namespace Funccia::UI {
         std::string content = buffer.str();
         root->m_children.clear();
         Funccia::UI::JsonUiBuilder::ParseUI(content, root.get());
+    }
+
+    auto Window::SetHoveredElement(UIElement *element) -> void {
+        if (hovered_element == element) return;
+        //std::cout << "SetHoveredElement called" << std::endl;
+        //std::cout << "  new: " << element << std::endl;
+        //std::cout << "  old: " << hovered_element << std::endl;
+
+        if (hovered_element) {
+            //std::cout << "  clearing old" << std::endl;
+            hovered_element->GetState().Clear(UIFlag::Hovered, hovered_element->Style());
+        }
+        hovered_element = element;
+        if (hovered_element) {
+            //std::cout << "  setting new" << std::endl;
+            hovered_element->GetState().Set(UIFlag::Hovered, hovered_element->Style());
+        }
     }
 
 

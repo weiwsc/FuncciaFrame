@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "SideOffset.h"
+#include "UIState.h"
 #include "UIStyle.h"
 #include "UITypes.h"
 #include "../graphic/gl/TextRenderer.h"
@@ -54,7 +55,7 @@ namespace Funccia::UI {
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
 
-        std::string componentName {};
+        //std::string componentName {};
 #ifdef FF_UI_LAZY_LAYOUT
         auto FlipLazyLayoutPass() -> void;
 #endif
@@ -65,15 +66,23 @@ namespace Funccia::UI {
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
         auto HandlePick(vec2 mouse_pos, Window* parent_window) -> bool;
+        auto HandleHover(vec2 mouse_pos, Window* parent_window) -> bool;
 
         auto Scale(float size) -> void;
+
+        auto Text(const std::string& text) -> void {m_text = text;}
+        auto GetText() -> std::string {return m_text;}
+
+        auto GetState() -> UIState& {return m_state;}
     protected:
 
         UIElement* m_parent {nullptr};
         std::vector<std::unique_ptr<UIElement>> m_children;
 
         UIStyle m_style;
+        UIState m_state;
 
+        std::string m_text;
 
 #ifdef FF_UI_LAZY_LAYOUT
         bool m_layoutUpdated {true};

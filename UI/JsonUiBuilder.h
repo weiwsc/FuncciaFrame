@@ -11,6 +11,10 @@
 #include <nlohmann/json.hpp>
 #include <utility>
 
+#include "UIState.h"
+#include "UIStyleDef.h"
+#include "UIStyleSheets.h"
+
 namespace Funccia::UI {
     using json = nlohmann::json;
     using StyleHandler = std::function<void(UIFluentAPI*, const json&)>;
@@ -25,7 +29,10 @@ namespace Funccia::UI {
 
         static auto ExpandSchema(std::string &schema, json &props) -> std::string;
 
-        static auto HandleStyle(nlohmann::basic_json<> styles, UIElement *root) -> void;
+        static auto ReadStyleSheet(const std::string& path)-> void;
+
+
+        static auto HandleStyle(nlohmann::basic_json<> styles, UIFluentAPI* ui_style) -> void;
         static auto ParseColor(const json& v) -> glm::vec4;
         static auto ParseUI(const std::string& jsonStr, UIElement* root) -> void;
         static vec2 parseVec2(const json& v) {
@@ -38,6 +45,7 @@ namespace Funccia::UI {
 
         static const std::unordered_map<std::string, StyleHandler> styleHandlers;
         static std::unordered_map<std::string, json> componentSchemas;
+        static std::unordered_map<std::string, UIStyleSheets> styleSheets;
 
     };
 }

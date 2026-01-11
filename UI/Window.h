@@ -20,6 +20,8 @@ namespace Funccia::UI {
         UIElement* selected_element {nullptr};
         [[nodiscard]] auto GetRoot() const -> UIElement * {return root.get();}
         auto ReloadFromJSON(const std::string& json_path) const -> void;
+
+        auto SetHoveredElement(UIElement* element) -> void;
     private:
         std::unique_ptr<UIElement> root;
         vec2 m_offset = {0,0};

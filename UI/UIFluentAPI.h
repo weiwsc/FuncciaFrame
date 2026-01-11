@@ -18,7 +18,6 @@ namespace Funccia::UI {
     class UIFluentAPI {
     public:
         virtual ~UIFluentAPI() = default;
-
         auto virtual MarginTop(float value) -> UIFluentAPI& = 0;
         auto virtual MarginLeft(float value) -> UIFluentAPI& = 0;
         auto virtual MarginRight(float value) -> UIFluentAPI& = 0;
@@ -59,9 +58,9 @@ namespace Funccia::UI {
         auto virtual HorizontalStack() -> UIFluentAPI& = 0;
         auto virtual VerticalStack() -> UIFluentAPI& = 0;
 
-        auto virtual SetTag(Tag _tag) -> UIFluentAPI& = 0;
+        auto virtual SetTag(const std::string& _tag) -> UIFluentAPI& = 0;
 
-        auto virtual Text(const std::string& _text) -> UIFluentAPI& = 0;
+        //auto virtual Text(const std::string& _text) -> UIFluentAPI& = 0;
         auto virtual FontSize(int size) -> UIFluentAPI& = 0;
         auto virtual TextWrap(Graphic::GL::TextWrap wrap) -> UIFluentAPI& = 0;
 
