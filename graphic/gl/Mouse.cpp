@@ -3,6 +3,10 @@
 //
 
 #include "Mouse.h"
+
+#include <iostream>
+#include <ostream>
+
 namespace Funccia::Graphic::GL {
     Mouse::Mouse()
     {
@@ -48,6 +52,16 @@ namespace Funccia::Graphic::GL {
             if (_event.button.button == SDL_BUTTON_LEFT) m_butLDown = false;
             if (_event.button.button == SDL_BUTTON_MIDDLE) m_butMDown = false;
             if (_event.button.button == SDL_BUTTON_RIGHT) m_butRDown = false;
+        }
+        else if (_event.type == SDL_EVENT_MOUSE_WHEEL) {
+            m_scrolled = true;
+            if (_event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) {
+                m_scroll.y = -_event.wheel.y;
+            }else {
+                m_scroll.y = _event.wheel.y;
+            }
+            std::cout << m_scroll.y << std::endl;
+            m_scroll.x = _event.wheel.x;
         }
     }
 }

@@ -22,9 +22,15 @@ namespace Funccia::Graphic::GL {
 
         bool Moved(SDL_Event _event,  glm::vec2 _pos);
         void ProcessButtons(SDL_Event _event);
+
+        auto GetScroll() -> glm::vec2 { return m_scroll; }
+        auto HasScrolled() -> bool {return m_scrolled;}
+        auto ScrollHandled() -> void { m_scrolled = false; }
     private:
         glm::vec2 m_pos {0,0};
         glm::vec2 m_posPrev {0,0};
+        glm::vec2 m_scroll {0,0};
+        bool m_scrolled = false;
         bool m_butLDown;
         bool m_butMDown;
         bool m_butRDown;

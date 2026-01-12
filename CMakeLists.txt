@@ -122,7 +122,11 @@ add_executable(FuncciaFrame main.cpp
         UI/UIState.cpp
         UI/UIState.h
         UI/UIStyleSheets.cpp
-        UI/UIStyleSheets.h)
+        UI/UIStyleSheets.h
+        graphic/text/FontManager.cpp
+        graphic/text/FontManager.h
+        core/ProfileTimer.cpp
+        core/ProfileTimer.h)
 
 set(LLVM_ROOT "/opt/homebrew/opt/llvm")
 

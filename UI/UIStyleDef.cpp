@@ -27,6 +27,8 @@ namespace Funccia::UI {
         if (other.font_size) font_size = other.font_size;
         if (other.text_wrap_mode) text_wrap_mode = other.text_wrap_mode;
         if (other.font_path) font_path = other.font_path;
+
+        if (other.handle_scroll) handle_scroll = other.handle_scroll;
     }
 
     void UIStyleDef::applyTo(UIStyle& style) const {
@@ -49,6 +51,8 @@ namespace Funccia::UI {
         if (font_size) style.font_size = *font_size;
         if (text_wrap_mode) style.text_wrap_mode = *text_wrap_mode;
         if (font_path) style.font_path = *font_path;
+
+        if (handle_scroll) style.handle_scroll = *handle_scroll;
     }
 
     // --- Margin ---
@@ -276,4 +280,8 @@ namespace Funccia::UI {
         return *this;
     }
 
+    auto UIStyleDef::HandleScroll(bool option) -> UIFluentAPI & {
+        handle_scroll = option;
+        return *this;
+    }
 }

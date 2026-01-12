@@ -39,6 +39,8 @@ namespace Funccia::Graphic::GL {
 
         [[nodiscard]] auto Mouse() -> GL::Mouse * override;
 
+        auto GetDisplayScale()->float override;
+
     private:
         SDL_Window *m_window{nullptr};
         const bool *m_keyboardState{nullptr};
@@ -49,6 +51,7 @@ namespace Funccia::Graphic::GL {
         static auto MapKey(Key key) -> SDL_Scancode;
 
         static inline int s_instanceCount = 0;
+        float m_displayScale{1.0f};
     };
 }
 #endif //FUNCCIAFRAME_SDLWINDOW_H

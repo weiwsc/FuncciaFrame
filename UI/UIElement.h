@@ -67,10 +67,10 @@ namespace Funccia::UI {
         // ==========> layout algorithms ends <==============
         auto HandlePick(vec2 mouse_pos, Window* parent_window) -> bool;
         auto HandleHover(vec2 mouse_pos, Window* parent_window) -> bool;
-
+        auto FindScrollHandler(vec2 mouse_pos) -> UIElement*;
         auto Scale(float size) -> void;
 
-        auto Text(const std::string& text) -> void {m_text = text;}
+        auto Text(const std::string& text) -> void {m_text = text; m_style.text_recalculate_flag = true;}
         auto GetText() -> std::string {return m_text;}
 
         auto GetState() -> UIState& {return m_state;}
@@ -95,6 +95,8 @@ namespace Funccia::UI {
         vec4 m_global_border_box {0,0,0,0};
         vec4 m_clipping_box {0,0,0,0};
         bool m_culled {false};
+
+        vec2 m_scroll {0,0};
 
         float m_text_grow_size {};
 

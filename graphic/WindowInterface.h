@@ -39,6 +39,8 @@ namespace Funccia::Graphic {
 
         virtual void* GetNativeWindow() = 0;
 
+        virtual auto GetDisplayScale()->float = 0;
+
         [[nodiscard]] virtual auto Mouse()-> GL::Mouse* = 0;
 
     };

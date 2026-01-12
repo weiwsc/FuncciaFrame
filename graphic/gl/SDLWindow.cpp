@@ -94,6 +94,9 @@ namespace Funccia::Graphic::GL {
         m_keyboardState = SDL_GetKeyboardState(nullptr);
 
         std::cout << "SDL Window initialized successfully" << std::endl;
+
+        m_displayScale = SDL_GetWindowDisplayScale(m_window);
+        std::cout << "Display scale: "<< m_displayScale << std::endl;
         return true;
     }
 
@@ -193,6 +196,10 @@ namespace Funccia::Graphic::GL {
 
     auto SDLWindow::Mouse() -> GL::Mouse * {
         return m_mouse;
+    }
+
+    auto SDLWindow::GetDisplayScale() -> float {
+        return m_displayScale;
     }
 
     auto SDLWindow::MapKey(Key key) -> SDL_Scancode {

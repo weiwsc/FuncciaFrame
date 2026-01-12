@@ -260,6 +260,15 @@ namespace Funccia::UI {
     const std::unordered_map<std::string, StyleHandler> JsonUiBuilder::styleHandlers = {
         // Text
         //{"content", [](UIFluentAPI *elf, const json &v) { elf->Text(v.get<std::string>()); }},
+        {"handle-scroll", [](UIFluentAPI *elf, const json &v) {
+            auto s = v.get<std::string>();
+            if (s == "true") {
+                elf->HandleScroll(true);
+            }
+            else {
+                elf->HandleScroll(false);
+            }
+        }},
         {"font-size", [](UIFluentAPI *elf, const json &v) { elf->FontSize(v.get<int>()); }},
         {"text-color", [](UIFluentAPI *elf, const json &v) { elf->TextColor(ParseColor(v)); }},
         {

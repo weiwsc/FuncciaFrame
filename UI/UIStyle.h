@@ -8,6 +8,8 @@
 #include "SideOffset.h"
 #include "UIFluentAPI.h"
 #include "../graphic/gl/TextRenderer.h"
+#include "../graphic/text/FontManager.h"
+
 namespace Funccia::UI {
     class UIStyle : public UIFluentAPI{
     public:
@@ -41,10 +43,13 @@ namespace Funccia::UI {
     
         // Text
         //std::string text {};
-        int font_size {35};
+        int font_size {16};
         Graphic::GL::TextWrap text_wrap_mode {Graphic::GL::TextWrap::Character};
-        std::string font_path {"/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/Libre Baskerville - Regular.ttf"};
-        
+        std::string font_path {FontManager::Instance().GetFont()};
+
+        bool text_recalculate_flag = true;
+
+        bool handle_scroll;
         
         auto MarginTop(float value) -> UIStyle& override;
         auto MarginLeft(float value) -> UIStyle& override;
@@ -93,6 +98,8 @@ namespace Funccia::UI {
         auto TextWrap(Graphic::GL::TextWrap wrap) -> UIStyle& override;
 
         auto InvisibleButOccupySpace(bool option) -> UIStyle& override;
+
+        auto HandleScroll(bool option) -> UIFluentAPI& override;
 
     public:
         ~UIStyle() override = default;

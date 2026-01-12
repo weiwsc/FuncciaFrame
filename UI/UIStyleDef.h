@@ -58,6 +58,8 @@ namespace Funccia::UI {
         std::optional<Graphic::GL::TextWrap> text_wrap_mode;
         std::optional<std::string> font_path;
 
+        std::optional<bool> handle_scroll;
+
         // Merge another style def on top of this one (other's values override)
         void merge(const UIStyleDef& other);
 
@@ -112,6 +114,7 @@ namespace Funccia::UI {
 
         auto InvisibleButOccupySpace(bool option) -> UIStyleDef& override;
 
+        auto HandleScroll(bool option) -> UIFluentAPI& override;
         ~UIStyleDef() override = default;
     };
 }

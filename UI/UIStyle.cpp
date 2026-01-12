@@ -16,16 +16,23 @@ namespace Funccia::UI {
 
     auto UIStyle::FontSize(int size) -> UIStyle & {
         font_size = size;
+        text_recalculate_flag = true;
         return *this;
     }
 
     auto UIStyle::TextWrap(Graphic::GL::TextWrap wrap) -> UIStyle & {
         text_wrap_mode = wrap;
+        text_recalculate_flag = true;
         return *this;
     }
 
     auto UIStyle::InvisibleButOccupySpace(bool option) -> UIStyle & {
         invisible_but_occupy_space = option;
+        return *this;
+    }
+
+    auto UIStyle::HandleScroll(bool option) -> UIFluentAPI & {
+        handle_scroll = option;
         return *this;
     }
 

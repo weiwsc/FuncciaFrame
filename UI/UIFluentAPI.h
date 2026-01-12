@@ -64,7 +64,9 @@ namespace Funccia::UI {
         auto virtual FontSize(int size) -> UIFluentAPI& = 0;
         auto virtual TextWrap(Graphic::GL::TextWrap wrap) -> UIFluentAPI& = 0;
 
-        auto virtual InvisibleButOccupySpace(bool option) -> UIFluentAPI& = 0; 
+        auto virtual InvisibleButOccupySpace(bool option) -> UIFluentAPI& = 0;
+
+        auto virtual HandleScroll(bool option) -> UIFluentAPI& = 0;
     };
 }
 

@@ -200,6 +200,8 @@ int main() {
     );
     watcher3.Start();
 
+
+
     // Main render loop
     while (!window->ShouldClose()) {
         auto now = std::chrono::high_resolution_clock::now();
@@ -253,7 +255,7 @@ int main() {
         renderer.BeginFrame();
         textRender->BeginFrame();
         for (int i = 0; i < 1; i++) {
-            uiWindow.Render(renderer,*textRender, 0, 200, glm::vec2(winW, winH));
+            uiWindow.Render(renderer,*textRender, 0, 0, glm::vec2(winW, winH));
         }
         // TODO: REVIEW THIS - UIRenderer.Render() may need platform-independent window
         // 🔍 STATIC_CAST LOCATION - Check if UIRenderer needs platform-specific window
