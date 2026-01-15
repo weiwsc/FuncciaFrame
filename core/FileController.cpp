@@ -15,11 +15,11 @@ namespace Funccia::Core {
         m_thread = {};
     }
     FileController::~FileController() = default;
-    auto FileController::GetCurrentDirectory() -> string {
+    //auto FileController::GetCurrentDirectory() -> string {
         //char buff[FILENAME_MAX];
         //FF_ASSERT(GetCurrentDir(buff, FILENAME_MAX) != nullptr, "Could not get current directory");
         //return string(buff);
-    }
+   // }
 
     /// Find the size given the file path.
     /// int64_t is used to avoid narrow conversion with ftell(), and since int can only support file up to about 2gb

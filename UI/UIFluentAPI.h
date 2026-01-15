@@ -6,7 +6,7 @@
 #define UI_UIFLUENTAPI_H
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
-
+#include <string>
 namespace Funccia::Graphic::GL {
     enum class TextWrap;
 }

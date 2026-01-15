@@ -20,6 +20,6 @@ namespace Funccia::Core {
     }
     void Asset::ToString() {
         std::cout << "Asset GUID: " << m_GUID << std::endl;
-        std::cout << "Asset Data Size: " << m_dataSize <<" bytes, "<< toReadableSize(m_dataSize) << std::endl;
+        std::cout << "Asset Data Size: " << m_dataSize <<" bytes, "<< Utilities::toReadableSize(m_dataSize) << std::endl;
     }
 }

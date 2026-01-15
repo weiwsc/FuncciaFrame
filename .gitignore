@@ -26,7 +26,8 @@ obj/
 *.dylib
 *.exe
 *.out
-
+.vs
+out/
 # CMake
 CMakeFiles/
 CMakeCache.txt

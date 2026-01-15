@@ -6,6 +6,7 @@
 #define FILECONTROLLER_H
 #include <optional>
 #include <thread>
+#include <string>
 #include "Singleton.h"
 
 namespace Funccia::Core {

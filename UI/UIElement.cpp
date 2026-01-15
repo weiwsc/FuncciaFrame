@@ -64,7 +64,7 @@ namespace Funccia::UI {
             case Axis::Vertical:
                 return m_border_box_size.GetY() + m_style.margin.top() + m_style.margin.bottom();
             default:
-
+                return 0;
         }
     }
 
@@ -300,6 +300,7 @@ namespace Funccia::UI {
             m_clipping_box.x * s, m_clipping_box.y * s, m_clipping_box.z * s, m_clipping_box.w * s,
         });
 
+        //if (!m_text.empty() && m_style.text_recalculate_flag) {
         if (!m_text.empty()) {
             // Calculate content box position from the global border box
             float content_x = m_global_border_box.x + m_style.border_widths.left() + m_style.padding.left();

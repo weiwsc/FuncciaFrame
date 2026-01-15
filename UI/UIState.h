@@ -6,6 +6,7 @@
 #define UIState_H
 #include <cstdint>
 #include <string>
+#include <optional>
 #include <vector>
 #include "UIFluentAPI.h"
 #include <iostream>
