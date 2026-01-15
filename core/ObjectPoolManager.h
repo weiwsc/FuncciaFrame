@@ -8,7 +8,6 @@
 #include "ObjectPool.h"
 #include "Resource.h"
 #include "Singleton.h"
-#include "../test/ContainerA.h"
 
 namespace Funccia::Core {
     class ObjectPoolManager : Singleton<ObjectPoolManager>{
@@ -16,9 +15,6 @@ namespace Funccia::Core {
         static ObjectPool<Asset>* AssetPool;
         static ObjectPool<Resource>* ResourcePool;
 
-        static ObjectPool<ContainerA>* ContainerAPool;
-        static ObjectPool<Object1>* Object1Pool;
-        static ObjectPool<Object2>* Object2Pool;
     };
 }
 

@@ -5,7 +5,7 @@
 #include "JsonUiBuilder.h"
 
 #include <sstream>
-#include <re2/re2.h>
+
 #include "../graphic/gl/TextRenderer.h"
 
 namespace Funccia::UI {
@@ -85,22 +85,23 @@ namespace Funccia::UI {
         }
     }
 
+    //TODO: consider if any regex library should be used
+    void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+        size_t pos = 0;
+        while ((pos = str.find(from, pos)) != std::string::npos) {
+            str.replace(pos, from.length(), to);
+            pos += to.length();
+        }
+    }
 
     auto JsonUiBuilder::ExpandSchema(std::string &schema, json &props) -> std::string {
         std::string result = schema;
         for (auto& [key, value] : props.items()) {
-            // $key -> value
             if (value.is_string()) {
-                std::string pattern = "\"\\$" + key + "\"";
-                RE2::GlobalReplace(&result, pattern, value.dump());
+                replaceAll(result, "\"$" + key + "\"", value.dump());
             }
-
-            // [key] -> array contents
             if (value.is_array()) {
-                std::string slotPattern = "\"\\[" + key + "\\]\"";
-                std::string arr = value.dump();
-                //std::string contents = arr.substr(1, arr.size() - 2);
-                RE2::GlobalReplace(&result, slotPattern, arr);
+                replaceAll(result, "\"[" + key + "]\"", value.dump());
             }
         }
         return result;

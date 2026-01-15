@@ -5,7 +5,7 @@
 #include "GLFWWindow.h"
 
 #include <iostream>
-
+/*
 namespace Funccia::Graphic::GL {
     GLFWWindow::~GLFWWindow() {
     }
@@ -202,3 +202,4 @@ namespace Funccia::Graphic::GL {
         }
     }
 }
+*/

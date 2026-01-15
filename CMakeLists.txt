@@ -52,15 +52,6 @@ add_executable(FuncciaFrame main.cpp
         core/ObjectPoolManager.h
         core/TypeRegistry.cpp
         core/TypeRegistry.h
-        test/ContainerA.cpp
-        test/ContainerA.h
-        test/Object1.cpp
-        test/Object1.h
-        test/Object2.h
-        test/OpenGLtest.cpp
-        test/OpenGLtest.h
-        test/TestRun.cpp
-        test/TestRun.h
         graphic/WindowController.cpp
         graphic/WindowController.h
         graphic/gl/mesh.cpp

@@ -4,6 +4,7 @@
 
 #ifndef FUNCCIAFRAME_GLFWWINDOW_H
 #define FUNCCIAFRAME_GLFWWINDOW_H
+/*
 #include "../WindowInterface.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -45,5 +46,5 @@ namespace Funccia::Graphic::GL {
         GLFWwindow *m_window{nullptr};
     };
 }
-
+*/
 #endif //FUNCCIAFRAME_GLFWWINDOW_H
