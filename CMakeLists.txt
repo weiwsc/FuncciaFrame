@@ -14,21 +14,14 @@ if(APPLE)
 endif()
 
 
+find_package(SDL3 CONFIG REQUIRED)
+find_package(harfbuzz CONFIG REQUIRED)
+find_package(Freetype CONFIG REQUIRED)
+find_package(re2 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(SDL3 REQUIRED IMPORTED_TARGET sdl3)
-pkg_check_modules(SDL3_MIXER REQUIRED IMPORTED_TARGET sdl3-mixer)
-pkg_check_modules(FT2 REQUIRED freetype2)
-pkg_check_modules(HARFBUZZ REQUIRED harfbuzz)
-set(re2_DIR "/opt/homebrew/lib/cmake/re2")
-find_package(re2 REQUIRED CONFIG)
-#pkg_check_modules(GLEW REQUIRED IMPORTED_TARGET glew)
 include_directories(external/glad/include)
 include_directories(external/std_image/include)
-
-find_package(harfbuzz REQUIRED)
-find_package(glfw3 3.4 REQUIRED)
-find_package(nlohmann_json 3.12.0 REQUIRED)
 
 add_executable(FuncciaFrame main.cpp
         core/FileController.cpp
@@ -128,38 +121,15 @@ add_executable(FuncciaFrame main.cpp
         util/FpsCounter.cpp
         util/FpsCounter.h)
 
-set(LLVM_ROOT "/opt/homebrew/opt/llvm")
 
-target_link_options(FuncciaFrame PRIVATE
-        "-nostdlib++"
-)
 
 target_link_libraries(FuncciaFrame PRIVATE
-        "${LLVM_ROOT}/lib/c++/libc++.dylib"
-        "${LLVM_ROOT}/lib/c++/libc++abi.dylib"
+        SDL3::SDL3
+        Freetype::Freetype
+        harfbuzz::harfbuzz
+        re2::re2
+        nlohmann_json::nlohmann_json
+        "-framework OpenGL"
 )
-
-target_link_options(FuncciaFrame PRIVATE
-        "-Wl,-rpath,${LLVM_ROOT}/lib"
-)
-
-target_link_libraries(FuncciaFrame PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(FuncciaFrame PRIVATE re2::re2)
-target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3 "-framework OpenGL")
-target_link_libraries(FuncciaFrame PRIVATE PkgConfig::SDL3_MIXER)
-target_link_libraries(FuncciaFrame PRIVATE glfw)
-target_link_libraries(FuncciaFrame
-        PRIVATE
-        harfbuzz
-)
-
-#target_link_libraries(FuncciaFrame PRIVATE PkgConfig::GLEW)
-target_include_directories(FuncciaFrame PRIVATE ${FT2_INCLUDE_DIRS})
-target_link_directories(FuncciaFrame PRIVATE ${FT2_LIBRARY_DIRS})
-target_link_libraries(FuncciaFrame PRIVATE ${FT2_LIBRARIES})
-
-target_include_directories(FuncciaFrame PRIVATE ${HARFBUZZ_INCLUDE_DIRS})
-target_link_directories(FuncciaFrame PRIVATE ${HARFBUZZ_LIBRARY_DIRS})
-target_link_libraries(FuncciaFrame PRIVATE ${HARFBUZZ_LIBRARIES})
 
 target_sources(FuncciaFrame PRIVATE external/glad/src/glad.c)

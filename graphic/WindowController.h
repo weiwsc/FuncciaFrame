@@ -6,7 +6,7 @@
 #define FUNCCIAFRAME_WINDOWCONTROLLER_H
 #include <memory>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 
 #include "gl/SDLWindow.h"
 #include "WindowInterface.h"

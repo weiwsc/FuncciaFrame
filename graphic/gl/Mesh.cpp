@@ -7,7 +7,7 @@
 #include <utility>
 #include "Mesh.h"
 
-#include <GLFW/glfw3.h>
+//#include <GLFW/glfw3.h>
 
 #include "Shader.h"
 #include "../../core/util.h"
