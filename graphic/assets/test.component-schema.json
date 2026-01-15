@@ -1,0 +1,365 @@
+{
+  "type": "schema-group",
+  "namespace": "demo",
+  "components": {
+    "menu-bar": {
+      "schema": {
+        "children": "[items]"
+      }
+    },
+    "menu-bar-item": {
+      "schema": {
+        "content": "$item-text"
+      }
+    },
+    "list-view": {
+      "schema": {
+        "children": "[items]"
+      }
+    },
+    "list-item": {
+      "schema": {
+        "children": [
+          { "tag": "demo::list-item-label", "content": "$item-text" },
+          {
+            "tag": "demo::sub-item-container",
+            "property": { "items": "[sub-items]" }
+          }
+        ]
+      }
+    },
+    "sub-item-container": {
+      "schema": {
+        "children": "[items]"
+      }
+    },
+    "inspector-panel": {
+      "schema": {
+        "children": "[sections]"
+      }
+    },
+    "inspector-header": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::inspector-toggle",
+            "property": { "enabled": "$enabled" }
+          },
+          {
+            "tag": "demo::inspector-icon",
+            "property": { "icon": "$icon" }
+          },
+          {
+            "content": "$name"
+          }
+        ]
+      }
+    },
+    "inspector-section": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::section-header",
+            "property": { "title": "$title", "collapsible": "$collapsible" }
+          },
+          {
+            "tag": "demo::section-body",
+            "property": { "fields": "[fields]" }
+          }
+        ]
+      }
+    },
+    "section-header": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::collapse-arrow"
+          },
+          {
+            "content": "$title"
+          }
+        ]
+      }
+    },
+    "section-body": {
+      "schema": {
+        "children": "[fields]"
+      }
+    },
+    "collapse-arrow": {
+      "schema": {
+        "content": "▼"
+      }
+    },
+    "field-row": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::field-value",
+            "property": { "value": "$value" }
+          }
+        ]
+      }
+    },
+    "field-label": {
+      "schema": {
+        "content": "$label"
+      }
+    },
+    "field-value": {
+      "schema": {
+        "content": "$value"
+      }
+    },
+    "field-vec3": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::vec3-input",
+            "property": { "x": "$x", "y": "$y", "z": "$z" }
+          }
+        ]
+      }
+    },
+    "vec3-input": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::axis-input",
+            "property": { "axis": "X", "value": "$x" }
+          },
+          {
+            "tag": "demo::axis-input",
+            "property": { "axis": "Y", "value": "$y" }
+          },
+          {
+            "tag": "demo::axis-input",
+            "property": { "axis": "Z", "value": "$z" }
+          }
+        ]
+      }
+    },
+    "axis-input": {
+      "schema": {
+        "children": [
+          {
+            "content": "$axis"
+          },
+          {
+            "content": "$value"
+          }
+        ]
+      }
+    },
+    "field-slider": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::slider-track",
+            "property": { "value": "$value", "min": "$min", "max": "$max" }
+          }
+        ]
+      }
+    },
+    "slider-track": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::slider-fill",
+            "property": { "value": "$value" }
+          },
+          {
+            "tag": "demo::slider-value-label",
+            "property": { "value": "$value" }
+          }
+        ]
+      }
+    },
+    "slider-fill": {
+      "schema": {
+        "content": ""
+      }
+    },
+    "slider-value-label": {
+      "schema": {
+        "content": "$value"
+      }
+    },
+    "field-checkbox": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::checkbox-box",
+            "property": { "checked": "$checked" }
+          }
+        ]
+      }
+    },
+    "checkbox-box": {
+      "schema": {
+        "content": "$checked"
+      }
+    },
+    "field-dropdown": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::dropdown-button",
+            "property": { "selected": "$selected" }
+          }
+        ]
+      }
+    },
+    "dropdown-button": {
+      "schema": {
+        "children": [
+          {
+            "content": "$selected"
+          },
+          {
+            "content": "▾"
+          }
+        ]
+      }
+    },
+    "field-color": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::color-swatch",
+            "property": { "color": "$color" }
+          }
+        ]
+      }
+    },
+    "color-swatch": {
+      "schema": {
+        "content": ""
+      }
+    },
+    "field-asset": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::field-label",
+            "property": { "label": "$label" }
+          },
+          {
+            "tag": "demo::asset-picker",
+            "property": {
+              "asset-name": "$asset-name",
+              "asset-type": "$asset-type"
+            }
+          }
+        ]
+      }
+    },
+    "asset-picker": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::asset-thumbnail"
+          },
+          {
+            "content": "$asset-name"
+          },
+          {
+            "tag": "demo::asset-picker-button",
+            "property": { "label": "◎" }
+          }
+        ]
+      }
+    },
+    "asset-thumbnail": {
+      "schema": {
+        "content": ""
+      }
+    },
+    "asset-picker-button": {
+      "schema": {
+        "content": "$label"
+      }
+    },
+    "component-section": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::component-header",
+            "property": {
+              "name": "$name",
+              "icon": "$icon",
+              "enabled": "$enabled"
+            }
+          },
+          {
+            "tag": "demo::component-body",
+            "property": { "fields": "[fields]" }
+          }
+        ]
+      }
+    },
+    "component-header": {
+      "schema": {
+        "children": [
+          {
+            "tag": "demo::collapse-arrow"
+          },
+          {
+            "tag": "demo::component-toggle",
+            "property": { "enabled": "$enabled" }
+          },
+          {
+            "content": "$name"
+          },
+          {
+            "tag": "demo::component-menu-button"
+          }
+        ]
+      }
+    },
+    "component-toggle": {
+      "schema": {
+        "content": "☑"
+      }
+    },
+    "component-menu-button": {
+      "schema": {
+        "content": "⋮"
+      }
+    },
+    "component-body": {
+      "schema": {
+        "children": "[fields]"
+      }
+    },
+    "add-component-button": {
+      "schema": {
+        "content": "Add Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Funccia UI Schema",
+  "description": "Schema for Funccia UI framework JSON definitions",
+
+  "definitions": {
+    "color": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+        },
+        { "type": "string", "pattern": "^rgba?\\(" },
+        {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 3,
+          "maxItems": 4
+        }
+      ]
+    },
+
+    "sideValues": {
+      "oneOf": [
+        { "type": "number" },
+        {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        {
+          "type": "array",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4
+        }
+      ]
+    },
+
+    "vec2": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+
+    "vec4": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 4,
+      "maxItems": 4
+    },
+
+    "sizing": {
+      "type": "string",
+      "enum": ["grow", "fit"]
+    },
+
+    "stack": {
+      "type": "string",
+      "enum": ["horizontal", "vertical"]
+    },
+
+    "textWrap": {
+      "type": "string",
+      "enum": ["wrap", "none"]
+    },
+
+    "style": {
+      "type": "object",
+      "properties": {
+        "background-color": { "$ref": "#/definitions/color" },
+        "text-color": { "$ref": "#/definitions/color" },
+        "border-color": { "$ref": "#/definitions/color" },
+
+        "margin": { "$ref": "#/definitions/sideValues" },
+        "margin-top": { "type": "number" },
+        "margin-right": { "type": "number" },
+        "margin-bottom": { "type": "number" },
+        "margin-left": { "type": "number" },
+
+        "padding": { "$ref": "#/definitions/sideValues" },
+        "padding-top": { "type": "number" },
+        "padding-right": { "type": "number" },
+        "padding-bottom": { "type": "number" },
+        "padding-left": { "type": "number" },
+
+        "border-radius": { "$ref": "#/definitions/sideValues" },
+        "border-width": { "$ref": "#/definitions/sideValues" },
+
+        "box-shadow-color": { "$ref": "#/definitions/color" },
+        "box-shadow-blur": { "type": "number" },
+        "box-shadow-spread": { "type": "number" },
+        "box-shadow-offset": { "$ref": "#/definitions/vec2" },
+
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "horizontal-sizing": { "$ref": "#/definitions/sizing" },
+        "vertical-sizing": { "$ref": "#/definitions/sizing" },
+
+        "stack": { "$ref": "#/definitions/stack" },
+
+        "font-size": { "type": "integer" },
+        "text-wrap": { "$ref": "#/definitions/textWrap" },
+
+        "invisible": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+
+    "element": {
+      "type": "object",
+      "properties": {
+        "tag": { "type": "string" },
+        "content": { "type": "string" },
+        "style": { "$ref": "#/definitions/style" },
+        "property": { "type": "object" },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/element" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "style": { "$ref": "#/definitions/style" },
+    "content": { "type": "string" },
+    "children": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/element" }
+    }
+  }
+}

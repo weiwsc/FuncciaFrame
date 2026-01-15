@@ -1,0 +1,759 @@
+{
+  "style": {
+    "border-width": 0,
+    "margin": 0,
+    "height": 1080,
+    "width": 1920
+  },
+  "children": [
+    {
+      "tag": "demo::root",
+      "children": [
+        {
+          "tag": "demo::menu-bar",
+          "property": {
+            "items": [
+              {
+                "tag": "demo::menu-bar-item",
+                "property": { "item-text": "File" }
+              },
+              {
+                "tag": "demo::menu-bar-item",
+                "property": { "item-text": "Edit" }
+              },
+              {
+                "tag": "demo::menu-bar-item",
+                "property": { "item-text": "View" }
+              },
+              {
+                "tag": "demo::menu-bar-item",
+                "property": { "item-text": "Help" }
+              }
+            ]
+          }
+        },
+        {
+          "style": {
+            "stack": "horizontal",
+            "horizontal-sizing": "grow",
+            "vertical-sizing": "grow"
+          },
+          "children": [
+            {
+              "tag": "demo::list-view",
+              "property": {
+                "items": [
+                  {
+                    "tag": "demo::list-item",
+                    "property": {
+                      "item-text": "Scene Hierarchy",
+                      "sub-items": [
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Main Camera (PerspectiveCamera)",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Post Processing Volume"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Audio Listener Component"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Directional Light (Sun)",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Shadow Cascade Settings"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Environment",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Terrain (HeightmapTerrain)",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Grass Spawner Component"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Tree Placement Data"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Water Reflection Probe"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Skybox Controller",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Day/Night Cycle Manager"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Cloud Rendering System"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Fog Volume (Global)"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Player Controller",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Character Model (Rig)",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Animation State Machine"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Inverse Kinematics Solver"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Ragdoll Physics Setup"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Input Handler Component"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Capsule Collider (Physics)"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Inventory System",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Weapon Slot Manager"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Consumable Items Container"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "UI Canvas (Screen Space)",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "HUD Container",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Health Bar Widget"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Stamina Bar Widget"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Minimap Renderer"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Quest Objective Tracker"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Pause Menu Panel",
+                                  "sub-items": [
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Settings Button"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Save Game Button"
+                                      }
+                                    },
+                                    {
+                                      "tag": "demo::list-item",
+                                      "property": {
+                                        "item-text": "Return to Main Menu Button"
+                                      }
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Dialog Box Container"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "tag": "demo::list-item",
+                    "property": {
+                      "item-text": "Asset Browser",
+                      "sub-items": [
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Materials",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "M_Character_Skin_Subsurface"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "M_Environment_Rock_Mossy"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "M_Water_Translucent_Caustics"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": { "item-text": "M_Metal_Worn_PBR" }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Textures",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "T_Terrain_Grass_Albedo_4K"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "T_Terrain_Grass_Normal_4K"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "T_Character_Face_Diffuse"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Audio Clips",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "SFX_Footstep_Grass_Loop"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "SFX_Sword_Swing_Whoosh"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "BGM_Forest_Ambience_Day"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "BGM_Combat_Intense_Orchestral"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Prefabs",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "PFB_Enemy_Goblin_Archer"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "PFB_Pickup_HealthPotion"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "PFB_Destructible_Barrel"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "PFB_VFX_Explosion_Fire"
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "tag": "demo::list-item",
+                    "property": {
+                      "item-text": "Project Settings",
+                      "sub-items": [
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Graphics Configuration",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Anti-Aliasing Mode (TAA)"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Shadow Quality Settings"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Global Illumination Method"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Physics Settings",
+                            "sub-items": [
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Gravity Vector (0, -9.81, 0)"
+                                }
+                              },
+                              {
+                                "tag": "demo::list-item",
+                                "property": {
+                                  "item-text": "Collision Layer Matrix"
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Input Bindings Configuration"
+                          }
+                        },
+                        {
+                          "tag": "demo::list-item",
+                          "property": {
+                            "item-text": "Build Settings and Platforms"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "style": { "horizontal-sizing": "grow" }
+            },
+            {
+              "style": {
+                "background-color": "#b53030ff",
+                "width": 400,
+                "vertical-sizing": "grow"
+              },
+              "children": [
+                {
+                  "tag": "demo::inspector-panel",
+                  "property": {
+                    "sections": [
+                      {
+                        "tag": "demo::inspector-header",
+                        "property": {
+                          "name": "Player Character",
+                          "icon": "🎮",
+                          "enabled": "☑"
+                        }
+                      },
+                      {
+                        "tag": "demo::component-section",
+                        "property": {
+                          "name": "Transform",
+                          "icon": "⊞",
+                          "enabled": "☑",
+                          "fields": [
+                            {
+                              "tag": "demo::field-vec3",
+                              "property": {
+                                "label": "Position",
+                                "x": "0.00",
+                                "y": "1.25",
+                                "z": "-3.50"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-vec3",
+                              "property": {
+                                "label": "Rotation",
+                                "x": "0.00",
+                                "y": "180.00",
+                                "z": "0.00"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-vec3",
+                              "property": {
+                                "label": "Scale",
+                                "x": "1.00",
+                                "y": "1.00",
+                                "z": "1.00"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "tag": "demo::component-section",
+                        "property": {
+                          "name": "Mesh Renderer",
+                          "icon": "◧",
+                          "enabled": "☑",
+                          "fields": [
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Cast Shadows",
+                                "checked": "☑"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Receive Shadows",
+                                "checked": "☑"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-dropdown",
+                              "property": {
+                                "label": "Light Probes",
+                                "selected": "Blend Probes"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-dropdown",
+                              "property": {
+                                "label": "Reflection Probes",
+                                "selected": "Simple"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-asset",
+                              "property": {
+                                "label": "Material",
+                                "asset-name": "M_Character_Body",
+                                "asset-type": "Material"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "tag": "demo::component-section",
+                        "property": {
+                          "name": "Rigidbody",
+                          "icon": "◉",
+                          "enabled": "☑",
+                          "fields": [
+                            {
+                              "tag": "demo::field-row",
+                              "property": { "label": "Mass", "value": "75.0" }
+                            },
+                            {
+                              "tag": "demo::field-slider",
+                              "property": {
+                                "label": "Drag",
+                                "value": "0.05",
+                                "min": "0",
+                                "max": "1"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-slider",
+                              "property": {
+                                "label": "Angular Drag",
+                                "value": "0.02",
+                                "min": "0",
+                                "max": "1"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Use Gravity",
+                                "checked": "☑"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Is Kinematic",
+                                "checked": "☐"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-dropdown",
+                              "property": {
+                                "label": "Interpolate",
+                                "selected": "Interpolate"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-dropdown",
+                              "property": {
+                                "label": "Collision Detection",
+                                "selected": "Continuous Dynamic"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "tag": "demo::component-section",
+                        "property": {
+                          "name": "Box Collider",
+                          "icon": "▢",
+                          "enabled": "☑",
+                          "fields": [
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Is Trigger",
+                                "checked": "☐"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-asset",
+                              "property": {
+                                "label": "Material",
+                                "asset-name": "None (Physic Material)",
+                                "asset-type": "PhysicMaterial"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-vec3",
+                              "property": {
+                                "label": "Center",
+                                "x": "0.00",
+                                "y": "0.50",
+                                "z": "0.00"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-vec3",
+                              "property": {
+                                "label": "Size",
+                                "x": "0.80",
+                                "y": "1.80",
+                                "z": "0.60"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "tag": "demo::component-section",
+                        "property": {
+                          "name": "Player Controller (Script)",
+                          "icon": "⚙",
+                          "enabled": "☑",
+                          "fields": [
+                            {
+                              "tag": "demo::field-row",
+                              "property": {
+                                "label": "Move Speed",
+                                "value": "5.5"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-row",
+                              "property": {
+                                "label": "Jump Force",
+                                "value": "8.0"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-slider",
+                              "property": {
+                                "label": "Mouse Sensitivity",
+                                "value": "2.5",
+                                "min": "0.1",
+                                "max": "10"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-checkbox",
+                              "property": {
+                                "label": "Can Double Jump",
+                                "checked": "☑"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-asset",
+                              "property": {
+                                "label": "Footstep Audio",
+                                "asset-name": "SFX_Footsteps",
+                                "asset-type": "AudioClip"
+                              }
+                            },
+                            {
+                              "tag": "demo::field-color",
+                              "property": {
+                                "label": "Trail Color",
+                                "color": "#3498dbff"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "tag": "demo::add-component-button"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
