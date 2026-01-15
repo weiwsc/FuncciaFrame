@@ -4,6 +4,7 @@
 
 #ifndef FUNCCIAFRAME_WINDOWCONTROLLER_H
 #define FUNCCIAFRAME_WINDOWCONTROLLER_H
+#include <memory>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -20,13 +21,13 @@ namespace Funccia::Graphic::GL {
 
         auto GetWindow() -> WindowInterface * {
             if (m_window == nullptr) NewWindow();
-            return m_window;
+            return m_window.get();
         }
 
         void NewWindow();
 
     private:
-        WindowInterface *m_window;
+        std::unique_ptr<WindowInterface> m_window;
 
     };
 }

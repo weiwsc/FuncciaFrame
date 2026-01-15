@@ -60,11 +60,11 @@ namespace Funccia {
 
     auto App::Shutdown() -> void {
         window->Close();
+        Funccia::Core::AssetController::Instance().Clear();
     }
 
     auto App::InitCoreSystem() -> void {
         Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
-        Funccia::Core::ObjectPoolManager::AssetPool = new Funccia::Core::ObjectPool<Funccia::Core::Asset>();
     }
 
     auto App::InitFpsCounter() -> void {
@@ -78,8 +78,8 @@ namespace Funccia {
 
     auto App::InitUIRenderer() -> void {
         ui_renderer = std::make_unique<Funccia::Graphic::GL::UIRenderer>();
-        ui_renderer->Initialize("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/UIShader-ver.glsl",
-                                "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/UIShader-frag.glsl");
+        ui_renderer->Initialize("../graphic/shaders/vertex/UIShader-ver.glsl",
+                                "../graphic/shaders/fragment/UIShader-frag.glsl");
     }
 
     auto App::InitUIWindow() -> void {
@@ -87,37 +87,37 @@ namespace Funccia {
 
 
         Funccia::UI::JsonUiBuilder::ReadComponentSchema(
-            "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json");
+            "../graphic/assets/test.component-schema.json");
         Funccia::UI::JsonUiBuilder::ReadStyleSheet(
-            "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.style.json");
-        ui_window->ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
+            "../graphic/assets/test.style.json");
+        ui_window->ReloadFromJSON("../graphic/assets/test.funccia-ui.json");
     }
 
     auto App::InitTextRenderer() -> void {
         text_renderer = std::make_unique<Funccia::Graphic::GL::TextRenderer>();
         text_renderer->Initialize(
-            "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/vertex/FontShader1-ver.glsl",
-            "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/shaders/fragment/FontShader1-fag.glsl");
+            "../graphic/shaders/vertex/FontShader1-ver.glsl",
+            "../graphic/shaders/fragment/FontShader1-fag.glsl");
     }
 
     auto App::InitFileWatcher() -> void {
         file_watcher = std::make_unique<Funccia::Core::FileWatcher>();
-        file_watcher->Add("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json",
+        file_watcher->Add("../graphic/assets/test.funccia-ui.json",
                           [&](const std::filesystem::path& path) {
                               ui_window->ReloadFromJSON(path.string());
                           }
         );
-        file_watcher->Add("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.component-schema.json",
+        file_watcher->Add("../graphic/assets/test.component-schema.json",
                           [&](const std::filesystem::path& path) {
                               Funccia::UI::JsonUiBuilder::ReadComponentSchema(path.string());
                               ui_window->ReloadFromJSON(
-                                  "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
+                                  "../graphic/assets/test.funccia-ui.json");
                           }
         );
-        file_watcher->Add("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.style.json",
+        file_watcher->Add("../graphic/assets/test.style.json",
                           [&](const std::filesystem::path& path) {
                               Funccia::UI::JsonUiBuilder::ReadStyleSheet(path.string());
-                              ui_window->ReloadFromJSON("/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/test.funccia-ui.json");
+                              ui_window->ReloadFromJSON("../graphic/assets/test.funccia-ui.json");
                           }
         );
         file_watcher->Start();

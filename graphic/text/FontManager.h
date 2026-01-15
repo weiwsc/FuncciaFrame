@@ -15,7 +15,7 @@ namespace Funccia::UI {
             return m_font;
         }
     private:
-        std::string m_font = "/Users/dvillera/Projects/cpp/FuncciaFrame/graphic/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf";
+        std::string m_font = "../graphic/assets/fonts/NotoSans-VariableFont_wdth,wght.ttf";
     };
 }
 

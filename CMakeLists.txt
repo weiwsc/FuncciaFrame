@@ -72,7 +72,6 @@ add_executable(FuncciaFrame main.cpp
         core/TextFile.cpp
         core/TextFile.h
         external/std_image/include/std_image.cpp
-        testGround.cpp
         graphic/gl/Transform.cpp
         graphic/gl/Transform.h
         graphic/gl/MathTypes.cpp

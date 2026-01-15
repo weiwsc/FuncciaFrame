@@ -17,12 +17,11 @@ namespace Funccia::Graphic::GL {
     WindowController::~WindowController() {
         if (m_window != nullptr) {
             m_window->Close();
-            m_window = nullptr;
         }
     }
 
     void WindowController::NewWindow() {
-        m_window = reinterpret_cast<WindowInterface *>(new SDLWindow());
+        m_window = std::make_unique<SDLWindow>();
         if (!m_window->Initialize(1920, 1080, "FuncciaFrame")) {
         std::cerr << "Failed to initialize window!" << std::endl;
     }
