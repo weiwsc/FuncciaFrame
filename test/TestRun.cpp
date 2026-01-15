@@ -5,7 +5,7 @@
 #include "TestRun.h"
 
 #include "../graphic/gl/Mesh.h"
-#include "../graphic/gl/WindowController.h"
+#include "../graphic/WindowController.h"
 
 
 void TestRun::GLFWTest() {

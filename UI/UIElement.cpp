@@ -10,7 +10,7 @@
 
 #include "UIHelper.h"
 #include "Window.h"
-#include "../graphic/gl/WindowController.h"
+#include "../graphic/WindowController.h"
 #include "../core/ProfileTimer.h"
 namespace Funccia::UI {
     float UIElement::borderBoxStartOnAxis(Axis axis) const {

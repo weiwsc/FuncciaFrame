@@ -61,8 +61,8 @@ add_executable(FuncciaFrame main.cpp
         test/OpenGLtest.h
         test/TestRun.cpp
         test/TestRun.h
-        graphic/gl/WindowController.cpp
-        graphic/gl/WindowController.h
+        graphic/WindowController.cpp
+        graphic/WindowController.h
         graphic/gl/mesh.cpp
         graphic/gl/mesh.h
         graphic/gl/ShaderUtil.cpp
@@ -117,8 +117,8 @@ add_executable(FuncciaFrame main.cpp
         UI/UIFluentAPI.h
         UI/UIStyleDef.cpp
         UI/UIStyleDef.h
-        UI/FileWatcher.cpp
-        UI/FileWatcher.h
+        core/FileWatcher.cpp
+        core/FileWatcher.h
         UI/UIState.cpp
         UI/UIState.h
         UI/UIStyleSheets.cpp
@@ -126,7 +126,17 @@ add_executable(FuncciaFrame main.cpp
         graphic/text/FontManager.cpp
         graphic/text/FontManager.h
         core/ProfileTimer.cpp
-        core/ProfileTimer.h)
+        core/ProfileTimer.h
+        input/Input.cpp
+        input/Input.h
+        graphic/GraphicsDevice.cpp
+        graphic/GraphicsDevice.h
+        graphic/gl/GLGraphicsDevice.cpp
+        graphic/gl/GLGraphicsDevice.h
+        App.cpp
+        App.h
+        util/FpsCounter.cpp
+        util/FpsCounter.h)
 
 set(LLVM_ROOT "/opt/homebrew/opt/llvm")
 

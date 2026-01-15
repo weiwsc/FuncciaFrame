@@ -6,8 +6,8 @@
 
 #include <iostream>
 
-#include "SDLWindow.h"
-#include "../../core/util.h"
+#include "gl/SDLWindow.h"
+#include "../core/util.h"
 
 namespace Funccia::Graphic::GL {
     WindowController::WindowController() {

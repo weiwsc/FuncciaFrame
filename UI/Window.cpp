@@ -9,7 +9,7 @@
 #include "JsonUiBuilder.h"
 #include "../graphic/WindowInterface.h"
 #include "../graphic/gl/TextRenderer.h"
-#include "../graphic/gl/WindowController.h"
+#include "../graphic/WindowController.h"
 #include "../core/ProfileTimer.h"
 
 struct Timer {

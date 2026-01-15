@@ -7,9 +7,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "SDLWindow.h"
-#include "../WindowInterface.h"
-#include "../../core/Singleton.h"
+#include "gl/SDLWindow.h"
+#include "WindowInterface.h"
+#include "../core/Singleton.h"
 
 namespace Funccia::Graphic::GL {
     class WindowController : public Core::Singleton<WindowController> {
@@ -27,6 +27,7 @@ namespace Funccia::Graphic::GL {
 
     private:
         WindowInterface *m_window;
+
     };
 }
 
