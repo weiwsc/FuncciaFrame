@@ -129,7 +129,15 @@ target_link_libraries(FuncciaFrame PRIVATE
         harfbuzz::harfbuzz
         re2::re2
         nlohmann_json::nlohmann_json
-        "-framework OpenGL"
 )
+if(APPLE)
+    target_link_libraries(FuncciaFrame PRIVATE "-framework OpenGL")
+elseif(WIN32)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(FuncciaFrame PRIVATE OpenGL::GL)
+elseif(UNIX)
+    find_package(OpenGL REQUIRED)
+    target_link_libraries(FuncciaFrame PRIVATE OpenGL::GL)
+endif()
 
 target_sources(FuncciaFrame PRIVATE external/glad/src/glad.c)

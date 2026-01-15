@@ -6,14 +6,14 @@
 #define UTIL_H
 
 #if defined(_WIN32) || defined(_WIN64)
-#define FF_PLATFROM_WINDOWS
+#define FF_PLATFORM_WINDOWS
 
 #elif defined(__APPLE__) || defined(__linux__)
 #define FF_PLATFORM_UNIX
 
 #endif
 
-#ifdef FF_PLATFROM_WINDOWS
+#ifdef FF_PLATFORM_WINDOWS
 #include <Windows.h>
 #include <direct.h>
 #define FF_ASSERT(_cond, _msg) \
