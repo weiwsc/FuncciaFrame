@@ -17,8 +17,7 @@ namespace Funccia::Graphic::GL {
     }
 
     float TextRenderer::ProcessText(float x, float y,float w, TextWrap text_wrap, vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run) {
-        std::vector<ShapedGlyph> shapedText{};
-        ShapeText(fontPath, text, shapedText);
+        const std::vector<ShapedGlyph>& shapedText = ShapeText(fontPath, text);
 
         float scale = pixel / 96.0f; //96 is the size used to init the font, change this later
         vec2 cursor {x, y + pixel};
@@ -55,8 +54,11 @@ namespace Funccia::Graphic::GL {
         return cursor.y;
     }
 
-    void TextRenderer::ShapeText(const std::string &fontPath, const std::string &text,
-                                 std::vector<ShapedGlyph> &shapedText) {
+    auto TextRenderer::ShapeText(const std::string &fontPath, const std::string &text)->const std::vector<ShapedGlyph>& {
+        if (auto it = shape_cache.find({fontPath, text}); it != shape_cache.end()) {
+            return it->second;
+        }
+
         FT_Face face = m_atlas->LoadFont(fontPath);
         std::unique_ptr<HBShaper> shaper = std::make_unique<HBShaper>();
         shaper->init(face);
@@ -72,6 +74,7 @@ namespace Funccia::Graphic::GL {
         if (!glyphToAdd.empty()) {
             m_atlas->CopyBitmapToAtlas(face, glyphToAdd);
         }
+        std::vector<ShapedGlyph> shapedText;
         for (auto result: results) {
             auto glyph = m_atlas->GetGlyph(result.glyph_id);
             float conversionFactor = 64.0f;
@@ -84,6 +87,8 @@ namespace Funccia::Graphic::GL {
                 .layer = glyph.layer,
             });
         }
+        auto [it, _] = shape_cache.emplace(std::make_pair(fontPath, text), std::move(shapedText));
+        return it->second;
     }
 
     void TextRenderer::PositionText(const std::vector<AtlasCell> &shapedText, float width, float height) {

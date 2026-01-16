@@ -8,13 +8,22 @@ namespace Funccia::Graphic::GL {
     enum class TextWrap;
     struct ShapedGlyph;
 
+    struct PairHash {
+        size_t operator()(const std::pair<std::string, std::string>& p) const {
+            size_t h1 = std::hash<std::string>{}(p.first);
+            size_t h2 = std::hash<std::string>{}(p.second);
+            return h1 ^ (h2 << 1);
+        }
+    };
+
+
     class TextRenderer {
     public:
         TextRenderer();
         ~TextRenderer();
         float ProcessText(float x, float y,float w, TextWrap text_wrap,vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run = true);
 
-        void ShapeText(const std::string &fontPath, const std::string &text, std::vector<ShapedGlyph> &shapedText);
+        auto ShapeText(const std::string &fontPath, const std::string &text) -> const std::vector<ShapedGlyph>&;
 
         void PositionText(const std::vector<AtlasCell> &shapedText, float width, float height);
         auto Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) -> bool;
@@ -40,6 +49,7 @@ namespace Funccia::Graphic::GL {
         std::unique_ptr<GlyphAtlas> m_atlas;
         Shader m_shader;
 
+        std::unordered_map<std::pair<std::string, std::string>, std::vector<ShapedGlyph>, PairHash> shape_cache;
 
         GLuint m_VAO, m_VBO, m_instanceVBO;
         std::vector<float> instanceData;
