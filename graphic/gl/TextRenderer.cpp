@@ -22,8 +22,8 @@ namespace Funccia::Graphic::GL {
         float scale = pixel / 96.0f; //96 is the size used to init the font, change this later
         vec2 cursor {x, y + pixel};
 
-        for (auto& cell: shapedText) {
-             if ( w>=0 && cursor.x + cell.advance.x * scale - x > w) {
+        for (const auto& [uv, size, bearing, advance, offset, layer]: shapedText) {
+             if ( w>=0 && cursor.x + advance.x * scale - x > w) {
                  if (text_wrap == TextWrap::Character) {
                      cursor.x = x;
                      cursor.y += pixel;
@@ -33,22 +33,22 @@ namespace Funccia::Graphic::GL {
                      break;
                  }
              }
-            float origin_x = cursor.x + cell.offset.x * scale;
-            float origin_y = cursor.y + cell.offset.y * scale;
+            float origin_x = cursor.x + offset.x * scale;
+            float origin_y = cursor.y + offset.y * scale;
 
             if (!dry_run) {
                 Collect({origin_x, origin_y,
-                    cell.size.x * scale, cell.size.y * scale,      // Scale size
-                    cell.bearing.x * scale, cell.bearing.y * scale, // Scale bearing
-                    cell.uv.x, cell.uv.y, cell.uv.z, cell.uv.w,
+                    size.x * scale, size.y * scale,      // Scale size
+                    bearing.x * scale, bearing.y * scale, // Scale bearing
+                    uv.x, uv.y, uv.z, uv.w,
                     color.r, color.g, color.b, color.a,
-                    static_cast<float>(cell.layer),
+                    static_cast<float>(layer),
                     clippingBox.x, clippingBox.y, clippingBox.z, clippingBox.w
                 });
             }
 
-            cursor.x += cell.advance.x * scale;  // Scale advance
-            cursor.y += cell.advance.y * scale;
+            cursor.x += advance.x * scale;  // Scale advance
+            cursor.y += advance.y * scale;
         }
         cursor.y += pixel/4; //makes the text looks more vertically centered in the text box
         return cursor.y;
@@ -59,9 +59,16 @@ namespace Funccia::Graphic::GL {
             return it->second;
         }
 
-        FT_Face face = m_atlas->LoadFont(fontPath);
-        std::unique_ptr<HBShaper> shaper = std::make_unique<HBShaper>();
-        shaper->init(face);
+        HBShaper *shaper;
+        if (auto it = shapers.find(fontPath); it != shapers.end()) {
+            shaper = it->second.get();
+        }
+        else {
+            FT_Face face = m_atlas->LoadFont(fontPath);
+            shapers[fontPath] = std::make_unique<HBShaper>();
+            shaper = shapers[fontPath].get();
+            shaper->init(face);
+        }
         std::vector<HBTextInfo> results;
         shaper->Shape(text, results);
 
@@ -72,6 +79,7 @@ namespace Funccia::Graphic::GL {
             }
         }
         if (!glyphToAdd.empty()) {
+            FT_Face face = m_atlas->LoadFont(fontPath);
             m_atlas->CopyBitmapToAtlas(face, glyphToAdd);
         }
         std::vector<ShapedGlyph> shapedText;

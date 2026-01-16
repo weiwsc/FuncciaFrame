@@ -4,7 +4,11 @@
 
 #ifndef PROFILETIMER_H
 #define PROFILETIMER_H
+//#define FF_PROFILING_ENABLED
+// Define this to enable profiling, comment out to disable
+// #define FF_PROFILING_ENABLED
 
+#ifdef FF_PROFILING_ENABLED
 
 #include <chrono>
 
@@ -16,7 +20,7 @@ public:
     ~ProfileTimer() {
         auto end = std::chrono::high_resolution_clock::now();
         double ms = std::chrono::duration<double, std::milli>(end - m_start).count();
-        if (ms > 0.01) {  // only log slow stuff
+        if (ms > 0.01) {
             printf("%s: %.3fms\n", m_name, ms);
         }
     }
@@ -25,5 +29,11 @@ private:
     std::chrono::high_resolution_clock::time_point m_start;
 };
 
+#else
 
-#endif //PROFILETIMER_H
+// Expands to nothing - zero cost
+#define PROFILE_SCOPE(name) ((void)0)
+
+#endif // FF_PROFILING_ENABLED
+
+#endif // PROFILETIMER_H

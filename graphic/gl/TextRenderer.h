@@ -47,6 +47,8 @@ namespace Funccia::Graphic::GL {
         void DebugDrawAtlasToDisk();
     private:
         std::unique_ptr<GlyphAtlas> m_atlas;
+
+        std::unordered_map<std::string,std::unique_ptr<HBShaper>> shapers;
         Shader m_shader;
 
         std::unordered_map<std::pair<std::string, std::string>, std::vector<ShapedGlyph>, PairHash> shape_cache;

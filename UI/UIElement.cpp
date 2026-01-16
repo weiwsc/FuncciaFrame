@@ -257,8 +257,8 @@ namespace Funccia::UI {
 
 
     auto UIElement::RenderQueue(UIRender &render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x,
-                                float parent_content_box_y) -> void {
-        float s = Graphic::GL::WindowController::Instance().GetWindow()->GetDisplayScale();
+                                float parent_content_box_y, float scale) -> void {
+        const float s = scale;
         if (m_style.invisible_but_occupy_space || !m_style.is_rendered || m_culled) { return; }
         // vec4 borderBox = {
         //     parent_content_box_x + m_border_box_pos.GetX(),
@@ -326,7 +326,7 @@ namespace Funccia::UI {
 
         for (auto &child: m_children) {
             child->RenderQueue(render, text_renderer, parent_content_box_x + contentBoxStartOnAxis(Axis::Horizontal),
-                               parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical));
+                               parent_content_box_y + contentBoxStartOnAxis(Axis::Vertical), scale);
         }
     }
 

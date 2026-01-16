@@ -62,7 +62,7 @@ namespace Funccia::UI {
 
         auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
         auto CullingPass(vec4 parent_clipping_box) -> void;
-        auto RenderQueue(UIRender& render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y) -> void;
+        auto RenderQueue(UIRender& render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y, float scale) -> void;
         //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
         auto HandlePick(vec2 mouse_pos, Window* parent_window) -> bool;

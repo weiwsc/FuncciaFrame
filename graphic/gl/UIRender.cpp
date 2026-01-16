@@ -144,8 +144,14 @@ namespace Funccia::Graphic::GL {
         instanceData.insert(instanceData.end(), data.begin(), data.end());
     }
 
+    void UIRenderer::CollectStruct(UIInstanceData data) {
+        instanceData.insert(instanceData.end(), data.data, data.data + 32);
+    }
+
+
     void UIRenderer::BeginFrame() {
         instanceData.clear();
+        instanceData.reserve(1024 * 32);
     }
 
     void UIRenderer::Cleanup() {

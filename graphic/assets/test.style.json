@@ -42,7 +42,7 @@
     "list-view": {
       "default": {
         "vertical-sizing": "grow",
-        "width": 350,
+        "width": 300,
         "stack": "vertical",
         "background-color": "#262626ff",
         "padding": 5,
@@ -64,7 +64,7 @@
       "default": {
         "horizontal-sizing": "grow",
         "vertical-sizing": "fit",
-        "font-size": 16,
+        "font-size": 13,
         "padding-top": 4,
         "padding-bottom": 4,
         "padding-left": 10,

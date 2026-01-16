@@ -38,11 +38,9 @@ namespace Funccia::UI {
 
     auto Window::Render(Graphic::GL::UIRenderer &renderer, Graphic::GL::TextRenderer &text_renderer, float target_x,
                         float target_y, const glm::vec2 &screenSize) -> void {
-        PROFILE_SCOPE("Total Render"); {
-            PROFILE_SCOPE("layout");
             {
-                PROFILE_SCOPE("layout::fit_x");
-                root->CalculateFitSizeOnAxis(Axis::Horizontal);
+            PROFILE_SCOPE("layout::fit_x");
+            root->CalculateFitSizeOnAxis(Axis::Horizontal);
             }
             {
                 PROFILE_SCOPE("layout::grow_x");
@@ -64,7 +62,7 @@ namespace Funccia::UI {
                 PROFILE_SCOPE("layout::pos_y");
                 root->PositionOnAxis(Axis::Vertical, m_offset.y);
             }
-        }
+
 
         double x, y;
         {
@@ -101,8 +99,8 @@ namespace Funccia::UI {
             }
         }
         {
-            PROFILE_SCOPE("render");
-            root->RenderQueue(renderer, text_renderer, target_x, target_y);
+            PROFILE_SCOPE("submit");
+            root->RenderQueue(renderer, text_renderer, target_x, target_y, Graphic::GL::WindowController::Instance().GetWindow()->GetDisplayScale());
         }
 
     }
@@ -151,7 +149,7 @@ namespace Funccia::UI {
         double culling = std::chrono::duration<double, std::milli>(end - start).count();
 
         start = std::chrono::high_resolution_clock::now();
-        root->RenderQueue(renderer, text_renderer, target_x, target_y);
+        root->RenderQueue(renderer, text_renderer, target_x, target_y, Graphic::GL::WindowController::Instance().GetWindow()->GetDisplayScale());
         end = std::chrono::high_resolution_clock::now();
         double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
 

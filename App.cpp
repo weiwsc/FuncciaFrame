@@ -7,6 +7,7 @@
 #include "core/AssetController.h"
 #include "core/FileWatcher.h"
 #include "core/ObjectPoolManager.h"
+#include "core/ProfileTimer.h"
 #include "graphic/gl/TextRenderer.h"
 #include "graphic/gl/UIRender.h"
 #include "graphic/WindowController.h"
@@ -35,26 +36,42 @@ namespace Funccia {
 
     auto App::Update() -> void {
         while (!window->ShouldClose()) {
-            file_watcher->Poll();
-            window->PollEvents();
+            {
+                PROFILE_SCOPE("Mics");
+                file_watcher->Poll();
+                window->PollEvents();
 
-            if (window->IsKeyPressed(Graphic::Key::Escape)) {
-                window->SetShouldClose(true);
+                if (window->IsKeyPressed(Graphic::Key::Escape)) {
+                    window->SetShouldClose(true);
+                }
+                graphics_device->Update();
+
+                fps_counter->Update();
             }
-            graphics_device->Update();
+            {
+                PROFILE_SCOPE("Begin Frame");
+                ui_renderer->BeginFrame();
+                text_renderer->BeginFrame();
+            }
 
-            fps_counter->Update();
-
-            ui_renderer->BeginFrame();
-            text_renderer->BeginFrame();
             int winW, winH;
-            window->GetFramebufferSize(winW, winH);
-            ui_window->Render(*ui_renderer, *text_renderer, 0, 0, glm::vec2(winW, winH));
-
-            ui_renderer->Render(glm::mat4(1.0f), glm::vec2(winW, winH));
-            text_renderer->Render(glm::vec2(winW, winH));
-
-            window->SwapBuffers();
+            {
+                PROFILE_SCOPE("total ui processing and submit");
+                window->GetFramebufferSize(winW, winH);
+                ui_window->Render(*ui_renderer, *text_renderer, 0, 0, glm::vec2(winW, winH));
+            }
+            {
+                PROFILE_SCOPE("UI rendering");
+               ui_renderer->Render(glm::mat4(1.0f), glm::vec2(winW, winH));
+            }
+            {
+                PROFILE_SCOPE("Text rendering");
+                text_renderer->Render(glm::vec2(winW, winH));
+            }
+            {
+                PROFILE_SCOPE("swap buffer");
+                window->SwapBuffers();
+            }
         }
     }
 

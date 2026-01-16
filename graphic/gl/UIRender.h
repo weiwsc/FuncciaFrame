@@ -13,6 +13,9 @@
 #include "glm/glm.hpp"
 
 namespace Funccia::Graphic::GL {
+    struct UIInstanceData {
+        float data[32];
+    };
     class UIRenderer {
     private:
         Shader m_shader;
@@ -33,7 +36,7 @@ namespace Funccia::Graphic::GL {
         void Render(const glm::mat4 &viewProjection, const glm::vec2 &screenSize);
 
         void Collect(std::initializer_list<float> values);
-
+        void CollectStruct(UIInstanceData data);
         void BeginFrame();
     };
 }
