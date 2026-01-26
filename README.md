@@ -17,7 +17,9 @@ cmake -B build -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.
 cmake --build build
 ```
 - for Visual Studio: a cmake preset is provided in the root folder. Refer to [Vcpkg documents](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started-vs?pivots=shell-powershell)
-
+  - set the environment variable first:
+    - `set VCPKG_ROOT=C:\path\to\vcpkg`
+    - Or add it permanently in System Environment Variables.
 ## FuncciaUI
 Retained mode DOM tree style UI library.
 
