@@ -43,56 +43,40 @@ Example:
 demo.funccia-ui.json (main UI definition):
 ```json
 {
-   "type": "stylesheet",
-   "namespace": "demo",
-   "styles": {
-      "header": {
-         "default": {
-            "height": 50,
-            "horizontal-sizing": "grow",
-            "background-color": "#2c3e50ff",
-            "padding": 15,
-            "font-size": 20,
-            "text-color": "#ffffffff"
+   "style": {
+   "width": 1920,
+   "height": 1080
+ },
+ "children": [
+   {
+     "tag": "demo::header",
+     "property": { "title": "FuncciaUI Demo" }
+   },
+   {
+     "style": {
+       "stack": "horizontal",
+       "horizontal-sizing": "grow",
+       "vertical-sizing": "grow"
+     },
+     "children": [
+       {
+         "tag": "demo::sidebar",
+         "property": {
+           "items": [
+             { "tag": "demo::sidebar-item", "property": { "text": "Home" } },
+             { "tag": "demo::sidebar-item", "property": { "text": "Settings" } },
+             { "tag": "demo::sidebar-item", "property": { "text": "About" } }
+           ]
          }
-      },
-      "sidebar": {
-         "default": {
-            "width": 200,
-            "vertical-sizing": "grow",
-            "background-color": "#34495eff",
-            "padding": 10
-         }
-      },
-      "sidebar-item": {
-         "default": {
-            "horizontal-sizing": "grow",
-            "padding": 12,
-            "margin-bottom": 5,
-            "font-size": 14,
-            "text-color": "#ecf0f1ff",
-            "border-radius": 4
-         },
-         "hovered": {
-            "background-color": "#3d566eff"
-         },
-         "selected": {
-            "background-color": "#2980b9ff"
-         }
-      },
-      "content": {
-         "default": {
-            "horizontal-sizing": "grow",
-            "vertical-sizing": "grow",
-            "background-color": "#ecf0f1ff",
-            "padding": 20,
-            "font-size": 16,
-            "text-color": "#2c3e50ff"
-         }
-      }
+       },
+       {
+         "tag": "demo::content",
+         "property": { "text": "Select an item from the sidebar." }
+       }
+     ]
    }
+ ]
 }
-
 ```
 demo.component-schema.json (reusable components):
 ```json
