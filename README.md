@@ -20,6 +20,7 @@ cmake --build build
   - set the environment variable first:
     - `set VCPKG_ROOT=C:\path\to\vcpkg`
     - Or add it permanently in System Environment Variables.
+
 ## FuncciaUI
 Retained mode DOM tree style UI library.
 
@@ -30,6 +31,12 @@ Current features:
 - Text rendering (OpenGL, FreeType)
 - A declarative JSON based UI definition, supporting parameterized component templates and style sheets.
 - Hot reload of UI definitions for faster iteration.
+
+Planed features:
+- Object binding
+- Callback function
+- Optimizations with lazy rendering
+
 
 Example:
 ![FuncciaUI Demo](screenshots/ui_demo.png)
