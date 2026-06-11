@@ -6,6 +6,8 @@
 #define FUNCCIAFRAME_INTERFACE_H
 #include <string>
 
+#include "RenderBackend.h"
+
 namespace Funccia::Graphic {
     enum class Key;
 }
@@ -18,7 +20,7 @@ namespace Funccia::Graphic {
     class WindowInterface{
         public:
         virtual ~WindowInterface() = default;
-        auto virtual Initialize(int _width, int _height, std::string _title) -> bool = 0;
+        auto virtual Initialize(int _width, int _height, std::string _title, RenderBackend backend) -> bool = 0;
         auto virtual Close() -> void = 0;
 
         auto virtual ShouldClose() -> bool = 0;

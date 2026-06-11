@@ -1,7 +1,30 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required (VERSION 4.2.3)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
+
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+else()
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+endif()
+set(CMAKE_CXX_STANDARD 23)
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_MODULE_STD ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+
+if(APPLE AND NOT CMAKE_CXX_STDLIB_MODULES_JSON)
+    foreach(LLVM_PREFIX "/opt/homebrew/opt/llvm" "/usr/local/opt/llvm")
+        if(EXISTS "${LLVM_PREFIX}/lib/c++/libc++.modules.json")
+            set(CMAKE_CXX_STDLIB_MODULES_JSON "${LLVM_PREFIX}/lib/c++/libc++.modules.json")
+            break()
+        endif()
+    endforeach()
+endif()
+
 project(FuncciaFrame)
 
-set(CMAKE_CXX_STANDARD 23)
 
 if(APPLE)
     execute_process(
@@ -19,6 +42,25 @@ find_package(harfbuzz CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
 find_package(re2 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
+
+find_package(Vulkan REQUIRED)
+add_library(VulkanCppModule)
+add_library(Vulkan::cppm ALIAS VulkanCppModule)
+
+target_compile_definitions(VulkanCppModule PUBLIC
+        VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
+        VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1
+)
+target_include_directories(VulkanCppModule PRIVATE "${Vulkan_INCLUDE_DIR}")
+target_link_libraries(VulkanCppModule PUBLIC Vulkan::Vulkan)
+
+set_target_properties(VulkanCppModule PROPERTIES CXX_STANDARD 23)
+target_sources(VulkanCppModule
+        PUBLIC
+        FILE_SET cxx_modules TYPE CXX_MODULES
+        BASE_DIRS "${Vulkan_INCLUDE_DIR}"
+        FILES "${Vulkan_INCLUDE_DIR}/vulkan/vulkan.cppm"
+)
 
 include_directories(external/glad/include)
 include_directories(external/std_image/include)
@@ -112,6 +154,7 @@ add_executable(FuncciaFrame main.cpp
         core/ProfileTimer.h
         input/Input.cpp
         input/Input.h
+        graphic/RenderBackend.h
         graphic/RenderTypes.h
         graphic/RendererInterfaces.h
         graphic/GraphicsDevice.cpp
@@ -121,11 +164,18 @@ add_executable(FuncciaFrame main.cpp
         App.cpp
         App.h
         util/FpsCounter.cpp
-        util/FpsCounter.h)
+        util/FpsCounter.h
+        graphic/vulkan/VulkanGraphicsDevice.cpp
+        graphic/vulkan/VulkanGraphicsDevice.h
+        graphic/vulkan/VulkanInstance.cpp
+        graphic/vulkan/VulkanInstance.h
+        graphic/vulkan/VulkanInclude.h
+        ApplicationMetadata.h)
 
 
 
 target_link_libraries(FuncciaFrame PRIVATE
+        Vulkan::Vulkan
         SDL3::SDL3
         Freetype::Freetype
         harfbuzz::harfbuzz

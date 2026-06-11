@@ -15,7 +15,8 @@ namespace Funccia::Graphic::GL {
 
         ~SDLWindow() override;
 
-        auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame") -> bool override;
+        auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame",
+                        RenderBackend backend = RenderBackend::OpenGL) -> bool override;
 
         auto Close() -> void override;
 
@@ -42,10 +43,15 @@ namespace Funccia::Graphic::GL {
         auto GetDisplayScale()->float override;
 
     private:
+        auto InitializeOpenGLWindow(int width, int height, const std::string& title) -> bool;
+        auto InitializeVulkanWindow(int width, int height, const std::string& title) -> bool;
+        auto FinishInitialization() -> void;
+
         SDL_Window *m_window{nullptr};
         const bool *m_keyboardState{nullptr};
         SDL_GLContext m_glContext{nullptr};
         bool m_shouldClose{false};
+        RenderBackend m_backend{RenderBackend::OpenGL};
         Input::MouseState *m_mouse{nullptr};
 
         static auto MapKey(Key key) -> SDL_Scancode;

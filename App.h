@@ -5,6 +5,8 @@
 #pragma once
 #include <memory>
 
+#include "ApplicationMetadata.h"
+
 namespace Funccia {
     namespace Util {
         class FpsCounter;
@@ -19,22 +21,24 @@ namespace Funccia {
     }
 
     namespace Graphic {
+        enum class RenderBackend;
         class GraphicsDevice;
         class ITextRenderer;
         class IUiRenderer;
         class WindowInterface;
     }
 
-    class App {
+    class App : public Core::Singleton<App> {
     public:
         App();
-        virtual ~App();
+        ~App() override;
         auto Init() -> void;
         auto Update() -> void;
         auto Shutdown() -> void;
+        ApplicationMetadata application_metadata;
     private:
         auto InitCoreSystem() -> void;
-        auto InitWindow() -> void;
+        auto InitWindow(Graphic::RenderBackend backend) -> void;
         auto InitFpsCounter() -> void;
         auto InitGraphicsDevice() -> void;
         auto InitUIRenderer() -> void;

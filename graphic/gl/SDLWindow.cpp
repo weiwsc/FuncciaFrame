@@ -13,7 +13,10 @@ namespace Funccia::Graphic::GL {
         delete m_mouse;
     }
 
-    auto SDLWindow::Initialize(int _width, int _height, std::string _title) -> bool {
+    auto SDLWindow::Initialize(int _width, int _height, std::string _title, RenderBackend backend) -> bool {
+        Close();
+        m_backend = backend;
+
         // Initialize SDL only once for first window
         if (s_instanceCount == 0) {
             if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -21,8 +24,35 @@ namespace Funccia::Graphic::GL {
                 return false;
             }
         }
+        delete m_mouse;
         m_mouse = new Input::MouseState();
 
+        bool initialized = false;
+        switch (m_backend) {
+            case RenderBackend::OpenGL:
+                initialized = InitializeOpenGLWindow(_width, _height, _title);
+                break;
+            case RenderBackend::Vulkan:
+                initialized = InitializeVulkanWindow(_width, _height, _title);
+                break;
+        }
+
+        if (!initialized) {
+            delete m_mouse;
+            m_mouse = nullptr;
+
+            if (s_instanceCount == 0) {
+                SDL_Quit();
+            }
+            return false;
+        }
+
+        s_instanceCount++;
+        FinishInitialization();
+        return true;
+    }
+
+    auto SDLWindow::InitializeOpenGLWindow(int width, int height, const std::string& title) -> bool {
         // Set OpenGL attributes
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -42,17 +72,14 @@ namespace Funccia::Graphic::GL {
 
         // Create window
         m_window = SDL_CreateWindow(
-            _title.c_str(),
-            _width,
-            _height,
+            title.c_str(),
+            width,
+            height,
             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY
         );
 
         if (!m_window) {
             std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
-            if (s_instanceCount == 0) {
-                SDL_Quit();
-            }
             return false;
         }
 
@@ -62,9 +89,6 @@ namespace Funccia::Graphic::GL {
             std::cerr << "Failed to create OpenGL context: " << SDL_GetError() << std::endl;
             SDL_DestroyWindow(m_window);
             m_window = nullptr;
-            if (s_instanceCount == 0) {
-                SDL_Quit();
-            }
             return false;
         }
 
@@ -74,8 +98,6 @@ namespace Funccia::Graphic::GL {
         // Set VSync (0 = off, 1 = on, -1 = adaptive)
         SDL_GL_SetSwapInterval(0);
 
-        s_instanceCount++;
-
         // Load OpenGL functions with GLAD
         if (!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress)) {
             std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -83,13 +105,32 @@ namespace Funccia::Graphic::GL {
             SDL_DestroyWindow(m_window);
             m_glContext = nullptr;
             m_window = nullptr;
-            s_instanceCount--;
-            if (s_instanceCount == 0) {
-                SDL_Quit();
-            }
+            return false;
+        }
+        return true;
+    }
+
+    auto SDLWindow::InitializeVulkanWindow(int width, int height, const std::string& title) -> bool {
+        (void) width;
+        (void) height;
+        (void) title;
+        m_window = SDL_CreateWindow(
+                title.data(),
+                width, height,
+                SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
+        );
+        if (!m_window) {
+            std::cerr << "Error creating window." << std::endl;
             return false;
         }
 
+
+        // Vulkan window creation will live here once the Vulkan backend owns surface setup.
+        std::cerr << "Vulkan SDL window initialization is not implemented yet." << std::endl;
+        return false;
+    }
+
+    auto SDLWindow::FinishInitialization() -> void {
         // Get initial keyboard state
         m_keyboardState = SDL_GetKeyboardState(nullptr);
 
@@ -97,7 +138,6 @@ namespace Funccia::Graphic::GL {
 
         m_displayScale = SDL_GetWindowDisplayScale(m_window);
         std::cout << "Display scale: "<< m_displayScale << std::endl;
-        return true;
     }
 
     auto SDLWindow::Close() -> void {
@@ -162,7 +202,9 @@ namespace Funccia::Graphic::GL {
                 case SDL_EVENT_WINDOW_RESIZED: {
                     int w = event.window.data1;
                     int h = event.window.data2;
-                    glViewport(0, 0, w, h);
+                    if (m_backend == RenderBackend::OpenGL) {
+                        glViewport(0, 0, w, h);
+                    }
                 }
                 break;
                 default:
@@ -173,7 +215,7 @@ namespace Funccia::Graphic::GL {
     }
 
     auto SDLWindow::SwapBuffers() -> void {
-        if (m_window) {
+        if (m_window && m_backend == RenderBackend::OpenGL) {
             SDL_GL_SwapWindow(m_window);
         }
     }

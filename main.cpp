@@ -5,7 +5,7 @@ using namespace std;
 
 
 int main() {
-    Funccia::App app = Funccia::App();
+    Funccia::App& app = Funccia::App::Instance();
     app.Init();
     app.Update();
     app.Shutdown();

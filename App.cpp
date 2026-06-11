@@ -11,6 +11,7 @@
 #include "graphic/gl/GLTextRenderer.h"
 #include "graphic/gl/GLUiRenderer.h"
 #include "graphic/gl/SDLWindow.h"
+#include "graphic/RenderBackend.h"
 #include "graphic/RenderTypes.h"
 #include "graphic/WindowController.h"
 #include "graphic/gl/GLGraphicsDevice.h"
@@ -21,15 +22,20 @@
 #include <iostream>
 
 namespace Funccia {
-    App::App() {
+    namespace {
+        constexpr auto kRenderBackend = Graphic::RenderBackend::OpenGL;
     }
 
-    App::~App() {
-    }
+    App::App() = default;
+
+    App::~App() = default;
 
     auto App::Init() -> void {
+        application_metadata = {
+            .applicationTitle = "FuncciaFrame"
+        };
         InitCoreSystem();
-        InitWindow();
+        InitWindow(kRenderBackend);
         InitGraphicsDevice();
         InitUIRenderer();
         InitUIWindow();
@@ -93,9 +99,9 @@ namespace Funccia {
         Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
     }
 
-    auto App::InitWindow() -> void {
+    auto App::InitWindow(Graphic::RenderBackend backend) -> void {
         auto sdlWindow = std::make_unique<Funccia::Graphic::GL::SDLWindow>();
-        if (!sdlWindow->Initialize(1920, 1080, "FuncciaFrame")) {
+        if (!sdlWindow->Initialize(1920, 1080, application_metadata.applicationTitle, backend)) {
             std::cerr << "Failed to initialize window!" << std::endl;
         }
 

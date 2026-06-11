@@ -17,7 +17,8 @@ namespace Funccia::Graphic::GL {
 
         ~GLFWWindow() override;
 
-        auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame") -> bool override;
+        auto Initialize(int _width = 1920, int _height = 1080, std::string _title = "FuncciaFrame",
+                        RenderBackend backend = RenderBackend::OpenGL) -> bool override;
 
         auto Close() -> void override;
 

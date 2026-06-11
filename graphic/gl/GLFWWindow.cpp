@@ -10,7 +10,7 @@ namespace Funccia::Graphic::GL {
     GLFWWindow::~GLFWWindow() {
     }
 
-    auto GLFWWindow::Initialize(int _width, int _height, std::string _title) -> bool {
+    auto GLFWWindow::Initialize(int _width, int _height, std::string _title, RenderBackend backend) -> bool {
         if (!glfwInit()) {
             std::cout << "Failed to initialize GLFW" << std::endl;
             return false;
