@@ -20,7 +20,7 @@ namespace Funccia::UI {
         return *this;
     }
 
-    auto UIStyle::TextWrap(Graphic::GL::TextWrap wrap) -> UIStyle & {
+    auto UIStyle::TextWrap(Graphic::TextWrap wrap) -> UIStyle & {
         text_wrap_mode = wrap;
         text_recalculate_flag = true;
         return *this;

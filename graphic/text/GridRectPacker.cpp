@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
 
     auto GridRectPacker::Pack(int width, int height, int &x, int &y) -> bool {
         const int pw = width + 2 * m_pad;

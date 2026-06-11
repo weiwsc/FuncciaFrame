@@ -4,7 +4,7 @@
 
 #ifndef FUNCCIAFRAME_SIDEOFFSET_H
 #define FUNCCIAFRAME_SIDEOFFSET_H
-#include "../graphic/gl/MathTypes.h"
+#include "../graphic/MathTypes.h"
 #include "UITypes.h"
 
 namespace Funccia::UI {

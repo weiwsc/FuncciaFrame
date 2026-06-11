@@ -16,7 +16,7 @@
 #include <hb.h>
 #include <hb-ft.h>
 
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     using vec2 = glm::vec2;
 
     struct Glyph {

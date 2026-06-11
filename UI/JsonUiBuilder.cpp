@@ -4,9 +4,8 @@
 
 #include "JsonUiBuilder.h"
 
+#include <fstream>
 #include <sstream>
-
-#include "../graphic/gl/TextRenderer.h"
 
 namespace Funccia::UI {
     auto JsonUiBuilder::ParseUI(const std::string &jsonStr, UIElement *root) -> void {
@@ -275,7 +274,7 @@ namespace Funccia::UI {
         {
             "text-wrap", [](UIFluentAPI *elf, const json &v) {
                 // assuming you have a string->enum mapping
-                elf->TextWrap(v == "wrap" ? Graphic::GL::TextWrap::Character : Graphic::GL::TextWrap::None);
+                elf->TextWrap(v == "wrap" ? Graphic::TextWrap::Character : Graphic::TextWrap::None);
             }
         },
 

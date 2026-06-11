@@ -7,7 +7,6 @@
 #include <string>
 #include "SideOffset.h"
 #include "UIFluentAPI.h"
-#include "../graphic/gl/TextRenderer.h"
 #include "../graphic/text/FontManager.h"
 
 namespace Funccia::UI {
@@ -44,12 +43,12 @@ namespace Funccia::UI {
         // Text
         //std::string text {};
         int font_size {16};
-        Graphic::GL::TextWrap text_wrap_mode {Graphic::GL::TextWrap::Character};
+        Graphic::TextWrap text_wrap_mode {Graphic::TextWrap::Character};
         std::string font_path {FontManager::Instance().GetFont()};
 
         bool text_recalculate_flag = true;
 
-        bool handle_scroll;
+        bool handle_scroll {false};
         
         auto MarginTop(float value) -> UIStyle& override;
         auto MarginLeft(float value) -> UIStyle& override;
@@ -95,7 +94,7 @@ namespace Funccia::UI {
 
         //auto Text(const std::string& _text) -> UIStyle& override;
         auto FontSize(int size) -> UIStyle& override;
-        auto TextWrap(Graphic::GL::TextWrap wrap) -> UIStyle& override;
+        auto TextWrap(Graphic::TextWrap wrap) -> UIStyle& override;
 
         auto InvisibleButOccupySpace(bool option) -> UIStyle& override;
 

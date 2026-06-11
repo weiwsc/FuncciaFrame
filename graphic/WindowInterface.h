@@ -7,12 +7,14 @@
 #include <string>
 
 namespace Funccia::Graphic {
-    namespace GL {
-        class Mouse;
-    }
-
     enum class Key;
+}
 
+namespace Funccia::Input {
+    class MouseState;
+}
+
+namespace Funccia::Graphic {
     class WindowInterface{
         public:
         virtual ~WindowInterface() = default;
@@ -41,7 +43,7 @@ namespace Funccia::Graphic {
 
         virtual auto GetDisplayScale()->float = 0;
 
-        [[nodiscard]] virtual auto Mouse()-> GL::Mouse* = 0;
+        [[nodiscard]] virtual auto Mouse()-> Input::MouseState* = 0;
 
     };
 

@@ -8,7 +8,7 @@
 
 #include "MathTypes.h"
 
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     enum class Space {
         World,
         Local

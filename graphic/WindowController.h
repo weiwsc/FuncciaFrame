@@ -5,14 +5,11 @@
 #ifndef FUNCCIAFRAME_WINDOWCONTROLLER_H
 #define FUNCCIAFRAME_WINDOWCONTROLLER_H
 #include <memory>
-#include <glad/glad.h>
-//#include <GLFW/glfw3.h>
 
-#include "gl/SDLWindow.h"
 #include "WindowInterface.h"
 #include "../core/Singleton.h"
 
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     class WindowController : public Core::Singleton<WindowController> {
     public:
         WindowController();
@@ -20,11 +17,10 @@ namespace Funccia::Graphic::GL {
         virtual ~WindowController();
 
         auto GetWindow() -> WindowInterface * {
-            if (m_window == nullptr) NewWindow();
             return m_window.get();
         }
 
-        void NewWindow();
+        auto SetWindow(std::unique_ptr<WindowInterface> window) -> void;
 
     private:
         std::unique_ptr<WindowInterface> m_window;

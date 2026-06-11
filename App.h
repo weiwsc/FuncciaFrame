@@ -20,12 +20,9 @@ namespace Funccia {
 
     namespace Graphic {
         class GraphicsDevice;
+        class ITextRenderer;
+        class IUiRenderer;
         class WindowInterface;
-    }
-
-    namespace Graphic::GL {
-        class TextRenderer;
-        class UIRenderer;
     }
 
     class App {
@@ -37,6 +34,7 @@ namespace Funccia {
         auto Shutdown() -> void;
     private:
         auto InitCoreSystem() -> void;
+        auto InitWindow() -> void;
         auto InitFpsCounter() -> void;
         auto InitGraphicsDevice() -> void;
         auto InitUIRenderer() -> void;
@@ -44,8 +42,8 @@ namespace Funccia {
         auto InitTextRenderer() -> void;
         auto InitFileWatcher() -> void;
 
-        std::unique_ptr<Funccia::Graphic::GL::UIRenderer> ui_renderer;
-        std::unique_ptr<Funccia::Graphic::GL::TextRenderer> text_renderer;
+        std::unique_ptr<Funccia::Graphic::IUiRenderer> ui_renderer;
+        std::unique_ptr<Funccia::Graphic::ITextRenderer> text_renderer;
         std::unique_ptr<Funccia::UI::Window> ui_window;
         std::unique_ptr<Funccia::Core::FileWatcher> file_watcher;
         std::unique_ptr<Funccia::Graphic::GraphicsDevice> graphics_device;

@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     void Transform::Translate(const vec3 &_translation, Space space) {
         switch (space) {
             case Space::World:

@@ -4,12 +4,11 @@
 
 #include "GLGraphicsDevice.h"
 
-#include "../WindowController.h"
 #include "glad/glad.h"
 
 namespace Funccia::Graphic::GL
 {
-    void GLGraphicsDevice::Init()
+    void GLGraphicsDevice::Init(WindowInterface& window)
     {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -21,11 +20,10 @@ namespace Funccia::Graphic::GL
         glEnable(GL_DEPTH_TEST);
     }
 
-    void GLGraphicsDevice::Update() {
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    void GLGraphicsDevice::BeginFrame(const FrameContext& frameContext) {
+        glClearColor(frameContext.clearColor.r, frameContext.clearColor.g,
+                     frameContext.clearColor.b, frameContext.clearColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        int winW, winH;
-        WindowController::Instance().GetWindow()->GetFramebufferSize(winW, winH);
-        glViewport(0, 0, winW, winH);
+        glViewport(0, 0, frameContext.framebufferSize.x, frameContext.framebufferSize.y);
     }
 }

@@ -268,7 +268,7 @@ namespace Funccia::UI {
         return *this;
     }
 
-    auto UIStyleDef::TextWrap(Graphic::GL::TextWrap wrap) -> UIStyleDef& {
+    auto UIStyleDef::TextWrap(Graphic::TextWrap wrap) -> UIStyleDef& {
         text_wrap_mode = wrap;
         return *this;
     }

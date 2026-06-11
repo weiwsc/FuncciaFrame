@@ -1,11 +1,9 @@
 #pragma once
+#include "../RendererInterfaces.h"
 #include "Shader.h"
-#include "../text/GlyphAtlas.h"
-
-struct GLFWwindow; // forward-declare to avoid pulling GLFW into the header
+#include "GLGlyphAtlas.h"
 
 namespace Funccia::Graphic::GL {
-    enum class TextWrap;
     struct ShapedGlyph;
 
     struct PairHash {
@@ -17,26 +15,22 @@ namespace Funccia::Graphic::GL {
     };
 
 
-    class TextRenderer {
+    class GLTextRenderer : public ITextRenderer {
     public:
-        TextRenderer();
-        ~TextRenderer();
-        float ProcessText(float x, float y,float w, TextWrap text_wrap,vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run = true);
+        GLTextRenderer();
+        ~GLTextRenderer() override;
 
         auto ShapeText(const std::string &fontPath, const std::string &text) -> const std::vector<ShapedGlyph>&;
 
         void PositionText(const std::vector<AtlasCell> &shapedText, float width, float height);
-        auto Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) -> bool;
+        auto Initialize(const std::string &vertexShaderPath,
+                        const std::string &fragmentShaderPath) -> bool override;
         void CreateGeometry();
-        void Render(const glm::vec2 &screenSize);
+        auto MeasureText(const TextDrawRequest& request) -> float override;
+        auto SubmitText(const TextDrawRequest& request) -> void override;
+        auto Render(const glm::vec2 &screenSize) -> void override;
 
-        void Collect(std::initializer_list<float> data) {
-            instanceData.insert(instanceData.end(), data.begin(), data.end());
-        }
-
-        void BeginFrame() {
-            instanceData.clear();
-        }
+        auto BeginFrame() -> void override { instanceData.clear(); }
 
         void Cleanup() {
             if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
@@ -46,7 +40,15 @@ namespace Funccia::Graphic::GL {
 
         void DebugDrawAtlasToDisk();
     private:
-        std::unique_ptr<GlyphAtlas> m_atlas;
+        float ProcessText(float x, float y, float w, TextWrap text_wrap, vec4 clippingBox,
+                          const std::string &text, vec4 color, float pixel,
+                          const std::string &fontPath, bool dry_run = true);
+
+        void Collect(std::initializer_list<float> data) {
+            instanceData.insert(instanceData.end(), data.begin(), data.end());
+        }
+
+        std::unique_ptr<GLGlyphAtlas> m_atlas;
 
         std::unordered_map<std::string,std::unique_ptr<HBShaper>> shapers;
         Shader m_shader;
@@ -73,10 +75,5 @@ namespace Funccia::Graphic::GL {
         vec2 advance;
         vec2 offset;
         int layer;
-    };
-    enum class TextWrap {
-        None,
-        Word,
-        Character
     };
 } // namespace Funccia::Graphic::GL

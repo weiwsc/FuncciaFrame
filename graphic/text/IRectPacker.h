@@ -4,7 +4,7 @@
 
 #ifndef FUNCCIAFRAME_IRECTPACKER_H
 #define FUNCCIAFRAME_IRECTPACKER_H
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     class IRectPacker {
     public:
         virtual ~IRectPacker() = default;

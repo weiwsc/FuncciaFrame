@@ -18,18 +18,18 @@
 #include <unordered_set>
 #include <glad/glad.h>
 
-#include "../gl/MathTypes.h"
-#include "Glyph.h"
-#include "HBShaper.h"
+#include "../MathTypes.h"
+#include "../text/Glyph.h"
+#include "../text/HBShaper.h"
 
 namespace Funccia::Graphic::GL {
     struct AtlasCell;
 
-    class GlyphAtlas {
+    class GLGlyphAtlas {
     public:
-        GlyphAtlas() = default;
+        GLGlyphAtlas() = default;
 
-        ~GlyphAtlas();
+        ~GLGlyphAtlas();
 
         void CreateAtlas(int width, int height, int maxLayers);
 

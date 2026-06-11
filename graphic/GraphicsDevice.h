@@ -5,13 +5,17 @@
 #ifndef GRAPHICSDEVICE_H
 #define GRAPHICSDEVICE_H
 
+#include "RenderTypes.h"
+
 namespace Funccia::Graphic {
+    class WindowInterface;
+
     class GraphicsDevice {
     public:
         virtual ~GraphicsDevice() = default;
 
-        virtual void Init() = 0;
-        virtual void Update() = 0;
+        virtual void Init(WindowInterface& window) = 0;
+        virtual void BeginFrame(const FrameContext& frameContext) = 0;
     };
 }
 

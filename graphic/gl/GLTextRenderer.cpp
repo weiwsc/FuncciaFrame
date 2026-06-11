@@ -1,5 +1,5 @@
 
-#include "TextRenderer.h"
+#include "GLTextRenderer.h"
 
 #include <memory>
 #include <unordered_set>
@@ -7,16 +7,18 @@
 #include "../text/HBShaper.h"
 
 namespace Funccia::Graphic::GL {
-    TextRenderer::TextRenderer() {
-        m_atlas = std::make_unique<Funccia::Graphic::GL::GlyphAtlas>();
+    GLTextRenderer::GLTextRenderer() {
+        m_atlas = std::make_unique<Funccia::Graphic::GL::GLGlyphAtlas>();
         m_atlas->CreateAtlas(2048, 2048, 4);
     }
 
-    TextRenderer::~TextRenderer() {
+    GLTextRenderer::~GLTextRenderer() {
         Cleanup();
     }
 
-    float TextRenderer::ProcessText(float x, float y,float w, TextWrap text_wrap, vec4 clippingBox, const std::string &text, vec4 color, float pixel, const std::string &fontPath, bool dry_run) {
+    float GLTextRenderer::ProcessText(float x, float y, float w, TextWrap text_wrap, vec4 clippingBox,
+                                      const std::string &text, vec4 color, float pixel,
+                                      const std::string &fontPath, bool dry_run) {
         const std::vector<ShapedGlyph>& shapedText = ShapeText(fontPath, text);
 
         float scale = pixel / 96.0f; //96 is the size used to init the font, change this later
@@ -24,7 +26,7 @@ namespace Funccia::Graphic::GL {
 
         for (const auto& [uv, size, bearing, advance, offset, layer]: shapedText) {
              if ( w>=0 && cursor.x + advance.x * scale - x > w) {
-                 if (text_wrap == TextWrap::Character) {
+                if (text_wrap == TextWrap::Character) {
                      cursor.x = x;
                      cursor.y += pixel;
                  }
@@ -54,7 +56,7 @@ namespace Funccia::Graphic::GL {
         return cursor.y;
     }
 
-    auto TextRenderer::ShapeText(const std::string &fontPath, const std::string &text)->const std::vector<ShapedGlyph>& {
+    auto GLTextRenderer::ShapeText(const std::string &fontPath, const std::string &text)->const std::vector<ShapedGlyph>& {
         if (auto it = shape_cache.find({fontPath, text}); it != shape_cache.end()) {
             return it->second;
         }
@@ -99,10 +101,10 @@ namespace Funccia::Graphic::GL {
         return it->second;
     }
 
-    void TextRenderer::PositionText(const std::vector<AtlasCell> &shapedText, float width, float height) {
+    void GLTextRenderer::PositionText(const std::vector<AtlasCell> &shapedText, float width, float height) {
     }
 
-    auto TextRenderer::Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) -> bool {
+    auto GLTextRenderer::Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) -> bool {
         {
             // Initialize shader
             m_shader.initialize(vertexShaderPath, fragmentShaderPath);
@@ -112,7 +114,7 @@ namespace Funccia::Graphic::GL {
         }
     }
 
-    void TextRenderer::CreateGeometry() {
+    void GLTextRenderer::CreateGeometry() {
         // Quad vertices (0,0) to (1,1)
         float quadVertices[] = {
             0.0f, 0.0f, // bottom-left
@@ -142,10 +144,10 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
 
-        // Instance data buffer setup - 12 floats per instance (3 vec4s)
+        // Instance data buffer setup for one glyph quad.
         glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
 
-        const size_t instanceSize = 19 * sizeof(float); // 3 vec4s
+        const size_t instanceSize = 19 * sizeof(float);
         size_t offset = 0;
 
         // origin (location 1)
@@ -164,7 +166,7 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
         glEnableVertexAttribArray(3);
         glVertexAttribDivisor(3, 1);
-        offset += 2 * sizeof(float); // THIS WAS MISSING!
+        offset += 2 * sizeof(float);
 
         // uv rect (location 4)
         glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
@@ -176,7 +178,7 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
         glEnableVertexAttribArray(5);
         glVertexAttribDivisor(5, 1);
-        offset += 4 * sizeof(float); // ADD THIS LINE
+        offset += 4 * sizeof(float);
 
         // layer (location 6)
         glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
@@ -191,7 +193,17 @@ namespace Funccia::Graphic::GL {
 
     }
 
-    void TextRenderer::Render(const glm::vec2 &screenSize) {
+    auto GLTextRenderer::MeasureText(const TextDrawRequest& request) -> float {
+        return ProcessText(request.x, request.y, request.width, request.textWrap, request.clippingBox,
+                           request.text, request.color, request.pixelSize, request.fontPath, true);
+    }
+
+    auto GLTextRenderer::SubmitText(const TextDrawRequest& request) -> void {
+        ProcessText(request.x, request.y, request.width, request.textWrap, request.clippingBox,
+                    request.text, request.color, request.pixelSize, request.fontPath, false);
+    }
+
+    auto GLTextRenderer::Render(const glm::vec2 &screenSize) -> void {
         if (instanceData.empty()) return;
 
         const size_t floatsPerInstance = 19;
@@ -241,7 +253,7 @@ namespace Funccia::Graphic::GL {
         glBindVertexArray(0);
     }
 
-    void TextRenderer::DebugDrawAtlasToDisk() {
+    void GLTextRenderer::DebugDrawAtlasToDisk() {
         m_atlas->WriteAtlasToDisk(0);
     }
 }

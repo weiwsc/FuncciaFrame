@@ -4,7 +4,8 @@
 
 #ifndef FUNCCIAFRAME_GLFWWINDOW_H
 #define FUNCCIAFRAME_GLFWWINDOW_H
-/*
+
+#if 0
 #include "../WindowInterface.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -39,12 +40,13 @@ namespace Funccia::Graphic::GL {
         void *GetNativeWindow() override;
 
 
-        [[nodiscard]]  auto Mouse()-> GL::Mouse* override { return nullptr; };
+        [[nodiscard]]  auto Mouse()-> Input::MouseState* override { return nullptr; };
     private:
         static auto KeyMap(Key key) -> int;
 
         GLFWwindow *m_window{nullptr};
     };
 }
-*/
+#endif
+
 #endif //FUNCCIAFRAME_GLFWWINDOW_H

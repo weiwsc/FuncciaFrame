@@ -4,7 +4,7 @@
 
 #include "FpsCounter.h"
 
-#include "../graphic/WindowController.h"
+#include "../graphic/WindowInterface.h"
 
 namespace Funccia::Util {
     FpsCounter::FpsCounter() {
@@ -12,7 +12,7 @@ namespace Funccia::Util {
         fpsWindowStart = lastTime;
     }
 
-    void FpsCounter::Update() {
+    void FpsCounter::Update(Graphic::WindowInterface& window) {
         const auto now = std::chrono::steady_clock::now();
         deltaTime = std::chrono::duration<float>(now - lastTime).count();
 
@@ -22,7 +22,7 @@ namespace Funccia::Util {
             fps = framesSinceUpdate / elapsed;
             ms = 1000.0 / (fps > 0.0 ? fps : 1.0);
             std::snprintf(titleBuf, sizeof(titleBuf), "FuncciaFrame | %.1f FPS (%.2f ms)", fps, ms);
-            Graphic::GL::WindowController::Instance().GetWindow()->SetTitle(titleBuf);
+            window.SetTitle(titleBuf);
             fpsWindowStart = now;
             framesSinceUpdate = 0;
         }

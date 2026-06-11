@@ -1,17 +1,18 @@
 #include <iostream>
-#include "UIRender.h"
+#include "GLUiRenderer.h"
 #include "Shader.h"
 
 namespace Funccia::Graphic::GL {
-    UIRenderer::UIRenderer()
+    GLUiRenderer::GLUiRenderer()
         : m_VAO(0), m_VBO(0), m_instanceVBO(0) {
     }
 
-    UIRenderer::~UIRenderer() {
+    GLUiRenderer::~GLUiRenderer() {
         Cleanup();
     }
 
-    bool UIRenderer::Initialize(const std::string &vertexShaderPath, const std::string &fragmentShaderPath) {
+    auto GLUiRenderer::Initialize(const std::string &vertexShaderPath,
+                                  const std::string &fragmentShaderPath) -> bool {
         // Initialize shader
         m_shader.initialize(vertexShaderPath, fragmentShaderPath);
 
@@ -19,7 +20,7 @@ namespace Funccia::Graphic::GL {
         return true;
     }
 
-    void UIRenderer::CreateGeometry() {
+    void GLUiRenderer::CreateGeometry() {
         // Quad vertices (0,0) to (1,1)
         float quadVertices[] = {
             0.0f, 0.0f, // bottom-left
@@ -43,10 +44,10 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *) 0);
         glEnableVertexAttribArray(0);
 
-        // Instance data buffer setup - 12 floats per instance (3 vec4s)
+        // Instance data buffer setup for eight vec4 attributes per rect.
         glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO);
 
-        const size_t instanceSize = 32 * sizeof(float); // 3 vec4s
+        const size_t instanceSize = 32 * sizeof(float);
         size_t offset = 0;
 
         // a_borderBox (location 1)
@@ -65,7 +66,7 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
         glEnableVertexAttribArray(3);
         glVertexAttribDivisor(3, 1);
-        offset += 4 * sizeof(float); // THIS WAS MISSING!
+        offset += 4 * sizeof(float);
 
         // a_shadowProperties (location 4)
         glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
@@ -77,7 +78,7 @@ namespace Funccia::Graphic::GL {
         glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
         glEnableVertexAttribArray(5);
         glVertexAttribDivisor(5, 1);
-        offset += 4 * sizeof(float); // ADD THIS LINE
+        offset += 4 * sizeof(float);
 
         // a_borderWidths (location 6)
         glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, instanceSize, (void *) offset);
@@ -97,7 +98,7 @@ namespace Funccia::Graphic::GL {
         glVertexAttribDivisor(8, 1);
     }
 
-    void UIRenderer::Render(const glm::mat4 &viewProjection, const glm::vec2 &screenSize) {
+    auto GLUiRenderer::Render(const glm::vec2 &screenSize) -> void {
         if (instanceData.empty()) return;
 
         const size_t floatsPerInstance = 32;
@@ -140,21 +141,29 @@ namespace Funccia::Graphic::GL {
         glBindVertexArray(0);
     }
 
-    void UIRenderer::Collect(std::initializer_list<float> data) {
+    void GLUiRenderer::Collect(std::initializer_list<float> data) {
         instanceData.insert(instanceData.end(), data.begin(), data.end());
     }
 
-    void UIRenderer::CollectStruct(UIInstanceData data) {
-        instanceData.insert(instanceData.end(), data.data, data.data + 32);
+    auto GLUiRenderer::Submit(const UiDrawRect& rect) -> void {
+        Collect({
+            rect.borderBox.x, rect.borderBox.y, rect.borderBox.z, rect.borderBox.w,
+            rect.backgroundColor.r, rect.backgroundColor.g, rect.backgroundColor.b, rect.backgroundColor.a,
+            rect.borderRadius.r, rect.borderRadius.g, rect.borderRadius.b, rect.borderRadius.a,
+            rect.shadowProperties.x, rect.shadowProperties.y, rect.shadowProperties.z, rect.shadowProperties.w,
+            rect.shadowColor.r, rect.shadowColor.g, rect.shadowColor.b, rect.shadowColor.a,
+            rect.borderWidths.x, rect.borderWidths.y, rect.borderWidths.z, rect.borderWidths.w,
+            rect.borderColor.r, rect.borderColor.g, rect.borderColor.b, rect.borderColor.a,
+            rect.clippingBox.x, rect.clippingBox.y, rect.clippingBox.z, rect.clippingBox.w,
+        });
     }
 
-
-    void UIRenderer::BeginFrame() {
+    auto GLUiRenderer::BeginFrame() -> void {
         instanceData.clear();
         instanceData.reserve(1024 * 32);
     }
 
-    void UIRenderer::Cleanup() {
+    void GLUiRenderer::Cleanup() {
         if (m_VAO) glDeleteVertexArrays(1, &m_VAO);
         if (m_VBO) glDeleteBuffers(1, &m_VBO);
         if (m_instanceVBO) glDeleteBuffers(1, &m_instanceVBO);

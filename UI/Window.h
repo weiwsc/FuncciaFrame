@@ -14,8 +14,8 @@ namespace Funccia::UI {
         virtual ~Window(){};
         auto InitLayout(float target_x, float target_y, const glm::vec2& screenSize) -> void;
 
-        auto Render(Graphic::GL::UIRenderer& renderer,Graphic::GL::TextRenderer& text_renderer, float target_x = 0, float target_y = 0 ,const glm::vec2& screenSize = {1920, 1080}) -> void;
-        auto RenderProfile(Graphic::GL::UIRenderer& renderer,Graphic::GL::TextRenderer& text_renderer,  Graphic::GL::TextRenderer& text_render,float target_x = 0, float target_y = 0 ,const glm::vec2& screenSize = {1920, 1080}) -> void;
+        auto Render(Graphic::IUiRenderer& renderer,Graphic::ITextRenderer& text_renderer, float target_x = 0, float target_y = 0 ,const glm::vec2& screenSize = {1920, 1080}) -> void;
+        auto RenderProfile(Graphic::IUiRenderer& renderer,Graphic::ITextRenderer& text_renderer,  Graphic::ITextRenderer& text_render,float target_x = 0, float target_y = 0 ,const glm::vec2& screenSize = {1920, 1080}) -> void;
         UIElement* hovered_element {nullptr};
         UIElement* selected_element {nullptr};
         [[nodiscard]] auto GetRoot() const -> UIElement * {return root.get();}

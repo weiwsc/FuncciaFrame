@@ -4,12 +4,9 @@
 
 #include "WindowController.h"
 
-#include <iostream>
+#include <utility>
 
-#include "gl/SDLWindow.h"
-#include "../core/util.h"
-
-namespace Funccia::Graphic::GL {
+namespace Funccia::Graphic {
     WindowController::WindowController() {
         m_window = nullptr;
     }
@@ -20,10 +17,10 @@ namespace Funccia::Graphic::GL {
         }
     }
 
-    void WindowController::NewWindow() {
-        m_window = std::make_unique<SDLWindow>();
-        if (!m_window->Initialize(1920, 1080, "FuncciaFrame")) {
-        std::cerr << "Failed to initialize window!" << std::endl;
-    }
+    auto WindowController::SetWindow(std::unique_ptr<WindowInterface> window) -> void {
+        if (m_window != nullptr) {
+            m_window->Close();
+        }
+        m_window = std::move(window);
     }
 }

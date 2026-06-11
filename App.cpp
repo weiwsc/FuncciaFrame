@@ -8,13 +8,17 @@
 #include "core/FileWatcher.h"
 #include "core/ObjectPoolManager.h"
 #include "core/ProfileTimer.h"
-#include "graphic/gl/TextRenderer.h"
-#include "graphic/gl/UIRender.h"
+#include "graphic/gl/GLTextRenderer.h"
+#include "graphic/gl/GLUiRenderer.h"
+#include "graphic/gl/SDLWindow.h"
+#include "graphic/RenderTypes.h"
 #include "graphic/WindowController.h"
 #include "graphic/gl/GLGraphicsDevice.h"
 #include "UI/JsonUiBuilder.h"
 #include "UI/Window.h"
 #include "util/FpsCounter.h"
+
+#include <iostream>
 
 namespace Funccia {
     App::App() {
@@ -25,7 +29,7 @@ namespace Funccia {
 
     auto App::Init() -> void {
         InitCoreSystem();
-        window = Funccia::Graphic::GL::WindowController::Instance().GetWindow();
+        InitWindow();
         InitGraphicsDevice();
         InitUIRenderer();
         InitUIWindow();
@@ -44,12 +48,17 @@ namespace Funccia {
                 if (window->IsKeyPressed(Graphic::Key::Escape)) {
                     window->SetShouldClose(true);
                 }
-                graphics_device->Update();
 
-                fps_counter->Update();
+                fps_counter->Update(*window);
             }
             {
                 PROFILE_SCOPE("Begin Frame");
+                int winW, winH;
+                window->GetFramebufferSize(winW, winH);
+                graphics_device->BeginFrame({
+                    .framebufferSize = {winW, winH},
+                    .clearColor = {1.0f, 1.0f, 1.0f, 1.0f},
+                });
                 ui_renderer->BeginFrame();
                 text_renderer->BeginFrame();
             }
@@ -62,7 +71,7 @@ namespace Funccia {
             }
             {
                 PROFILE_SCOPE("UI rendering");
-               ui_renderer->Render(glm::mat4(1.0f), glm::vec2(winW, winH));
+                ui_renderer->Render(glm::vec2(winW, winH));
             }
             {
                 PROFILE_SCOPE("Text rendering");
@@ -84,17 +93,28 @@ namespace Funccia {
         Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
     }
 
+    auto App::InitWindow() -> void {
+        auto sdlWindow = std::make_unique<Funccia::Graphic::GL::SDLWindow>();
+        if (!sdlWindow->Initialize(1920, 1080, "FuncciaFrame")) {
+            std::cerr << "Failed to initialize window!" << std::endl;
+        }
+
+        auto& windowController = Funccia::Graphic::WindowController::Instance();
+        windowController.SetWindow(std::move(sdlWindow));
+        window = windowController.GetWindow();
+    }
+
     auto App::InitFpsCounter() -> void {
         fps_counter = std::make_unique<Funccia::Util::FpsCounter>();
     }
 
     auto App::InitGraphicsDevice() -> void {
         graphics_device = std::make_unique<Funccia::Graphic::GL::GLGraphicsDevice>();
-        graphics_device->Init();
+        graphics_device->Init(*window);
     }
 
     auto App::InitUIRenderer() -> void {
-        ui_renderer = std::make_unique<Funccia::Graphic::GL::UIRenderer>();
+        ui_renderer = std::make_unique<Funccia::Graphic::GL::GLUiRenderer>();
         ui_renderer->Initialize("../graphic/shaders/vertex/UIShader-ver.glsl",
                                 "../graphic/shaders/fragment/UIShader-frag.glsl");
     }
@@ -111,7 +131,7 @@ namespace Funccia {
     }
 
     auto App::InitTextRenderer() -> void {
-        text_renderer = std::make_unique<Funccia::Graphic::GL::TextRenderer>();
+        text_renderer = std::make_unique<Funccia::Graphic::GL::GLTextRenderer>();
         text_renderer->Initialize(
             "../graphic/shaders/vertex/FontShader1-ver.glsl",
             "../graphic/shaders/fragment/FontShader1-fag.glsl");

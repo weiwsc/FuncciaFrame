@@ -7,9 +7,8 @@
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 #include <string>
-namespace Funccia::Graphic::GL {
-    enum class TextWrap;
-}
+
+#include "../graphic/RenderTypes.h"
 
 namespace Funccia::UI {
     enum class Tag;
@@ -62,7 +61,7 @@ namespace Funccia::UI {
 
         //auto virtual Text(const std::string& _text) -> UIFluentAPI& = 0;
         auto virtual FontSize(int size) -> UIFluentAPI& = 0;
-        auto virtual TextWrap(Graphic::GL::TextWrap wrap) -> UIFluentAPI& = 0;
+        auto virtual TextWrap(Graphic::TextWrap wrap) -> UIFluentAPI& = 0;
 
         auto virtual InvisibleButOccupySpace(bool option) -> UIFluentAPI& = 0;
 

@@ -16,12 +16,12 @@ namespace Funccia::Graphic::GL {
     auto SDLWindow::Initialize(int _width, int _height, std::string _title) -> bool {
         // Initialize SDL only once for first window
         if (s_instanceCount == 0) {
-            if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+            if (!SDL_Init(SDL_INIT_VIDEO)) {
                 std::cerr << "Failed to initialize SDL: " << SDL_GetError() << std::endl;
                 return false;
             }
         }
-        m_mouse = new GL::Mouse();
+        m_mouse = new Input::MouseState();
 
         // Set OpenGL attributes
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -101,6 +101,8 @@ namespace Funccia::Graphic::GL {
     }
 
     auto SDLWindow::Close() -> void {
+        const bool hadOpenResources = m_glContext != nullptr || m_window != nullptr;
+
         if (m_glContext) {
             SDL_GL_DestroyContext(m_glContext);
             m_glContext = nullptr;
@@ -111,8 +113,10 @@ namespace Funccia::Graphic::GL {
             m_window = nullptr;
         }
 
-        s_instanceCount--;
-        if (s_instanceCount == 0) {
+        if (hadOpenResources && s_instanceCount > 0) {
+            s_instanceCount--;
+        }
+        if (hadOpenResources && s_instanceCount == 0) {
             SDL_Quit();
         }
     }
@@ -128,11 +132,32 @@ namespace Funccia::Graphic::GL {
     auto SDLWindow::PollEvents() -> void {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
-            m_mouse->ProcessButtons(event);
             switch (event.type) {
                 case SDL_EVENT_QUIT:
                     m_shouldClose = true;
                     break;
+
+                case SDL_EVENT_MOUSE_MOTION:
+                    m_mouse->SetPosition({event.motion.x, event.motion.y});
+                    break;
+
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) m_mouse->SetButton(Input::MouseButton::Left, true);
+                    if (event.button.button == SDL_BUTTON_MIDDLE) m_mouse->SetButton(Input::MouseButton::Middle, true);
+                    if (event.button.button == SDL_BUTTON_RIGHT) m_mouse->SetButton(Input::MouseButton::Right, true);
+                    break;
+
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                    if (event.button.button == SDL_BUTTON_LEFT) m_mouse->SetButton(Input::MouseButton::Left, false);
+                    if (event.button.button == SDL_BUTTON_MIDDLE) m_mouse->SetButton(Input::MouseButton::Middle, false);
+                    if (event.button.button == SDL_BUTTON_RIGHT) m_mouse->SetButton(Input::MouseButton::Right, false);
+                    break;
+
+                case SDL_EVENT_MOUSE_WHEEL: {
+                    float scrollY = event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED ? -event.wheel.y : event.wheel.y;
+                    m_mouse->SetScroll({event.wheel.x, scrollY});
+                    break;
+                }
 
                 case SDL_EVENT_WINDOW_RESIZED: {
                     int w = event.window.data1;
@@ -182,6 +207,7 @@ namespace Funccia::Graphic::GL {
             float fx, fy;
 
             SDL_GetMouseState(&fx, &fy);
+            m_mouse->SetPosition({fx, fy});
             x = static_cast<double>(fx);
             y = static_cast<double>(fy);
         } else {
@@ -194,7 +220,7 @@ namespace Funccia::Graphic::GL {
         return m_window;
     }
 
-    auto SDLWindow::Mouse() -> GL::Mouse * {
+    auto SDLWindow::Mouse() -> Input::MouseState * {
         return m_mouse;
     }
 

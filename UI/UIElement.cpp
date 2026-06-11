@@ -3,14 +3,11 @@
 //
 
 #include "UIElement.h"
-#include "../graphic/gl/UIRender.h"
-#include "../graphic/gl/TextRenderer.h"
 #include <algorithm>
 #include <numeric>
 
 #include "UIHelper.h"
 #include "Window.h"
-#include "../graphic/WindowController.h"
 #include "../core/ProfileTimer.h"
 namespace Funccia::UI {
     float UIElement::borderBoxStartOnAxis(Axis axis) const {
@@ -126,7 +123,7 @@ namespace Funccia::UI {
         return m_border_box_size.OnAxis(axis) + margin;
     }
 
-    auto UIElement::CalculateGrowSizeOnAxis(Axis axis, Graphic::GL::TextRenderer &text_renderer) -> void {
+    auto UIElement::CalculateGrowSizeOnAxis(Axis axis, Graphic::ITextRenderer &text_renderer) -> void {
         if (!m_style.is_rendered) return;
 #ifdef FF_UI_LAZY_LAYOUT
         if (!m_layoutUpdated) return;
@@ -137,9 +134,17 @@ namespace Funccia::UI {
                 float w = m_border_box_size.GetX()
                           - m_style.border_widths.left() - m_style.border_widths.right()
                           - m_style.padding.left() - m_style.padding.right();
-                m_text_grow_size = text_renderer.ProcessText(0, 0, w, m_style.text_wrap_mode, {0, 0, 0, 0}, m_text,
-                                                             m_style.color, static_cast<float>(m_style.font_size),
-                                                             m_style.font_path);
+                m_text_grow_size = text_renderer.MeasureText({
+                    .x = 0,
+                    .y = 0,
+                    .width = w,
+                    .textWrap = m_style.text_wrap_mode,
+                    .clippingBox = {0, 0, 0, 0},
+                    .text = m_text,
+                    .color = m_style.color,
+                    .pixelSize = static_cast<float>(m_style.font_size),
+                    .fontPath = m_style.font_path,
+                });
                 m_style.text_recalculate_flag = false;
             }
         }
@@ -256,7 +261,7 @@ namespace Funccia::UI {
     }
 
 
-    auto UIElement::RenderQueue(UIRender &render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x,
+    auto UIElement::RenderQueue(Graphic::IUiRenderer &render, Graphic::ITextRenderer &text_renderer, float parent_content_box_x,
                                 float parent_content_box_y, float scale) -> void {
         const float s = scale;
         if (m_style.invisible_but_occupy_space || !m_style.is_rendered || m_culled) { return; }
@@ -277,27 +282,30 @@ namespace Funccia::UI {
             borderColor = m_style.border_color;
         }
 
-        render.Collect({
-            // a_borderBox (4 floats)
-            m_global_border_box.x * s, m_global_border_box.y * s, m_global_border_box.z * s, m_global_border_box.w * s,
-            // a_backgroundColor (4 floats)
-            m_style.background.r, m_style.background.g, m_style.background.b, m_style.background.a,
-            // a_borderRadius (4 floats)
-            m_style.border_radius.r * s, m_style.border_radius.g * s, m_style.border_radius.b * s,
-            m_style.border_radius.a * s,
-            // a_shadowProperties (4 floats)
-            m_style.shadow.shadow_offset.x * s, m_style.shadow.shadow_offset.y * s, m_style.shadow.blur_radius * s,
-            m_style.shadow.spread * s,
-            // a_shadowColor (4 floats)
-            m_style.shadow.shadow_color.r, m_style.shadow.shadow_color.g, m_style.shadow.shadow_color.b,
-            m_style.shadow.shadow_color.a,
-            // a_borderWidths (4 floats)
-            m_style.border_widths.top() * s, m_style.border_widths.right() * s, m_style.border_widths.bottom() * s,
-            m_style.border_widths.left() * s,
-            // a_borderColor (4 floats)
-            borderColor.r, borderColor.g, borderColor.b, borderColor.a,
-            // the clipping box (4 floats)
-            m_clipping_box.x * s, m_clipping_box.y * s, m_clipping_box.z * s, m_clipping_box.w * s,
+        render.Submit({
+            .borderBox = {
+                m_global_border_box.x * s, m_global_border_box.y * s,
+                m_global_border_box.z * s, m_global_border_box.w * s
+            },
+            .backgroundColor = m_style.background,
+            .borderRadius = {
+                m_style.border_radius.r * s, m_style.border_radius.g * s,
+                m_style.border_radius.b * s, m_style.border_radius.a * s
+            },
+            .shadowProperties = {
+                m_style.shadow.shadow_offset.x * s, m_style.shadow.shadow_offset.y * s,
+                m_style.shadow.blur_radius * s, m_style.shadow.spread * s
+            },
+            .shadowColor = m_style.shadow.shadow_color,
+            .borderWidths = {
+                m_style.border_widths.top() * s, m_style.border_widths.right() * s,
+                m_style.border_widths.bottom() * s, m_style.border_widths.left() * s
+            },
+            .borderColor = borderColor,
+            .clippingBox = {
+                m_clipping_box.x * s, m_clipping_box.y * s,
+                m_clipping_box.z * s, m_clipping_box.w * s
+            },
         });
 
         //if (!m_text.empty() && m_style.text_recalculate_flag) {
@@ -309,19 +317,20 @@ namespace Funccia::UI {
                               - m_style.border_widths.left() - m_style.border_widths.right()
                               - m_style.padding.left() - m_style.padding.right();
 
-            text_renderer.ProcessText(
-                content_x * s,
-                content_y * s,
-                content_w * s,
-                m_style.text_wrap_mode,
-                vec4(m_clipping_box.x * s, m_clipping_box.y * s,
-                     m_clipping_box.z * s, m_clipping_box.w * s),
-                m_text,
-                m_style.color,
-                static_cast<float>(m_style.font_size) * s,
-                m_style.font_path,
-                false
-            );
+            text_renderer.SubmitText({
+                .x = content_x * s,
+                .y = content_y * s,
+                .width = content_w * s,
+                .textWrap = m_style.text_wrap_mode,
+                .clippingBox = {
+                    m_clipping_box.x * s, m_clipping_box.y * s,
+                    m_clipping_box.z * s, m_clipping_box.w * s
+                },
+                .text = m_text,
+                .color = m_style.color,
+                .pixelSize = static_cast<float>(m_style.font_size) * s,
+                .fontPath = m_style.font_path,
+            });
         }
 
         for (auto &child: m_children) {

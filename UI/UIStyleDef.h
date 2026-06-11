@@ -10,7 +10,6 @@
 #include "SideOffset.h"
 #include "UIFluentAPI.h"
 #include "UIStyle.h"
-#include "../graphic/gl/TextRenderer.h"
 
 namespace Funccia::UI {
     class UIStyleDef : public UIFluentAPI {
@@ -55,7 +54,7 @@ namespace Funccia::UI {
         // Text
         //std::optional<std::string> text;
         std::optional<int> font_size;
-        std::optional<Graphic::GL::TextWrap> text_wrap_mode;
+        std::optional<Graphic::TextWrap> text_wrap_mode;
         std::optional<std::string> font_path;
 
         std::optional<bool> handle_scroll;
@@ -110,7 +109,7 @@ namespace Funccia::UI {
 
         //auto Text(const std::string& _text) -> UIStyleDef& override;
         auto FontSize(int size) -> UIStyleDef& override;
-        auto TextWrap(Graphic::GL::TextWrap wrap) -> UIStyleDef& override;
+        auto TextWrap(Graphic::TextWrap wrap) -> UIStyleDef& override;
 
         auto InvisibleButOccupySpace(bool option) -> UIStyleDef& override;
 

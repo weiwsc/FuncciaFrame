@@ -6,10 +6,10 @@
 #include "UIElement.h"
 #include <chrono>
 #include <algorithm>
+#include <fstream>
 #include "JsonUiBuilder.h"
 #include "../graphic/WindowInterface.h"
-#include "../graphic/gl/TextRenderer.h"
-#include "../graphic/WindowController.h"
+#include "../input/MouseState.h"
 #include "../core/ProfileTimer.h"
 
 struct Timer {
@@ -36,7 +36,7 @@ namespace Funccia::UI {
     }
 
 
-    auto Window::Render(Graphic::GL::UIRenderer &renderer, Graphic::GL::TextRenderer &text_renderer, float target_x,
+    auto Window::Render(Graphic::IUiRenderer &renderer, Graphic::ITextRenderer &text_renderer, float target_x,
                         float target_y, const glm::vec2 &screenSize) -> void {
             {
             PROFILE_SCOPE("layout::fit_x");
@@ -76,7 +76,8 @@ namespace Funccia::UI {
 
         {
             PROFILE_SCOPE("input");
-            if (Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->GetButLDown()) {
+            auto* mouse = m_window->Mouse();
+            if (mouse && mouse->GetButLDown()) {
                 root->HandlePick({x, y}, this);
             }
             //SetHoveredElement(nullptr);
@@ -84,9 +85,9 @@ namespace Funccia::UI {
             if (selected_element) {
                 selected_element->GetState().Set(UIFlag::Selected, selected_element->Style());
             }
-            if (Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->HasScrolled()) {
+            if (mouse && mouse->HasScrolled()) {
                 if (UIElement* handler = root->FindScrollHandler({x, y})) {
-                    vec2 scrolled = Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->GetScroll();
+                    vec2 scrolled = mouse->GetScroll();
                     float height = 0;
                     for (auto& child : handler->m_children) {
                         height += child->m_border_box_size.GetY();
@@ -94,19 +95,19 @@ namespace Funccia::UI {
                     handler->m_scroll.y = std::min((scrolled.y)*5.0f + (handler->m_scroll.y), 0.0f);
 
                     handler->m_scroll.x = std::min(scrolled.x + handler->m_scroll.x, 0.0f);
-                    Graphic::GL::WindowController::Instance().GetWindow()->Mouse()->ScrollHandled();
+                    mouse->ScrollHandled();
                 }
             }
         }
         {
             PROFILE_SCOPE("submit");
-            root->RenderQueue(renderer, text_renderer, target_x, target_y, Graphic::GL::WindowController::Instance().GetWindow()->GetDisplayScale());
+            root->RenderQueue(renderer, text_renderer, target_x, target_y, m_window->GetDisplayScale());
         }
 
     }
 
-    auto Window::RenderProfile(Graphic::GL::UIRenderer &renderer, Graphic::GL::TextRenderer &text_renderer,
-                               Graphic::GL::TextRenderer &text_render,
+    auto Window::RenderProfile(Graphic::IUiRenderer &renderer, Graphic::ITextRenderer &text_renderer,
+                               Graphic::ITextRenderer &text_render,
                                float target_x, float target_y, const glm::vec2 &screenSize) -> void {
         auto start = std::chrono::high_resolution_clock::now();
         root->CalculateFitSizeOnAxis(Axis::Horizontal);
@@ -149,7 +150,7 @@ namespace Funccia::UI {
         double culling = std::chrono::duration<double, std::milli>(end - start).count();
 
         start = std::chrono::high_resolution_clock::now();
-        root->RenderQueue(renderer, text_renderer, target_x, target_y, Graphic::GL::WindowController::Instance().GetWindow()->GetDisplayScale());
+        root->RenderQueue(renderer, text_renderer, target_x, target_y, m_window->GetDisplayScale());
         end = std::chrono::high_resolution_clock::now();
         double renderQueue = std::chrono::duration<double, std::milli>(end - start).count();
 

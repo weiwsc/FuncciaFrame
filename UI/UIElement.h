@@ -8,24 +8,16 @@
 //#define FF_UI_LAZY_LAYOUT
 #include <memory>
 
-#include "../graphic/gl/MathTypes.h"
+#include "../graphic/MathTypes.h"
 #include <vector>
 
 #include "SideOffset.h"
 #include "UIState.h"
 #include "UIStyle.h"
 #include "UITypes.h"
-#include "../graphic/gl/TextRenderer.h"
-
-
-namespace Funccia::Graphic::GL {
-    enum class TextWrap;
-    class TextRenderer;
-    class UIRenderer;
-}
+#include "../graphic/RendererInterfaces.h"
 
 namespace Funccia::UI {
-    using UIRender = Funccia::Graphic::GL::UIRenderer;
     class Window;
 
     class UIElement {
@@ -51,7 +43,7 @@ namespace Funccia::UI {
         auto Style() -> UIStyle& {return m_style;}
         // ==========> layout algorithms <==============
         auto CalculateFitSizeOnAxis(Axis axis) -> float;
-        auto CalculateGrowSizeOnAxis(Axis axis, Graphic::GL::TextRenderer &text_renderer) -> void;
+        auto CalculateGrowSizeOnAxis(Axis axis, Graphic::ITextRenderer &text_renderer) -> void;
         auto CalculateTextBounds(Axis axis) -> void;
         auto PositionOnAxis(Axis axis, float parent_content_box_start) -> void;
 
@@ -62,8 +54,8 @@ namespace Funccia::UI {
 
         auto GlobalPositionPass(float parent_content_box_x, float parent_content_box_y)->void;
         auto CullingPass(vec4 parent_clipping_box) -> void;
-        auto RenderQueue(UIRender& render, Graphic::GL::TextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y, float scale) -> void;
-        //auto TextRenderQueue(Graphic::GL::TextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
+        auto RenderQueue(Graphic::IUiRenderer& render, Graphic::ITextRenderer &text_renderer, float parent_content_box_x, float parent_content_box_y, float scale) -> void;
+        //auto TextRenderQueue(Graphic::ITextRenderer& render, float parent_content_box_x, float parent_content_box_y) -> void;
         // ==========> layout algorithms ends <==============
         auto HandlePick(vec2 mouse_pos, Window* parent_window) -> bool;
         auto HandleHover(vec2 mouse_pos, Window* parent_window) -> bool;

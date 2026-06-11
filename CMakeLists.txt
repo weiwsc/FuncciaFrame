@@ -47,8 +47,8 @@ add_executable(FuncciaFrame main.cpp
         core/TypeRegistry.h
         graphic/WindowController.cpp
         graphic/WindowController.h
-        graphic/gl/mesh.cpp
-        graphic/gl/mesh.h
+        graphic/gl/Mesh.cpp
+        graphic/gl/Mesh.h
         graphic/gl/ShaderUtil.cpp
         graphic/gl/ShaderUtil.h
         graphic/gl/Shader.cpp
@@ -56,22 +56,22 @@ add_executable(FuncciaFrame main.cpp
         core/TextFile.cpp
         core/TextFile.h
         external/std_image/include/std_image.cpp
-        graphic/gl/Transform.cpp
-        graphic/gl/Transform.h
-        graphic/gl/MathTypes.cpp
-        graphic/gl/MathTypes.h
+        graphic/Transform.cpp
+        graphic/Transform.h
+        graphic/MathTypes.cpp
+        graphic/MathTypes.h
         UI/UIElement.cpp
         UI/UIElement.h
-        graphic/gl/TextRenderer.cpp
-        graphic/gl/TextRenderer.h
+        graphic/gl/GLTextRenderer.cpp
+        graphic/gl/GLTextRenderer.h
         external/std_image/include/stb_image_write.cpp
-        graphic/text/GlyphAtlas.cpp
-        graphic/text/GlyphAtlas.h
+        graphic/gl/GLGlyphAtlas.cpp
+        graphic/gl/GLGlyphAtlas.h
         UI/SideOffset.cpp
         UI/SideOffset.h
         UI/UITypes.h
-        graphic/gl/UIRender.cpp
-        graphic/gl/UIRender.h
+        graphic/gl/GLUiRenderer.cpp
+        graphic/gl/GLUiRenderer.h
         UI/Window.cpp
         UI/Window.h
         UI/UIElementFluentAPI.cpp
@@ -90,8 +90,8 @@ add_executable(FuncciaFrame main.cpp
         graphic/text/IRectPacker.h
         graphic/text/GridRectPacker.cpp
         graphic/text/GridRectPacker.h
-        graphic/gl/Mouse.cpp
-        graphic/gl/Mouse.h
+        input/MouseState.cpp
+        input/MouseState.h
         UI/JsonUiBuilder.cpp
         UI/JsonUiBuilder.h
         UI/UIStyle.cpp
@@ -112,6 +112,8 @@ add_executable(FuncciaFrame main.cpp
         core/ProfileTimer.h
         input/Input.cpp
         input/Input.h
+        graphic/RenderTypes.h
+        graphic/RendererInterfaces.h
         graphic/GraphicsDevice.cpp
         graphic/GraphicsDevice.h
         graphic/gl/GLGraphicsDevice.cpp

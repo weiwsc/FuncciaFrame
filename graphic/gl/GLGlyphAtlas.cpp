@@ -2,7 +2,7 @@
 // Created by Wangsicong Wei on 2025-09-25.
 //
 
-#include "GlyphAtlas.h"
+#include "GLGlyphAtlas.h"
 
 #include <iostream>
 #include <ranges>
@@ -11,11 +11,11 @@
 #include <freetype/freetype.h>
 
 
-#include "HBShaper.h"
+#include "../text/HBShaper.h"
 #include "stb_image_write.h"
 
 namespace Funccia::Graphic::GL {
-    GlyphAtlas::~GlyphAtlas() {
+    GLGlyphAtlas::~GLGlyphAtlas() {
         for (auto &val: FontDictionary | std::views::values) {
             FT_Done_Face(val);
         }
@@ -27,7 +27,7 @@ namespace Funccia::Graphic::GL {
         }
     }
 
-    void GlyphAtlas::CreateAtlas(int width, int height, int maxLayers) {
+    void GLGlyphAtlas::CreateAtlas(int width, int height, int maxLayers) {
         if (m_ft == nullptr) {
             initFreeType();
         }
@@ -61,22 +61,22 @@ namespace Funccia::Graphic::GL {
     }
 
 
-    void GlyphAtlas::BindAtlasLayer(int layerIndex) const {
+    void GLGlyphAtlas::BindAtlasLayer(int layerIndex) const {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
     }
 
-    void GlyphAtlas::BindCurrentAtlasLayer() const {
+    void GLGlyphAtlas::BindCurrentAtlasLayer() const {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D_ARRAY, m_atlasTextureArray);
     }
 
-    auto GlyphAtlas::GlyphExists(hb_codepoint_t codepoint) const -> bool {
+    auto GLGlyphAtlas::GlyphExists(hb_codepoint_t codepoint) const -> bool {
         return GlyphDictionary.contains(codepoint);
     }
 
 
-    void GlyphAtlas::CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t> &glyphToAdd) {
+    void GLGlyphAtlas::CopyBitmapToAtlas(FT_Face face, std::unordered_set<hb_codepoint_t> &glyphToAdd) {
         for (auto &result: glyphToAdd) {
             //Glyph glyph = Glyph();
             FT_Int32 flags = FT_LOAD_DEFAULT;
@@ -106,7 +106,7 @@ namespace Funccia::Graphic::GL {
             int startY = 0;
 
             if (!PackGlyph(w, h, startX, startY)) {
-                throw std::runtime_error("GlyphAtlas: Failed to pack glyph");
+                throw std::runtime_error("GLGlyphAtlas: Failed to pack glyph");
             }
 
 
@@ -136,7 +136,7 @@ namespace Funccia::Graphic::GL {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4); // restore default
     }
 
-    auto GlyphAtlas::PackGlyph(int width, int height, int &x, int &y) -> bool {
+    auto GLGlyphAtlas::PackGlyph(int width, int height, int &x, int &y) -> bool {
         const int pw = width + 2 * m_pad;
         const int ph = height + 2 * m_pad;
 
@@ -152,7 +152,7 @@ namespace Funccia::Graphic::GL {
         return true;
     }
 
-    auto GlyphAtlas::PackGlyphInRow(int paddedWidth, int paddedHeight, int &x, int &y) -> bool {
+    auto GLGlyphAtlas::PackGlyphInRow(int paddedWidth, int paddedHeight, int &x, int &y) -> bool {
         if (m_cursorY + paddedHeight > m_atlasHeight) return false;
         if (m_cursorX + paddedWidth <= m_atlasWidth) {
             x = m_cursorX;
@@ -164,7 +164,7 @@ namespace Funccia::Graphic::GL {
         return false;
     }
 
-    auto GlyphAtlas::AdvanceRow() -> bool {
+    auto GLGlyphAtlas::AdvanceRow() -> bool {
         if (m_cursorY + m_maxRowHeight < m_atlasHeight) {
             m_cursorX = m_pad;
             m_cursorY += m_maxRowHeight;
@@ -174,7 +174,7 @@ namespace Funccia::Graphic::GL {
         return false;
     }
 
-    auto GlyphAtlas::AdvanceLayer() -> bool {
+    auto GLGlyphAtlas::AdvanceLayer() -> bool {
         if (m_atlasCurrentLayerIndex + 1 >= m_maxAtlasLayers) {
             return false; // no more pages available
         }
@@ -187,7 +187,7 @@ namespace Funccia::Graphic::GL {
     }
 
 
-    void GlyphAtlas::WriteAtlasToDisk(int layer) {
+    void GLGlyphAtlas::WriteAtlasToDisk(int layer) {
         GLuint fbo = 0;
         glGenFramebuffers(1, &fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -211,13 +211,13 @@ namespace Funccia::Graphic::GL {
     }
 
 
-    void GlyphAtlas::initFreeType() {
+    void GLGlyphAtlas::initFreeType() {
         if (FT_Init_FreeType(&m_ft)) {
             throw std::runtime_error("ERROR::FREETYPE: Could not init FreeType Library");
         }
     }
 
-    auto GlyphAtlas::loadFreeTypeFace(const std::string &fontPath) -> FT_Face {
+    auto GLGlyphAtlas::loadFreeTypeFace(const std::string &fontPath) -> FT_Face {
         FT_Face face;
         if (FT_New_Face(m_ft, fontPath.c_str(), 0, &face)) {
             throw std::runtime_error("ERROR::FREETYPE: Failed to load font: " + fontPath);
@@ -226,12 +226,12 @@ namespace Funccia::Graphic::GL {
         return face;
     }
 
-    auto GlyphAtlas::LoadFont(const std::string &fontPath) -> FT_Face {
+    auto GLGlyphAtlas::LoadFont(const std::string &fontPath) -> FT_Face {
         if (FontDictionary.find(fontPath) == FontDictionary.end()) {
             FontDictionary[fontPath] = loadFreeTypeFace(fontPath);
         }
         return FontDictionary[fontPath];
     }
 
-    auto GlyphAtlas::GetGlyph(hb_codepoint_t codepoint) -> AtlasCell { return GlyphDictionary[codepoint]; }
+    auto GLGlyphAtlas::GetGlyph(hb_codepoint_t codepoint) -> AtlasCell { return GlyphDictionary[codepoint]; }
 }

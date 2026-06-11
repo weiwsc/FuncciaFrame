@@ -10,9 +10,8 @@ namespace Funccia::Graphic::GL
     class GLGraphicsDevice : public GraphicsDevice {
     public:
         ~GLGraphicsDevice() override = default;
-        void Init() override;
-        void Update() override;
+        void Init(WindowInterface& window) override;
+        void BeginFrame(const FrameContext& frameContext) override;
     };
 }
-
 

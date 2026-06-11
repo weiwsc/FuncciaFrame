@@ -4,7 +4,7 @@
 
 #ifndef PROFILETIMER_H
 #define PROFILETIMER_H
-//#define FF_PROFILING_ENABLED
+#define FF_PROFILING_ENABLED
 // Define this to enable profiling, comment out to disable
 // #define FF_PROFILING_ENABLED
 

@@ -5,11 +5,15 @@
 #pragma once
 #include <chrono>
 
+namespace Funccia::Graphic {
+    class WindowInterface;
+}
+
 namespace Funccia::Util {
     class FpsCounter {
     public:
         FpsCounter();
-        void Update();
+        void Update(Graphic::WindowInterface& window);
         [[nodiscard]] auto GetFPS() const -> double { return fps; }
         [[nodiscard]] auto GetFrameMS() const -> double { return ms; }
         [[nodiscard]] auto GetDeltaTime() const -> float { return deltaTime; }
