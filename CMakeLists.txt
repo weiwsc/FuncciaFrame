@@ -38,6 +38,7 @@ endif()
 
 
 find_package(SDL3 CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
 find_package(re2 CONFIG REQUIRED)
@@ -165,12 +166,17 @@ add_executable(FuncciaFrame main.cpp
         App.h
         util/FpsCounter.cpp
         util/FpsCounter.h
-        graphic/vulkan/VulkanGraphicsDevice.cpp
-        graphic/vulkan/VulkanGraphicsDevice.h
-        graphic/vulkan/VulkanInstance.cpp
-        graphic/vulkan/VulkanInstance.h
+        graphic/vulkan/VulkanApplication.cpp
+        graphic/vulkan/VulkanApplication.h
+        graphic/vulkan/VulkanContext.cpp
+        graphic/vulkan/VulkanContext.h
         graphic/vulkan/VulkanInclude.h
-        ApplicationMetadata.h)
+        ApplicationMetadata.h
+        graphic/vulkan/VulkanLayer.cpp
+        graphic/vulkan/VulkanLayer.h
+        graphic/vulkan/VulkanExtension.cpp
+        graphic/vulkan/VulkanExtension.h
+        graphic/vulkan/VulkanPhysicalDevice.h)
 
 
 

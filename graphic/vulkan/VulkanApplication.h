@@ -5,13 +5,16 @@
 #pragma once
 #include "../GraphicsDevice.h"
 #include "VulkanInclude.h"
+#include "VulkanContext.h"
+
 namespace Funccia::Graphic::Vulkan {
-    class VulkanGraphicsDevice : public GraphicsDevice {
+    class VulkanApplication : public GraphicsDevice {
     public:
-        VulkanGraphicsDevice() = default;
+        VulkanApplication();
         void Init(WindowInterface& window) override;
+        void BeginFrame(const FrameContext& frameContext) override {};
 
     private:
-
+        VulkanContext vk_instance_ {};
     };
 }

@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "glad/glad.h"
+#include <SDL3/SDL_vulkan.h>
 
 namespace Funccia::Graphic::GL {
     SDLWindow::~SDLWindow() {
@@ -111,23 +112,17 @@ namespace Funccia::Graphic::GL {
     }
 
     auto SDLWindow::InitializeVulkanWindow(int width, int height, const std::string& title) -> bool {
-        (void) width;
-        (void) height;
-        (void) title;
         m_window = SDL_CreateWindow(
-                title.data(),
+                title.c_str(),
                 width, height,
-                SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
+                SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY
         );
         if (!m_window) {
-            std::cerr << "Error creating window." << std::endl;
+            std::cerr << "Error creating Vulkan SDL window: " << SDL_GetError() << std::endl;
             return false;
         }
 
-
-        // Vulkan window creation will live here once the Vulkan backend owns surface setup.
-        std::cerr << "Vulkan SDL window initialization is not implemented yet." << std::endl;
-        return false;
+        return true;
     }
 
     auto SDLWindow::FinishInitialization() -> void {
