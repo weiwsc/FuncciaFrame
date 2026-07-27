@@ -174,12 +174,12 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/VulkanContext.h
         graphic/vulkan/VulkanInclude.h
         ApplicationMetadata.h
-        graphic/vulkan/VulkanLayer.cpp
-        graphic/vulkan/VulkanLayer.h
-        graphic/vulkan/VulkanExtension.cpp
-        graphic/vulkan/VulkanExtension.h
-        graphic/vulkan/VulkanPhysicalDevice.h
-        graphic/vulkan/VulkanPhysicalDevice.cpp)
+        graphic/vulkan/util/VulkanLayerUtil.cpp
+        graphic/vulkan/util/VulkanLayerUtil.h
+        graphic/vulkan/util/VulkanInstanceExtensionUtil.cpp
+        graphic/vulkan/util/VulkanInstanceExtensionUtil.h
+        graphic/vulkan/util/VulkanPhysicalDeviceUtil.h
+        graphic/vulkan/util/VulkanPhysicalDeviceUtil.cpp)
 
 
 

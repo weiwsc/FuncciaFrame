@@ -4,9 +4,9 @@
 
 #include "VulkanContext.h"
 
-#include "VulkanExtension.h"
-#include "VulkanLayer.h"
-#include "VulkanPhysicalDevice.h"
+#include "util/VulkanInstanceExtensionUtil.h"
+#include "util/VulkanLayerUtil.h"
+#include "util/VulkanPhysicalDeviceUtil.h"
 #include "../../App.h"
 
 namespace Funccia::Graphic::Vulkan {
@@ -28,8 +28,8 @@ namespace Funccia::Graphic::Vulkan {
             .apiVersion = vk::ApiVersion14
         };
 
-        auto required_layers = VulkanLayer::GetRequiredLayers(context, enableValidationLayers);
-        auto required_extensions = Util::GetRequiredExtensions(context, enableValidationLayers);
+        auto required_layers = Util::GetRequiredLayers(context, enableValidationLayers);
+        auto required_extensions = Util::GetRequiredInstanceExtensions(context, enableValidationLayers);
 
         vk::InstanceCreateInfo create_info{
             .pApplicationInfo = &application_info,

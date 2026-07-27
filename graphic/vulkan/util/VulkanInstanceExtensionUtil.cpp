@@ -2,10 +2,10 @@
 // Created by Wangsicong Wei on 2026-06-11.
 //
 
-#include "VulkanExtension.h"
+#include "VulkanInstanceExtensionUtil.h"
 
 namespace Funccia::Graphic::Vulkan::Util {
-    auto GetRequiredExtensions(const vk::raii::Context& context,
+    auto GetRequiredInstanceExtensions(const vk::raii::Context& context,
                                const bool enableValidationLayers) -> std::vector<char const*> {
         uint32_t sdlExtensionCount = 0;
         auto sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
