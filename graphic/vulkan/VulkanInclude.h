@@ -8,6 +8,3 @@
 #else
 import vulkan_hpp;
 #endif
-
-
-

@@ -2,7 +2,9 @@ cmake_minimum_required (VERSION 4.2.3)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.4)
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
 else()
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
@@ -176,7 +178,8 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/VulkanLayer.h
         graphic/vulkan/VulkanExtension.cpp
         graphic/vulkan/VulkanExtension.h
-        graphic/vulkan/VulkanPhysicalDevice.h)
+        graphic/vulkan/VulkanPhysicalDevice.h
+        graphic/vulkan/VulkanPhysicalDevice.cpp)
 
 
 

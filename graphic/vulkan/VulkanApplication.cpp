@@ -4,7 +4,7 @@
 
 #include "VulkanApplication.h"
 
-namespace Funccia::Graphic::Vulkan{
+namespace Funccia::Graphic::Vulkan {
     VulkanApplication::VulkanApplication() {
     }
 

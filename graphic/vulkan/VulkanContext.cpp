@@ -11,16 +11,16 @@
 
 namespace Funccia::Graphic::Vulkan {
     static VKAPI_ATTR vk::Bool32 VKAPI_CALL debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity,
-                                                  vk::DebugUtilsMessageTypeFlagsEXT type,
-                                                  const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData,
-                                                  void *) {
+                                                          vk::DebugUtilsMessageTypeFlagsEXT type,
+                                                          const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                                          void*) {
         std::cerr << "validation layer: type " << to_string(type) << " msg: " << pCallbackData->pMessage << std::endl;
 
         return vk::False;
     }
 
     void VulkanContext::createInstance() {
-        vk::ApplicationInfo application_info {
+        vk::ApplicationInfo application_info{
             .pApplicationName = Funccia::App::Instance().application_metadata.applicationTitle.data(),
             .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
             .pEngineName = "Funccia Engine",
@@ -29,7 +29,7 @@ namespace Funccia::Graphic::Vulkan {
         };
 
         auto required_layers = VulkanLayer::GetRequiredLayers(context, enableValidationLayers);
-        auto required_extensions = VulkanExtension::GetRequiredExtensions(context, enableValidationLayers);
+        auto required_extensions = Util::GetRequiredExtensions(context, enableValidationLayers);
 
         vk::InstanceCreateInfo create_info{
             .pApplicationInfo = &application_info,
@@ -45,7 +45,7 @@ namespace Funccia::Graphic::Vulkan {
         createInstance();
         setupDebugMessenger();
         setupSurface(window);
-        physical_device = VulkanPhysicalDevice::pickPhysicalDevice(instance_, requiredDeviceExtensions);
+        physical_device = Util::pickPhysicalDevice(instance_, requiredDeviceExtensions);
     }
 
     void VulkanContext::setupDebugMessenger() {
@@ -66,7 +66,8 @@ namespace Funccia::Graphic::Vulkan {
 
     void VulkanContext::setupSurface(WindowInterface& window) {
         VkSurfaceKHR _surface;
-        if (!SDL_Vulkan_CreateSurface(static_cast<SDL_Window*>(window.GetNativeWindow()), *instance_, nullptr, &_surface)) {
+        if (!SDL_Vulkan_CreateSurface(static_cast<SDL_Window*>(window.GetNativeWindow()), *instance_, nullptr,
+                                      &_surface)) {
             throw std::runtime_error("failed to create window surface!");
         }
         surface = vk::raii::SurfaceKHR(instance_, _surface);

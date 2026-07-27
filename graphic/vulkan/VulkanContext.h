@@ -12,7 +12,6 @@
 
 namespace Funccia::Graphic::Vulkan {
     struct VulkanContext {
-
         void Init(WindowInterface& window);
 
         vk::raii::Instance instance_ = nullptr;
@@ -21,6 +20,7 @@ namespace Funccia::Graphic::Vulkan {
         vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
         vk::raii::SurfaceKHR surface = nullptr;
         vk::raii::PhysicalDevice physical_device = nullptr;
+
     private:
         void createInstance();
         void setupDebugMessenger();

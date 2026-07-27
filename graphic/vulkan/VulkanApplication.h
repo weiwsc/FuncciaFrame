@@ -12,9 +12,11 @@ namespace Funccia::Graphic::Vulkan {
     public:
         VulkanApplication();
         void Init(WindowInterface& window) override;
-        void BeginFrame(const FrameContext& frameContext) override {};
+
+        void BeginFrame(const FrameContext& frameContext) override {
+        };
 
     private:
-        VulkanContext vk_instance_ {};
+        VulkanContext vk_instance_{};
     };
 }

@@ -19,10 +19,10 @@
     "version>=" : "2025-11-05"
   }, {
     "name" : "harfbuzz",
-    "version>=" : "12.3.0"
+    "version>=" : "13.0.1"
   }, {
     "name" : "sdl3",
-    "version>=" : "3.4.0",
+    "version>=" : "3.4.2#1",
     "features" : [ "vulkan" ]
   }, {
     "name" : "freetype",
