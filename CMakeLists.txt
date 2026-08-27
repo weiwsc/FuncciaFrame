@@ -45,7 +45,7 @@ find_package(harfbuzz CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
 find_package(re2 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-
+find_package(quill CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 add_library(VulkanCppModule)
 add_library(Vulkan::cppm ALIAS VulkanCppModule)
@@ -54,6 +54,9 @@ target_compile_definitions(VulkanCppModule PUBLIC
         VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
         VULKAN_HPP_NO_STRUCT_CONSTRUCTORS=1
 )
+
+
+
 target_include_directories(VulkanCppModule PRIVATE "${Vulkan_INCLUDE_DIR}")
 target_link_libraries(VulkanCppModule PUBLIC Vulkan::Vulkan)
 
@@ -168,10 +171,10 @@ add_executable(FuncciaFrame main.cpp
         App.h
         util/FpsCounter.cpp
         util/FpsCounter.h
-        graphic/vulkan/VulkanApplication.cpp
-        graphic/vulkan/VulkanApplication.h
-        graphic/vulkan/VulkanContext.cpp
-        graphic/vulkan/VulkanContext.h
+        graphic/vulkan/VulkanGraphicsDevice.cpp
+        graphic/vulkan/VulkanGraphicsDevice.h
+        graphic/vulkan/VulkanInstance.cpp
+        graphic/vulkan/VulkanInstance.h
         graphic/vulkan/VulkanInclude.h
         ApplicationMetadata.h
         graphic/vulkan/util/VulkanLayerUtil.cpp
@@ -179,7 +182,16 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/util/VulkanInstanceExtensionUtil.cpp
         graphic/vulkan/util/VulkanInstanceExtensionUtil.h
         graphic/vulkan/util/VulkanPhysicalDeviceUtil.h
-        graphic/vulkan/util/VulkanPhysicalDeviceUtil.cpp)
+        graphic/vulkan/util/VulkanPhysicalDeviceUtil.cpp
+        graphic/vulkan/util/VulkanDebugMessengerUtil.cpp
+        graphic/vulkan/util/VulkanDebugMessengerUtil.h
+        graphic/vulkan/VulkanDevice.cpp
+        graphic/vulkan/VulkanDevice.h
+        graphic/vulkan/util/VulkanLogicalDeviceUtil.cpp
+        graphic/vulkan/util/VulkanLogicalDeviceUtil.h
+        graphic/vulkan/types/VulkanTypesDef.h
+        util/Log.cpp
+        util/Log.h)
 
 
 
@@ -190,6 +202,7 @@ target_link_libraries(FuncciaFrame PRIVATE
         harfbuzz::harfbuzz
         re2::re2
         nlohmann_json::nlohmann_json
+        quill::quill
 )
 if(APPLE)
     target_link_libraries(FuncciaFrame PRIVATE "-framework OpenGL")
@@ -200,5 +213,5 @@ elseif(UNIX)
     find_package(OpenGL REQUIRED)
     target_link_libraries(FuncciaFrame PRIVATE OpenGL::GL)
 endif()
-
+target_compile_definitions(FuncciaFrame PRIVATE QUILL_DISABLE_NON_PREFIXED_MACROS)
 target_sources(FuncciaFrame PRIVATE external/glad/src/glad.c)

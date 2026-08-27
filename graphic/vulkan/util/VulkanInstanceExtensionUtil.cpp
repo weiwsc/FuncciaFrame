@@ -6,7 +6,7 @@
 
 namespace Funccia::Graphic::Vulkan::Util {
     auto GetRequiredInstanceExtensions(const vk::raii::Context& context,
-                               const bool enableValidationLayers) -> std::vector<char const*> {
+                                       const bool enableValidationLayers) -> std::vector<char const*> {
         uint32_t sdlExtensionCount = 0;
         auto sdlExtensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
         std::vector requiredExtensions(sdlExtensions, sdlExtensions + sdlExtensionCount);

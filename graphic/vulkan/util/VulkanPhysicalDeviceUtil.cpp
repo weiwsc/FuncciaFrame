@@ -4,6 +4,8 @@
 #include <iostream>
 #include "VulkanPhysicalDeviceUtil.h"
 
+#include "../../../util/Log.h"
+
 namespace Funccia::Graphic::Vulkan::Util {
     namespace {
         auto hasGraphicsQueue(const vk::raii::PhysicalDevice& dev) -> bool {
@@ -42,10 +44,11 @@ namespace Funccia::Graphic::Vulkan::Util {
         -> vk::raii::PhysicalDevice {
         auto devices = instance.enumeratePhysicalDevices();
         const auto devIter = std::ranges::find_if(devices, [&](auto const& device) {
-            std::cout << "Physical Device: " << device.getProperties2().properties.deviceName << std::endl;
+            vva_log_info("Physical Device: {}", device.getProperties2().properties.deviceName.data());
             return isSuitable(device, requiredDeviceExtensions);
         });
         if (devIter == devices.end()) {
+            vva_log_error("failed to find a suitable GPU!");
             throw std::runtime_error("failed to find a suitable GPU!");
         }
         return *devIter;

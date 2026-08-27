@@ -10,5 +10,5 @@
 
 namespace Funccia::Graphic::Vulkan::Util {
     auto GetRequiredInstanceExtensions(const vk::raii::Context& context,
-                               const bool enableValidationLayers) -> std::vector<char const*>;
+                                       const bool enableValidationLayers) -> std::vector<char const*>;
 }

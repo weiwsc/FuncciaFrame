@@ -11,23 +11,17 @@
 #include "../../core/Singleton.h"
 
 namespace Funccia::Graphic::Vulkan {
-    struct VulkanContext {
-        void Init(WindowInterface& window);
+    struct VulkanInstance {
+        void Init();
 
-        vk::raii::Instance instance_ = nullptr;
+        vk::raii::Instance instance = nullptr;
         vk::raii::Context context;
         bool enableValidationLayers = true;
         vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
-        vk::raii::SurfaceKHR surface = nullptr;
-        vk::raii::PhysicalDevice physical_device = nullptr;
+
+
 
     private:
         void createInstance();
-        void setupDebugMessenger();
-        void setupSurface(WindowInterface& window);
-
-        static constexpr std::array requiredDeviceExtensions = {
-            vk::KHRSwapchainExtensionName,
-        };
     };
 }

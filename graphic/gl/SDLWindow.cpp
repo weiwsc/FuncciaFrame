@@ -9,6 +9,8 @@
 #include "glad/glad.h"
 #include <SDL3/SDL_vulkan.h>
 
+#include "../../util/Log.h"
+
 namespace Funccia::Graphic::GL {
     SDLWindow::~SDLWindow() {
         delete m_mouse;
@@ -129,10 +131,10 @@ namespace Funccia::Graphic::GL {
         // Get initial keyboard state
         m_keyboardState = SDL_GetKeyboardState(nullptr);
 
-        std::cout << "SDL Window initialized successfully" << std::endl;
 
+        vva_log_info("SDL Window initialized successfully");
         m_displayScale = SDL_GetWindowDisplayScale(m_window);
-        std::cout << "Display scale: "<< m_displayScale << std::endl;
+        vva_log_info("Display scale: {}", m_displayScale);
     }
 
     auto SDLWindow::Close() -> void {
