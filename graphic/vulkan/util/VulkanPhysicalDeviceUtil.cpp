@@ -4,16 +4,19 @@
 #include <iostream>
 #include "VulkanPhysicalDeviceUtil.h"
 
+#include "VulkanLogicalDeviceUtil.h"
+#include "../VulkanDeviceRequirement.h"
 #include "../../../util/Log.h"
+#include "../types/VulkanTypesDef.h"
 
 namespace Funccia::Graphic::Vulkan::Util {
     namespace {
-        auto hasGraphicsQueue(const vk::raii::PhysicalDevice& dev) -> bool {
-            auto qfs = dev.getQueueFamilyProperties();
-            return std::ranges::any_of(qfs, [](auto const& q) {
-                return static_cast<bool>(q.queueFlags & vk::QueueFlagBits::eGraphics);
-            });
-        }
+        // auto hasGraphicsQueue(const vk::raii::PhysicalDevice& dev) -> bool {
+        //     auto qfs = dev.getQueueFamilyProperties();
+        //     return std::ranges::any_of(qfs, [](auto const& q) {
+        //         return static_cast<bool>(q.queueFlags & vk::QueueFlagBits::eGraphics);
+        //     });
+        // }
 
         auto supportsExtensions(const vk::raii::PhysicalDevice& dev,
                                 std::span<char const* const> required) -> bool {
@@ -28,29 +31,39 @@ namespace Funccia::Graphic::Vulkan::Util {
             }
             return ok;
         }
-
-        auto isSuitable(const vk::raii::PhysicalDevice& dev,
-                        std::span<char const* const> required) -> bool {
-            return dev.getProperties().apiVersion >= VK_API_VERSION_1_3
-                && dev.getFeatures2().features.samplerAnisotropy == vk::True
-                && hasGraphicsQueue(dev)
-                && supportsExtensions(dev, required);
+        auto isSwapChainAvailable(const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface) -> bool {
+            return !device.getSurfaceFormatsKHR(*surface).empty() &&
+                    !device.getSurfacePresentModesKHR(*surface).empty();
+        }
+        auto isSuitable(const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface ) -> bool {
+            return device.getProperties().apiVersion >=
+           VulkanDeviceRequirement::minimum_api_version
+    && VulkanDeviceRequirement::is_required_feature_supported(device)
+    && supportsExtensions(device, VulkanDeviceRequirement::extensions)
+    && isSwapChainAvailable(device, surface);
         }
     }
 
     [[nodiscard]]
-    auto pickPhysicalDevice(const vk::raii::Instance& instance,
-                            std::span<char const* const> requiredDeviceExtensions)
-        -> vk::raii::PhysicalDevice {
+    auto pickPhysicalDevice(const vk::raii::Instance& instance, const vk::raii::SurfaceKHR& surface)
+        -> PickPhysicalDeviceResult {
         auto devices = instance.enumeratePhysicalDevices();
+        DeviceQueueCoordinates queue_selection {};
         const auto devIter = std::ranges::find_if(devices, [&](auto const& device) {
             vva_log_info("Physical Device: {}", device.getProperties2().properties.deviceName.data());
-            return isSuitable(device, requiredDeviceExtensions);
+            //check if the device has the required queue family
+            if (const auto selection_result= Util::SelectDeviceQueues(surface, device)) {
+                queue_selection = selection_result.value();
+            } else {return false;}
+            return isSuitable(device, surface);
         });
         if (devIter == devices.end()) {
             vva_log_error("failed to find a suitable GPU!");
             throw std::runtime_error("failed to find a suitable GPU!");
         }
-        return *devIter;
+        return PickPhysicalDeviceResult {
+            .physical_device = *devIter,
+            .queue_coordinates = queue_selection
+        };
     }
 }

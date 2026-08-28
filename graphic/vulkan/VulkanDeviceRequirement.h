@@ -1,0 +1,57 @@
+//
+// Created by Wangsicong Wei on 2026-08-27.
+//
+#pragma once
+
+#include "VulkanInclude.h"
+
+namespace Funccia::Graphic::Vulkan {
+    struct VulkanDeviceRequirement {
+        static constexpr uint32_t minimum_api_version = vk::ApiVersion14;
+        static constexpr std::array extensions{
+            vk::KHRSwapchainExtensionName
+        };
+
+        static constexpr vk::QueueFlags required_queue_flags =
+            vk::QueueFlagBits::eGraphics |
+            vk::QueueFlagBits::eCompute |
+            vk::QueueFlagBits::eTransfer;
+
+        using VulkanFeatureChain = vk::StructureChain<
+            vk::PhysicalDeviceFeatures2,
+            vk::PhysicalDeviceVulkan11Features,
+            vk::PhysicalDeviceVulkan13Features,
+            vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>;
+
+        [[nodiscard]]
+        static auto features() -> VulkanFeatureChain {
+            VulkanFeatureChain chain;
+
+            chain.get<vk::PhysicalDeviceFeatures2>().features.samplerAnisotropy = vk::True;
+            chain.get<vk::PhysicalDeviceVulkan11Features>().shaderDrawParameters = vk::True;
+            chain.get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering = vk::True;
+            chain.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState = vk::True;
+
+            return chain;
+        }
+
+        [[nodiscard]]
+        static auto is_required_feature_supported(const vk::raii::PhysicalDevice& device) -> bool {
+            auto supported = device.getFeatures2<
+                vk::PhysicalDeviceFeatures2,
+                vk::PhysicalDeviceVulkan11Features,
+                vk::PhysicalDeviceVulkan13Features,
+                vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
+
+            return
+                supported.get<vk::PhysicalDeviceFeatures2>()
+                         .features.samplerAnisotropy &&
+                supported.get<vk::PhysicalDeviceVulkan11Features>()
+                         .shaderDrawParameters &&
+                supported.get<vk::PhysicalDeviceVulkan13Features>()
+                         .dynamicRendering &&
+                supported.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>()
+                         .extendedDynamicState;
+        }
+    };
+}

@@ -171,8 +171,8 @@ add_executable(FuncciaFrame main.cpp
         App.h
         util/FpsCounter.cpp
         util/FpsCounter.h
-        graphic/vulkan/VulkanGraphicsDevice.cpp
-        graphic/vulkan/VulkanGraphicsDevice.h
+        graphic/vulkan/VulkanRenderer.cpp
+        graphic/vulkan/VulkanRenderer.h
         graphic/vulkan/VulkanInstance.cpp
         graphic/vulkan/VulkanInstance.h
         graphic/vulkan/VulkanInclude.h
@@ -191,7 +191,10 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/util/VulkanLogicalDeviceUtil.h
         graphic/vulkan/types/VulkanTypesDef.h
         util/Log.cpp
-        util/Log.h)
+        util/Log.h
+        graphic/vulkan/VulkanDeviceRequirement.h
+        graphic/vulkan/VulkanSwapChain.cpp
+        graphic/vulkan/VulkanSwapChain.h)
 
 
 

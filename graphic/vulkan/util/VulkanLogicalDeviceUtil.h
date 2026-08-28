@@ -11,7 +11,7 @@
 #include "../VulkanInclude.h"
 
 namespace Funccia::Graphic::Vulkan::Util {
-    auto CreateVulkanDevice(const vk::raii::SurfaceKHR& surface, vk::raii::PhysicalDevice physicalDevice) -> VulkanDevice;
-
+    auto CreateVulkanDevice(vk::raii::PhysicalDevice physicalDevice, DeviceQueueCoordinates queue_selection) -> VulkanDevice;
+    auto SelectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates>;
     uint32_t findTransferQue(uint32_t graphicsIndex, const vk::raii::PhysicalDevice& physicalDevice);
 }

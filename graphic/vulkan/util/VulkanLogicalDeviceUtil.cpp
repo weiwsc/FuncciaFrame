@@ -5,13 +5,11 @@
 #include "VulkanLogicalDeviceUtil.h"
 
 #include "../VulkanDevice.h"
+#include "../VulkanDeviceRequirement.h"
 #include "../../../util/Log.h"
 
 namespace Funccia::Graphic::Vulkan::Util {
-    constexpr vk::QueueFlags required =
-        vk::QueueFlagBits::eGraphics |
-        vk::QueueFlagBits::eCompute |
-        vk::QueueFlagBits::eTransfer;
+
 
     namespace {
 
@@ -36,12 +34,12 @@ namespace Funccia::Graphic::Vulkan::Util {
                                                    queue_selection.transfer.QueueFamilyIndex,
                                                    queue_selection.transfer.QueueIndex)
             };
-            vva_log_info("Vulkan Graphical Device Created");
+            vva_log_info("Vulkan Device Created");
             return VulkanDevice {
                 .physical_device = std::move(physical_device),
                 .logical_device = std::move(logical_device),
-                .device_queues = std::move(queues),
-                .device_queue_coordinates = queue_selection
+                .queues = std::move(queues),
+                .queue_coordinates = queue_selection
             };
         }
 
@@ -49,6 +47,8 @@ namespace Funccia::Graphic::Vulkan::Util {
                                          const vk::raii::PhysicalDevice& physical_device) -> std::optional<QueueCoordinate> {
             std::vector<vk::QueueFamilyProperties2> queue_family_properties = physical_device.
                 getQueueFamilyProperties2();
+
+            constexpr auto required = VulkanDeviceRequirement::required_queue_flags;
 
             for (size_t i = 0; i < queue_family_properties.size(); i++) {
                 if (((queue_family_properties[i].queueFamilyProperties.queueFlags & required) == required)
@@ -60,27 +60,20 @@ namespace Funccia::Graphic::Vulkan::Util {
             return std::nullopt;
         }
 
-        auto SelectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> DeviceQueueCoordinates {
-            //std::vector<vk::QueueFamilyProperties> queueFamilyProperties = device.physical_device_.getQueueFamilyProperties2();
-            if (const auto result = SelectAllCapableQueueFamily(surface, physical_device)) {
-                const QueueCoordinate graphics = result.value();
-                return {.graphics = graphics, .present = graphics, .compute = graphics, .transfer = graphics};
-            }
-            else {
-                vva_log_error("Suitable Device not found");
-                //TODO: don't directly crash the program when suitable device is not found
-                exit(1);
-            }
+    }
+    auto SelectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates> {
+        //std::vector<vk::QueueFamilyProperties> queueFamilyProperties = device.physical_device_.getQueueFamilyProperties2();
+        if (const auto result = SelectAllCapableQueueFamily(surface, physical_device)) {
+            const QueueCoordinate graphics = result.value();
+            return std::optional<DeviceQueueCoordinates>{{.graphics = graphics, .present = graphics, .compute = graphics, .transfer = graphics}};
+        }
+        else {
+            vva_log_error("Suitable Device not found");
+            return std::nullopt;
         }
     }
-
     auto CreateVulkanDevice(
-        const vk::raii::SurfaceKHR& surface, vk::raii::PhysicalDevice physicalDevice) -> VulkanDevice {
-
-        // find the index of the first queue family that supports graphics
-        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
-
-        DeviceQueueCoordinates queue_selection = SelectDeviceQueues(surface, physicalDevice);
+        vk::raii::PhysicalDevice physicalDevice, DeviceQueueCoordinates queue_selection) -> VulkanDevice {
 
         float queue_priority = 0.5;
         vk::DeviceQueueCreateInfo device_queue_create_info{
@@ -88,28 +81,17 @@ namespace Funccia::Graphic::Vulkan::Util {
             .queueCount = 1,
             .pQueuePriorities = &queue_priority
         };
-        vk::PhysicalDeviceFeatures device_features;
+
         // Create a chain of feature structures
-        vk::StructureChain<vk::PhysicalDeviceFeatures2,
-                           vk::PhysicalDeviceVulkan11Features,
-                           vk::PhysicalDeviceVulkan13Features,
-                           vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>
-            featureChain = {
-                {}, // vk::PhysicalDeviceFeatures2 (empty for now)
-                {.shaderDrawParameters = true}, // Enable shader draw parameters from Vulkan 1.1
-                {.dynamicRendering = true}, // Enable dynamic rendering from Vulkan 1.3
-                {.extendedDynamicState = true} // Enable extended dynamic state from the extension
-            };
-        std::vector<const char*> requiredDeviceExtension = {
-            vk::KHRSwapchainExtensionName
-        };
+
+        auto required_features = VulkanDeviceRequirement::features();
 
         vk::DeviceCreateInfo deviceCreateInfo{
-            .pNext = &featureChain.get<vk::PhysicalDeviceFeatures2>(),
+            .pNext = &required_features.get<vk::PhysicalDeviceFeatures2>(),
             .queueCreateInfoCount = 1,
             .pQueueCreateInfos = &device_queue_create_info,
-            .enabledExtensionCount = static_cast<uint32_t>(requiredDeviceExtension.size()),
-            .ppEnabledExtensionNames = requiredDeviceExtension.data()
+            .enabledExtensionCount = static_cast<uint32_t>(VulkanDeviceRequirement::extensions.size()),
+            .ppEnabledExtensionNames = VulkanDeviceRequirement::extensions.data()
         };
 
         return assembleVulkanDevice(std::move(physicalDevice),
@@ -119,7 +101,7 @@ namespace Funccia::Graphic::Vulkan::Util {
 
     }
 
-    uint32_t findTransferQue(uint32_t graphicsIndex,
+    uint32_t findTransferQue(const uint32_t graphicsIndex,
                              const vk::raii::PhysicalDevice& physicalDevice) {
         std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
         //find if there's any queue that is specialized for transfer

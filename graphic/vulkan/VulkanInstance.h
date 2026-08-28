@@ -12,16 +12,11 @@
 
 namespace Funccia::Graphic::Vulkan {
     struct VulkanInstance {
-        void Init();
-
-        vk::raii::Instance instance = nullptr;
         vk::raii::Context context;
+        vk::raii::Instance instance = nullptr;
         bool enableValidationLayers = true;
         vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
 
-
-
-    private:
-        void createInstance();
+        static auto createVulkanInstance(bool enableValidationLayers) -> VulkanInstance;
     };
 }

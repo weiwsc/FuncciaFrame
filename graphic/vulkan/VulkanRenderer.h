@@ -7,15 +7,18 @@
 #include "../GraphicsDevice.h"
 #include "VulkanInclude.h"
 #include "VulkanInstance.h"
+#include "VulkanSwapChain.h"
 
 namespace Funccia::Graphic::Vulkan {
-    class VulkanGraphicsDevice : public GraphicsDevice {
+    class VulkanRenderer : public GraphicsDevice {
     public:
-        VulkanGraphicsDevice();
+        VulkanRenderer(VulkanInstance, VulkanDevice, vk::raii::SurfaceKHR, VulkanSwapChain);
         void Init(WindowInterface& window) override;
 
         void BeginFrame(const FrameContext& frameContext) override {
         };
+
+        static auto CreateVulkanRenderer(WindowInterface& window_interface) -> VulkanRenderer;
 
     private:
         static auto CreateSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;
@@ -23,5 +26,6 @@ namespace Funccia::Graphic::Vulkan {
         VulkanInstance instance{};
         VulkanDevice device{};
         vk::raii::SurfaceKHR surface{nullptr};
+        VulkanSwapChain swap_chain{};
     };
 }

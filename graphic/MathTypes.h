@@ -2,8 +2,8 @@
 // Created by Wangsicong Wei on 2025-09-24.
 //
 
-#ifndef FUNCCIAFRAME_MATHTYPES_H
-#define FUNCCIAFRAME_MATHTYPES_H
+#pragma once
+
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,6 +13,7 @@
 
 namespace Funccia::Graphic {
     using vec2 = glm::vec2;
+    using ivec2 = glm::ivec2;
     using vec3 = glm::vec3;
     using vec4 = glm::vec4;
     using quat = glm::quat;
@@ -79,4 +80,4 @@ namespace Funccia::Graphic {
     };
 }
 
-#endif //FUNCCIAFRAME_MATHTYPES_H
+

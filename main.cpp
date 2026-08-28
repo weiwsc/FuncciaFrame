@@ -2,7 +2,7 @@
 #include <vector>
 #include "App.h"
 #include "graphic/gl/SDLWindow.h"
-#include "graphic/vulkan/VulkanGraphicsDevice.h"
+#include "graphic/vulkan/VulkanRenderer.h"
 #include <iostream>
 
 #include "util/Log.h"
@@ -22,8 +22,9 @@ int main() {
         return 1;
     }
 
-    Funccia::Graphic::Vulkan::VulkanGraphicsDevice vkApp;
-    vkApp.Init(window);
+    Funccia::Graphic::Vulkan::VulkanRenderer renderer = Funccia::Graphic::Vulkan::VulkanRenderer::CreateVulkanRenderer(window);
+
+
 
     //vva_log_info("test");
     //vva_log_debug("Window size: {}x{}", 1920, 1080);
