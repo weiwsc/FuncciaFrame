@@ -6,6 +6,10 @@
 #include "VulkanInclude.h"
 
 namespace Funccia::Graphic::Vulkan {
+    struct VulkanRenderConfig {
+        static constexpr uint32_t max_frame_in_flight = 2;
+    };
+
     struct VulkanDeviceRequirement {
         static constexpr uint32_t minimum_api_version = vk::ApiVersion14;
         static constexpr std::array extensions{

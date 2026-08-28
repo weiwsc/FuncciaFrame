@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "VulkanAllocator.h"
 #include "VulkanInclude.h"
 #include "types/VulkanTypesDef.h"
 
@@ -12,7 +13,6 @@ namespace Funccia::Graphic::Vulkan {
     struct VulkanDevice {
         vk::raii::PhysicalDevice physical_device{nullptr};
         vk::raii::Device logical_device{nullptr};
-
         DeviceQueues queues;
         DeviceQueueCoordinates queue_coordinates;
     };

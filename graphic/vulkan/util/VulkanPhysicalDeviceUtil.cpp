@@ -5,7 +5,7 @@
 #include "VulkanPhysicalDeviceUtil.h"
 
 #include "VulkanLogicalDeviceUtil.h"
-#include "../VulkanDeviceRequirement.h"
+#include "../VulkanConfig.h"
 #include "../../../util/Log.h"
 #include "../types/VulkanTypesDef.h"
 

@@ -30,5 +30,8 @@
   }, {
     "name" : "quill",
     "version>=" : "11.1.0"
+  }, {
+    "name" : "vulkan-memory-allocator",
+    "version>=" : "3.3.0"
   } ]
 }

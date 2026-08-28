@@ -47,6 +47,8 @@ find_package(re2 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(quill CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
+
 add_library(VulkanCppModule)
 add_library(Vulkan::cppm ALIAS VulkanCppModule)
 
@@ -192,9 +194,18 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/types/VulkanTypesDef.h
         util/Log.cpp
         util/Log.h
-        graphic/vulkan/VulkanDeviceRequirement.h
+        graphic/vulkan/VulkanConfig.h
         graphic/vulkan/VulkanSwapChain.cpp
-        graphic/vulkan/VulkanSwapChain.h)
+        graphic/vulkan/VulkanSwapChain.h
+        graphic/vulkan/VulkanImage.cpp
+        graphic/vulkan/VulkanImage.h
+        graphic/vulkan/VulkanFrame.cpp
+        graphic/vulkan/VulkanFrame.h
+        graphic/vulkan/VulkanUploadContext.cpp
+        graphic/vulkan/VulkanUploadContext.h
+        graphic/vulkan/VulkanAllocator.cpp
+        graphic/vulkan/VulkanAllocator.h
+        graphic/vulkan/VmaImplementation.cpp)
 
 
 
@@ -206,7 +217,9 @@ target_link_libraries(FuncciaFrame PRIVATE
         re2::re2
         nlohmann_json::nlohmann_json
         quill::quill
+        GPUOpen::VulkanMemoryAllocator
 )
+
 if(APPLE)
     target_link_libraries(FuncciaFrame PRIVATE "-framework OpenGL")
 elseif(WIN32)

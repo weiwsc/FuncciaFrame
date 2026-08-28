@@ -4,15 +4,26 @@
 
 #pragma once
 #include "VulkanDevice.h"
+#include "VulkanFrame.h"
 #include "../GraphicsDevice.h"
 #include "VulkanInclude.h"
 #include "VulkanInstance.h"
 #include "VulkanSwapChain.h"
+#include "VulkanUploadContext.h"
 
 namespace Funccia::Graphic::Vulkan {
+    struct VulkanContext {
+        VulkanInstance instance;
+        VulkanDevice device;
+        VulkanAllocator allocator;
+        vk::raii::SurfaceKHR surface{nullptr};
+        VulkanSwapChain swap_chain;
+        VulkanFrameController frame_controller;
+        VulkanUploadContext upload_context;
+    };
     class VulkanRenderer : public GraphicsDevice {
     public:
-        VulkanRenderer(VulkanInstance, VulkanDevice, vk::raii::SurfaceKHR, VulkanSwapChain);
+        VulkanRenderer(VulkanContext context);
         void Init(WindowInterface& window) override;
 
         void BeginFrame(const FrameContext& frameContext) override {
@@ -22,10 +33,6 @@ namespace Funccia::Graphic::Vulkan {
 
     private:
         static auto CreateSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;
-
-        VulkanInstance instance{};
-        VulkanDevice device{};
-        vk::raii::SurfaceKHR surface{nullptr};
-        VulkanSwapChain swap_chain{};
+        VulkanContext context_;
     };
 }

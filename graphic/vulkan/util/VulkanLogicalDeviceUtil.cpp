@@ -5,7 +5,7 @@
 #include "VulkanLogicalDeviceUtil.h"
 
 #include "../VulkanDevice.h"
-#include "../VulkanDeviceRequirement.h"
+#include "../VulkanConfig.h"
 #include "../../../util/Log.h"
 
 namespace Funccia::Graphic::Vulkan::Util {
@@ -34,6 +34,7 @@ namespace Funccia::Graphic::Vulkan::Util {
                                                    queue_selection.transfer.QueueFamilyIndex,
                                                    queue_selection.transfer.QueueIndex)
             };
+
             vva_log_info("Vulkan Device Created");
             return VulkanDevice {
                 .physical_device = std::move(physical_device),

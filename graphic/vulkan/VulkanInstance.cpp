@@ -4,7 +4,7 @@
 
 #include "VulkanInstance.h"
 
-#include "VulkanDeviceRequirement.h"
+#include "VulkanConfig.h"
 #include "util/VulkanInstanceExtensionUtil.h"
 #include "util/VulkanLayerUtil.h"
 #include "util/VulkanPhysicalDeviceUtil.h"
