@@ -24,6 +24,7 @@ namespace Funccia::Graphic::Vulkan {
         using VulkanFeatureChain = vk::StructureChain<
             vk::PhysicalDeviceFeatures2,
             vk::PhysicalDeviceVulkan11Features,
+            vk::PhysicalDeviceVulkan12Features,
             vk::PhysicalDeviceVulkan13Features,
             vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>;
 
@@ -33,6 +34,7 @@ namespace Funccia::Graphic::Vulkan {
 
             chain.get<vk::PhysicalDeviceFeatures2>().features.samplerAnisotropy = vk::True;
             chain.get<vk::PhysicalDeviceVulkan11Features>().shaderDrawParameters = vk::True;
+            chain.get<vk::PhysicalDeviceVulkan12Features>().bufferDeviceAddress = vk::True;
             chain.get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering = vk::True;
             chain.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState = vk::True;
 
@@ -44,6 +46,7 @@ namespace Funccia::Graphic::Vulkan {
             auto supported = device.getFeatures2<
                 vk::PhysicalDeviceFeatures2,
                 vk::PhysicalDeviceVulkan11Features,
+                vk::PhysicalDeviceVulkan12Features,
                 vk::PhysicalDeviceVulkan13Features,
                 vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>();
 
@@ -52,6 +55,8 @@ namespace Funccia::Graphic::Vulkan {
                          .features.samplerAnisotropy &&
                 supported.get<vk::PhysicalDeviceVulkan11Features>()
                          .shaderDrawParameters &&
+                supported.get<vk::PhysicalDeviceVulkan12Features>()
+                         .bufferDeviceAddress &&
                 supported.get<vk::PhysicalDeviceVulkan13Features>()
                          .dynamicRendering &&
                 supported.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>()

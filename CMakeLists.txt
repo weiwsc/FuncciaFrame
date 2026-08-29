@@ -49,8 +49,39 @@ find_package(quill CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 
+if(DEFINED ENV{VULKAN_SDK})
+    set(_vk_sdk "$ENV{VULKAN_SDK}")
+else()
+    cmake_path(GET Vulkan_INCLUDE_DIR PARENT_PATH _vk_sdk)
+endif()
+
+find_path(SLANG_INCLUDE_DIR
+        NAMES slang.h
+        HINTS "${_vk_sdk}/include" "${_vk_sdk}/include/slang"
+        REQUIRED)
+
+find_library(SLANG_LIBRARY
+        NAMES slang-compiler slang
+        HINTS "${_vk_sdk}/lib"
+        REQUIRED)
+
 add_library(VulkanCppModule)
 add_library(Vulkan::cppm ALIAS VulkanCppModule)
+add_library(slang::slang SHARED IMPORTED)
+
+set_target_properties(slang::slang PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SLANG_INCLUDE_DIR}")
+if(WIN32)
+    # find_library returns the import lib on Windows; the DLL lives in bin/
+    find_file(SLANG_DLL NAMES slang-compiler.dll slang.dll
+            HINTS "${_vk_sdk}/bin" "${_vk_sdk}/lib" REQUIRED)
+    set_target_properties(slang::slang PROPERTIES
+            IMPORTED_IMPLIB   "${SLANG_LIBRARY}"
+            IMPORTED_LOCATION "${SLANG_DLL}")
+else()
+    set_target_properties(slang::slang PROPERTIES
+            IMPORTED_LOCATION "${SLANG_LIBRARY}")
+endif()
 
 target_compile_definitions(VulkanCppModule PUBLIC
         VULKAN_HPP_DISPATCH_LOADER_DYNAMIC=1
@@ -205,7 +236,13 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/VulkanUploadContext.h
         graphic/vulkan/VulkanAllocator.cpp
         graphic/vulkan/VulkanAllocator.h
-        graphic/vulkan/VmaImplementation.cpp)
+        graphic/vulkan/VmaImplementation.cpp
+        graphic/vulkan/AllocatedBuffer.cpp
+        graphic/vulkan/AllocatedBuffer.h
+        graphic/vulkan/AllocatedImage.cpp
+        graphic/vulkan/AllocatedImage.h
+        graphic/shaders/SlangShaderCompiler.cpp
+        graphic/shaders/SlangShaderCompiler.h)
 
 
 
@@ -218,6 +255,7 @@ target_link_libraries(FuncciaFrame PRIVATE
         nlohmann_json::nlohmann_json
         quill::quill
         GPUOpen::VulkanMemoryAllocator
+        slang::slang
 )
 
 if(APPLE)

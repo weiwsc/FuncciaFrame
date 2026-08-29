@@ -8,6 +8,7 @@
 
 #include "VulkanConfig.h"
 #include "VulkanDevice.h"
+#include "../../util/Log.h"
 
 namespace Funccia::Graphic::Vulkan {
     auto VulkanAllocator::Create(
@@ -15,6 +16,7 @@ namespace Funccia::Graphic::Vulkan {
         const vk::raii::Device& device,
         const vk::raii::Instance& instance) -> VulkanAllocator {
         VmaAllocatorCreateInfo create_info{
+            .flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT,
             .physicalDevice = static_cast<VkPhysicalDevice>(*physical_device),
             .device = static_cast<VkDevice>(*device),
             .instance = static_cast<VkInstance>(*instance),
@@ -28,6 +30,7 @@ namespace Funccia::Graphic::Vulkan {
                 "failed to create VMA allocator: " +
                 vk::to_string(static_cast<vk::Result>(result)));
         }
+        vva_log_info("allocator created.");
         return {handle};
     }
 

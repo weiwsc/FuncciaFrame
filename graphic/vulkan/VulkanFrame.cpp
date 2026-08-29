@@ -6,10 +6,11 @@
 
 #include "VulkanConfig.h"
 #include "VulkanDevice.h"
+#include "../../util/Log.h"
 
 namespace Funccia::Graphic::Vulkan {
     auto VulkanFrameController::Create(const VulkanDevice& device) -> VulkanFrameController {
-        vk::CommandPoolCreateInfo poolInfo{
+        const vk::CommandPoolCreateInfo poolInfo{
             .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
             .queueFamilyIndex = device.queue_coordinates.graphics.QueueFamilyIndex
         };
@@ -38,6 +39,7 @@ namespace Funccia::Graphic::Vulkan {
                     }
                 });
         }
+        vva_log_info("frame controller created");
         return {
             std::move(command_pool),
             std::move(frame_resources)
@@ -48,7 +50,7 @@ namespace Funccia::Graphic::Vulkan {
         return frame_resources_[frame_index_];
     }
 
-    auto VulkanFrameController::advanceFrame() {
+    auto VulkanFrameController::advanceFrame() -> void {
         frame_index_ = (frame_index_ + 1) % VulkanRenderConfig::max_frame_in_flight;
     }
 }

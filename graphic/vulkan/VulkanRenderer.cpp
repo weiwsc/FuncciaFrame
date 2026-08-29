@@ -34,6 +34,7 @@ namespace Funccia::Graphic::Vulkan {
             VulkanSwapChain::CreateSwapChain(surface, physical_device, device.logical_device, buffer_size);
         auto frame_controller = VulkanFrameController::Create(device);
         auto upload_context = CreateVulkanUploadContext(device);
+        auto shader_compiler = Graphics::Shader::SlangShaderCompiler::Create();
         vva_log_info("vulkan renderer created");
         return VulkanRenderer{
             {
@@ -43,7 +44,8 @@ namespace Funccia::Graphic::Vulkan {
                 .surface = std::move(surface),
                 .swap_chain = std::move(swap_chain),
                 .frame_controller = std::move(frame_controller),
-                .upload_context = std::move(upload_context)
+                .upload_context = std::move(upload_context),
+                .slang_shader_compiler = std::move(shader_compiler)
             }
         };
     }

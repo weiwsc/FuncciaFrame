@@ -10,6 +10,7 @@
 #include "VulkanInstance.h"
 #include "VulkanSwapChain.h"
 #include "VulkanUploadContext.h"
+#include "../shaders/SlangShaderCompiler.h"
 
 namespace Funccia::Graphic::Vulkan {
     struct VulkanContext {
@@ -20,6 +21,7 @@ namespace Funccia::Graphic::Vulkan {
         VulkanSwapChain swap_chain;
         VulkanFrameController frame_controller;
         VulkanUploadContext upload_context;
+        Graphics::Shader::SlangShaderCompiler slang_shader_compiler;
     };
     class VulkanRenderer : public GraphicsDevice {
     public:
