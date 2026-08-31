@@ -22,7 +22,7 @@ namespace Funccia::Graphics::Shader {
         //TODO: separate slang global session and session?
         slang::TargetDesc target_desc = {};
         target_desc.format = SLANG_SPIRV;
-        target_desc.profile = global_session->findProfile("spriv_1_6");
+        target_desc.profile = global_session->findProfile("spirv_1_6");
         //https://docs.shader-slang.org/en/latest/external/slang/docs/user-guide/08-compiling.html#pre-defined-macros
         // std::array<slang::PreprocessorMacroDesc, 2> preprocessorMacroDesc =
         // {
@@ -55,8 +55,9 @@ namespace Funccia::Graphics::Shader {
     }
 
     auto SlangShaderCompiler::compile(const std::string& module_name,
+        const std::string& entry_point) const -> std::vector<uint32_t> {
+
         //https://shader-slang.org/docs/compilation-api/
-        const std::string& entry_point) -> std::vector<uint32_t> {
         Slang::ComPtr<slang::IBlob> diag;
 
         slang::IModule* module = session_->loadModule(module_name.data(), diag.writeRef());

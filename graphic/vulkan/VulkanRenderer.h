@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "GraphicsPipeline.h"
 #include "VulkanDevice.h"
 #include "VulkanFrame.h"
 #include "../GraphicsDevice.h"
@@ -22,6 +23,7 @@ namespace Funccia::Graphic::Vulkan {
         VulkanFrameController frame_controller;
         VulkanUploadContext upload_context;
         Graphics::Shader::SlangShaderCompiler slang_shader_compiler;
+        GraphicsPipeline graphics_pipeline;
     };
     class VulkanRenderer : public GraphicsDevice {
     public:

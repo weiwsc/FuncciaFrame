@@ -33,7 +33,7 @@ namespace Funccia::Graphic::Vulkan {
                 VulkanFrameResource{
                     .command_buffer = std::move(command_buffers[i]),
                     .present_complete_semaphore = {device.logical_device, vk::SemaphoreCreateInfo()},
-                    .render_finished_semaphore = {device.logical_device, vk::SemaphoreCreateInfo()},
+                    .image_available_semaphore = {device.logical_device, vk::SemaphoreCreateInfo()},
                     .in_flight_fences = {
                         device.logical_device, vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled}
                     }

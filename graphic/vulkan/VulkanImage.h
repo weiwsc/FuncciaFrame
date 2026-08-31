@@ -10,6 +10,7 @@ namespace Funccia::Graphic::Vulkan {
         //just a non owning handle of the image, the image is owned by the swap chain
         vk::Image image;
         vk::raii::ImageView image_view;
+        vk::raii::Semaphore render_finished_semaphore;
     };
 
     inline auto CreateImageView(const vk::raii::Device& device, const vk::Image& image,
@@ -30,7 +31,8 @@ namespace Funccia::Graphic::Vulkan {
         auto image_view = vk::raii::ImageView(device, view_create_info);
         return {
             .image = image,
-            .image_view = std::move(image_view)
+            .image_view = std::move(image_view),
+            .render_finished_semaphore = vk::raii::Semaphore {device, vk::SemaphoreCreateInfo()}
         };
     }
 }

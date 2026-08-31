@@ -242,7 +242,11 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/AllocatedImage.cpp
         graphic/vulkan/AllocatedImage.h
         graphic/shaders/SlangShaderCompiler.cpp
-        graphic/shaders/SlangShaderCompiler.h)
+        graphic/shaders/SlangShaderCompiler.h
+        graphic/vulkan/GraphicsPipeline.cpp
+        graphic/vulkan/GraphicsPipeline.h
+        graphic/vulkan/types/Param.cpp
+        graphic/vulkan/types/Param.h)
 
 
 
@@ -257,7 +261,7 @@ target_link_libraries(FuncciaFrame PRIVATE
         GPUOpen::VulkanMemoryAllocator
         slang::slang
 )
-
+target_include_directories(FuncciaFrame SYSTEM BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/external/doc_header)
 if(APPLE)
     target_link_libraries(FuncciaFrame PRIVATE "-framework OpenGL")
 elseif(WIN32)

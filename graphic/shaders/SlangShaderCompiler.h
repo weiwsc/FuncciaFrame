@@ -29,7 +29,7 @@ namespace Funccia::Graphics::Shader {
             global_session_ = std::move(other.global_session_);
             session_ = std::move(other.session_);
         }
-        auto compile(const std::string& module_name, const std::string& entry_point)->std::vector<uint32_t>;
+        auto compile(const std::string& module_name, const std::string& entry_point) const ->std::vector<uint32_t>;
     private:
         Slang::ComPtr<slang::IGlobalSession> global_session_;
         Slang::ComPtr<slang::ISession> session_;

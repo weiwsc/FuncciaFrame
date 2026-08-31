@@ -32,7 +32,6 @@ int main() {
         vva_log_critical("test critical");
         vva_log_trace("hello trace");
         vva_log_warning("Remielle.");
-
         Funccia::Engine::Log::shutdown();
 
         return 0;

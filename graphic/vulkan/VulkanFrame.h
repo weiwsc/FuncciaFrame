@@ -11,7 +11,7 @@ namespace Funccia::Graphic::Vulkan {
     struct VulkanFrameResource {
         vk::raii::CommandBuffer command_buffer;
         vk::raii::Semaphore present_complete_semaphore;
-        vk::raii::Semaphore render_finished_semaphore;
+        vk::raii::Semaphore image_available_semaphore;
         vk::raii::Fence in_flight_fences;
     };
 
