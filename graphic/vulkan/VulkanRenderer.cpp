@@ -7,6 +7,7 @@
 #include <SDL3/SDL_vulkan.h>
 
 #include "../../util/Log.h"
+#include "types/Texture.h"
 #include "util/VulkanLogicalDeviceUtil.h"
 #include "util/VulkanPhysicalDeviceUtil.h"
 
@@ -36,6 +37,8 @@ namespace Funccia::Graphic::Vulkan {
         auto upload_context = CreateVulkanUploadContext(device);
         auto shader_compiler = Graphics::Shader::SlangShaderCompiler::Create();
         auto graphics_pipeline = GraphicsPipeline::Create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler);
+        auto sampler = createTextureSampler(device.logical_device, physical_device);
+        auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device, swap_chain.extent);
         vva_log_info("vulkan renderer created");
         return VulkanRenderer{
             {
@@ -47,7 +50,9 @@ namespace Funccia::Graphic::Vulkan {
                 .frame_controller = std::move(frame_controller),
                 .upload_context = std::move(upload_context),
                 .slang_shader_compiler = std::move(shader_compiler),
-                .graphics_pipeline = std::move(graphics_pipeline)
+                .graphics_pipeline = std::move(graphics_pipeline),
+                .sampler = std::move(sampler),
+                .depth_resource = std::move(depth_resource)
             }
         };
     }

@@ -4,7 +4,9 @@
 
 #include "GraphicsPipeline.h"
 
+#include "AllocatedImage.h"
 #include "types/Param.h"
+#include "types/Texture.h"
 
 namespace Funccia::Graphic::Vulkan {
     struct PipelineShaderModule {
@@ -50,14 +52,7 @@ namespace Funccia::Graphic::Vulkan {
             throw std::runtime_error("failed to find supported format!");
         }
 
-        vk::Format findDepthFormat(const vk::raii::PhysicalDevice& physical_device) {
-            return findSupportedFormat(
-                {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
-                vk::ImageTiling::eOptimal,
-                vk::FormatFeatureFlagBits::eDepthStencilAttachment,
-                physical_device
-            );
-        }
+
 
         auto createDescriptorSetLayout(const vk::raii::Device& device) -> vk::raii::DescriptorSetLayout {
             std::array bindings = {
@@ -75,7 +70,29 @@ namespace Funccia::Graphic::Vulkan {
             return vk::raii::DescriptorSetLayout(device, layoutInfo);
         }
     }
-
+    auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format{
+        return findSupportedFormat(
+            {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
+            vk::ImageTiling::eOptimal,
+            vk::FormatFeatureFlagBits::eDepthStencilAttachment,
+            physical_device
+        );
+    }
+    auto createDepthResources(const VmaAllocator& allocator, const vk::raii::Device& device, const vk::raii::PhysicalDevice& physical_device, vk::Extent2D size) -> Texture2D {
+        vk::Format depth_format = findDepthFormat(physical_device);
+        vk::ImageCreateInfo image_create_info {
+            .imageType = vk::ImageType::e2D,
+            .format = depth_format,
+            .extent = {size.width, size.height, 1},
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .samples = vk::SampleCountFlagBits::e1,
+            .tiling = vk::ImageTiling::eOptimal,
+            .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+            .sharingMode = vk::SharingMode::eExclusive
+        };
+        return CreateTextureImage(allocator, device,image_create_info,depth_format, vk::ImageAspectFlagBits::eDepth);
+    }
     auto GraphicsPipeline::Create(const vk::raii::Device& device,
                                   const vk::raii::PhysicalDevice& physical_device,
                                   const vk::SurfaceFormatKHR& surface_format,

@@ -36,6 +36,7 @@ namespace Funccia::Graphic::Vulkan {
             chain.get<vk::PhysicalDeviceVulkan11Features>().shaderDrawParameters = vk::True;
             chain.get<vk::PhysicalDeviceVulkan12Features>().bufferDeviceAddress = vk::True;
             chain.get<vk::PhysicalDeviceVulkan13Features>().dynamicRendering = vk::True;
+            chain.get<vk::PhysicalDeviceVulkan13Features>().synchronization2 = vk::True;
             chain.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>().extendedDynamicState = vk::True;
 
             return chain;
@@ -59,6 +60,8 @@ namespace Funccia::Graphic::Vulkan {
                          .bufferDeviceAddress &&
                 supported.get<vk::PhysicalDeviceVulkan13Features>()
                          .dynamicRendering &&
+                supported.get<vk::PhysicalDeviceVulkan13Features>()
+                         .synchronization2 &&
                 supported.get<vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT>()
                          .extendedDynamicState;
         }

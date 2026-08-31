@@ -40,6 +40,7 @@ endif()
 
 
 find_package(SDL3 CONFIG REQUIRED)
+find_package(SDL3_image CONFIG REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(harfbuzz CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
@@ -246,7 +247,15 @@ add_executable(FuncciaFrame main.cpp
         graphic/vulkan/GraphicsPipeline.cpp
         graphic/vulkan/GraphicsPipeline.h
         graphic/vulkan/types/Param.cpp
-        graphic/vulkan/types/Param.h)
+        graphic/vulkan/types/Param.h
+        graphic/vulkan/types/Model.cpp
+        graphic/vulkan/types/Model.h
+        graphic/vulkan/types/Texture.cpp
+        graphic/vulkan/types/Texture.h
+        graphic/vulkan/types/Shader.cpp
+        graphic/vulkan/types/Shader.h
+        graphic/vulkan/DescriptorAllocator.cpp
+        graphic/vulkan/DescriptorAllocator.h)
 
 
 
@@ -260,6 +269,11 @@ target_link_libraries(FuncciaFrame PRIVATE
         quill::quill
         GPUOpen::VulkanMemoryAllocator
         slang::slang
+)
+target_link_libraries(FuncciaFrame PRIVATE
+        $<IF:$<TARGET_EXISTS:SDL3_image::SDL3_image-shared>,
+        SDL3_image::SDL3_image-shared,
+        SDL3_image::SDL3_image-static>
 )
 target_include_directories(FuncciaFrame SYSTEM BEFORE PRIVATE ${CMAKE_SOURCE_DIR}/external/doc_header)
 if(APPLE)

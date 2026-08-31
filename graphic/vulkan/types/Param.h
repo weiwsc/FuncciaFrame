@@ -45,11 +45,8 @@ struct UniformBufferObject2 {
             };
         }
     };
-    template<> struct std::hash<PosNormalUV> {
-        size_t operator()(PosNormalUV const& vertex) const {
-            return ((std::hash<glm::vec3>()(vertex.pos) ^
-                   (std::hash<glm::vec3>()(vertex.normal) << 1)) >> 1) ^
-                   (std::hash<glm::vec2>()(vertex.texCoord) << 1);
-        }
-    };
+
 }
+template<> struct std::hash<Funccia::Graphic::Shader::Param::PosNormalUV> {
+    size_t operator()(const Funccia::Graphic::Shader::Param::PosNormalUV& vertex) const { /* same body */ }
+};

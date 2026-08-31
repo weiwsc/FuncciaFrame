@@ -24,6 +24,8 @@ namespace Funccia::Graphic::Vulkan {
         VulkanUploadContext upload_context;
         Graphics::Shader::SlangShaderCompiler slang_shader_compiler;
         GraphicsPipeline graphics_pipeline;
+        vk::raii::Sampler sampler;
+        Texture2D depth_resource;
     };
     class VulkanRenderer : public GraphicsDevice {
     public:

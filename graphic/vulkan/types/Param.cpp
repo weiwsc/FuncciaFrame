@@ -4,11 +4,5 @@
 
 #include "Param.h"
 
-namespace Funccia {
-    namespace Graphic {
-        namespace Shader {
-            namespace Param {
-            } // Param
-        } // Shader
-    } // Graphic
-} // Funccia
+namespace Funccia::Graphic::Shader::Param {
+}

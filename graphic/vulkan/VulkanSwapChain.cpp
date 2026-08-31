@@ -93,7 +93,8 @@ namespace Funccia::Graphic::Vulkan {
                 vulkan_swap_chain_images.emplace_back(
                     VulkanSwapChainImage{
                         .image = image,
-                        .image_view = {device, imageViewCreateInfo}
+                        .image_view = {device, imageViewCreateInfo},
+                        .render_finished_semaphore = vk::raii::Semaphore(device, vk::SemaphoreCreateInfo())
                     });
             }
             return vulkan_swap_chain_images;
@@ -131,7 +132,8 @@ namespace Funccia::Graphic::Vulkan {
         };
 
         auto swapChain = vk::raii::SwapchainKHR(device, swap_chain_create_info);
-        auto swapChainImages = createSwapChainImageViews(swapChain.getImages(), swap_chain_surface_format.format, device);
+        auto swapChainImages = createSwapChainImageViews(swapChain.getImages(), swap_chain_surface_format.format,
+                                                         device);
 
         return VulkanSwapChain{
             .handle = std::move(swapChain),

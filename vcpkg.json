@@ -33,5 +33,11 @@
   }, {
     "name" : "vulkan-memory-allocator",
     "version>=" : "3.3.0"
+  }, {
+    "name" : "sdl3-image",
+    "version>=" : "3.4.0"
+  }, {
+    "name" : "tinyobjloader",
+    "version>=" : "2.0.0rc13"
   } ]
 }
