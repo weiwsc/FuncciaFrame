@@ -18,7 +18,7 @@
 #include <unordered_set>
 #include <glad/glad.h>
 
-#include "../MathTypes.h"
+#include "../../engine/gfx/MathTypes.h"
 #include "../text/Glyph.h"
 #include "../text/HBShaper.h"
 

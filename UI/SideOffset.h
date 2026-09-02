@@ -4,7 +4,7 @@
 
 #ifndef FUNCCIAFRAME_SIDEOFFSET_H
 #define FUNCCIAFRAME_SIDEOFFSET_H
-#include "../graphic/MathTypes.h"
+#include "../engine/gfx/MathTypes.h"
 #include "UITypes.h"
 
 namespace vva::UI {

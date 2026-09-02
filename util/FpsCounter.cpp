@@ -4,7 +4,7 @@
 
 #include "FpsCounter.h"
 
-#include "../graphic/WindowInterface.h"
+#include "../engine/gfx/WindowInterface.h"
 
 namespace vva::util {
     FpsCounter::FpsCounter() {

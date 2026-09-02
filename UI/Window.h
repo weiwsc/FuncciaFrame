@@ -5,7 +5,7 @@
 #ifndef FUNCCIAFRAME_WINDOW_H
 #define FUNCCIAFRAME_WINDOW_H
 #include "UIElement.h"
-#include "../graphic/WindowInterface.h"
+#include "../engine/gfx/WindowInterface.h"
 
 namespace vva::UI {
     class Window {

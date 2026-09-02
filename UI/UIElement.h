@@ -8,7 +8,7 @@
 //#define FF_UI_LAZY_LAYOUT
 #include <memory>
 
-#include "../graphic/MathTypes.h"
+#include "../engine/gfx/MathTypes.h"
 #include <vector>
 
 #include "SideOffset.h"

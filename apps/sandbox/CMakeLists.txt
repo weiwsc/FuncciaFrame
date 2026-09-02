@@ -1,0 +1,5 @@
+add_executable(sandbox main.cpp)
+target_link_libraries(sandbox PRIVATE vva::gfx::vulkan vva::platform vva::core)
+target_compile_definitions(sandbox PRIVATE VVA_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
+set_target_properties(sandbox PROPERTIES CXX_SCAN_FOR_MODULES ON)
+vva_configure_target(sandbox)

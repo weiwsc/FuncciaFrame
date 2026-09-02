@@ -6,7 +6,7 @@
 #define FUNCCIAFRAME_WINDOWCONTROLLER_H
 #include <memory>
 
-#include "WindowInterface.h"
+#include "../engine/gfx/WindowInterface.h"
 #include "../core/Singleton.h"
 
 namespace vva::gfx {

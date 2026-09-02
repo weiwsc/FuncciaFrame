@@ -8,7 +8,7 @@
 #include <vector>
 #include <glad/glad.h>
 
-#include "../Transform.h"
+#include "../../engine/gfx/Transform.h"
 
 namespace vva::gfx::GL {
     class Shader;

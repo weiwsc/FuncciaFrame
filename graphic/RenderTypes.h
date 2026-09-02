@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "MathTypes.h"
+#include "../engine/gfx/MathTypes.h"
 
 namespace vva::gfx {
     enum class TextWrap {

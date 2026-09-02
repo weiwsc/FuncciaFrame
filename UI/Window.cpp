@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <fstream>
 #include "JsonUiBuilder.h"
-#include "../graphic/WindowInterface.h"
+#include "../engine/gfx/WindowInterface.h"
 #include "../input/MouseState.h"
 #include "../core/ProfileTimer.h"
 
