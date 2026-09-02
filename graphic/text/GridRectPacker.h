@@ -6,7 +6,7 @@
 #define FUNCCIAFRAME_GRIDRECTPACKER_H
 #include "IRectPacker.h"
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     class GridRectPacker : public IRectPacker {
     public:
         GridRectPacker(int atlasHeight, int atlasWidth,int pad, int maxLayer);

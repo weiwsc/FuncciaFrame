@@ -6,11 +6,11 @@
 #include "VulkanInclude.h"
 #include <vk_mem_alloc.h>
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanDevice;
 
     struct VulkanAllocator {
-        static auto Create(const vk::raii::PhysicalDevice& physical_device,
+        static auto create(const vk::raii::PhysicalDevice& physical_device,
                            const vk::raii::Device& device,
                            const vk::raii::Instance& instance) -> VulkanAllocator;
 

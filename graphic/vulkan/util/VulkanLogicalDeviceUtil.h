@@ -10,8 +10,8 @@
 #include "../VulkanDevice.h"
 #include "../VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan::Util {
-    auto CreateVulkanDevice(vk::raii::PhysicalDevice physicalDevice, DeviceQueueCoordinates queue_selection) -> VulkanDevice;
-    auto SelectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates>;
-    uint32_t findTransferQue(uint32_t graphicsIndex, const vk::raii::PhysicalDevice& physicalDevice);
+namespace vva::gfx::vulkan::util {
+    auto createVulkanDevice(vk::raii::PhysicalDevice physical_device, DeviceQueueCoordinates queue_selection) -> VulkanDevice;
+    auto selectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates>;
+    uint32_t findTransferQue(uint32_t graphics_index, const vk::raii::PhysicalDevice& physical_device);
 }

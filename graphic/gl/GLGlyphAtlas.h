@@ -22,7 +22,7 @@
 #include "../text/Glyph.h"
 #include "../text/HBShaper.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     struct AtlasCell;
 
     class GLGlyphAtlas {

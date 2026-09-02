@@ -5,15 +5,15 @@
 #pragma once
 #include <chrono>
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     class WindowInterface;
 }
 
-namespace Funccia::Util {
+namespace vva::util {
     class FpsCounter {
     public:
         FpsCounter();
-        void Update(Graphic::WindowInterface& window);
+        void Update(gfx::WindowInterface& window);
         [[nodiscard]] auto GetFPS() const -> double { return fps; }
         [[nodiscard]] auto GetFrameMS() const -> double { return ms; }
         [[nodiscard]] auto GetDeltaTime() const -> float { return deltaTime; }
@@ -25,4 +25,4 @@ namespace Funccia::Util {
         double fps = 0;
         double ms = 0;
     };
-} // Funccia::Util
+} // vva::util

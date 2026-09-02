@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 
-namespace Funccia::Core {
+namespace vva::core {
     FileController::FileController() {
         m_handle = nullptr;
         m_readSuccess = false;
@@ -93,5 +93,5 @@ namespace Funccia::Core {
         file.close();
         return readStatus;
     }
-} // Core
+} // core
 // Funccia

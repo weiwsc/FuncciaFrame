@@ -5,7 +5,7 @@
 #pragma once
 #include "VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanDevice;
 
     struct VulkanFrameResource {
@@ -16,7 +16,7 @@ namespace Funccia::Graphic::Vulkan {
     };
 
     struct VulkanFrameController {
-        static auto Create(const VulkanDevice& device) -> VulkanFrameController;
+        static auto create(const VulkanDevice& device) -> VulkanFrameController;
         [[nodiscard]] auto frame() const -> const VulkanFrameResource&;
         auto advanceFrame() -> void;
 

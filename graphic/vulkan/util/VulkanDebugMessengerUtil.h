@@ -6,8 +6,8 @@
 #include <optional>
 #include "../VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan::Util {
+namespace vva::gfx::vulkan::util {
     [[nodiscard]]
-    auto CreateDebugMessenger(const vk::raii::Instance& instance,
-                              bool enableValidationLayers) -> std::optional<vk::raii::DebugUtilsMessengerEXT>;
+    auto createDebugMessenger(const vk::raii::Instance& instance,
+                              bool enable_validation_layers) -> std::optional<vk::raii::DebugUtilsMessengerEXT>;
 }

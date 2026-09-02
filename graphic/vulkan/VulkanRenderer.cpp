@@ -11,7 +11,7 @@
 #include "util/VulkanLogicalDeviceUtil.h"
 #include "util/VulkanPhysicalDeviceUtil.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     VulkanRenderer::VulkanRenderer(VulkanContext context)
         : context_(std::move(context)) {
     }
@@ -20,23 +20,23 @@ namespace Funccia::Graphic::Vulkan {
         // TODO: deprecate init() style intialization in the interface
     }
 
-    auto VulkanRenderer::CreateVulkanRenderer(WindowInterface& window_interface) -> VulkanRenderer {
+    auto VulkanRenderer::createVulkanRenderer(WindowInterface& window_interface) -> VulkanRenderer {
         auto instance = VulkanInstance::createVulkanInstance(true);
-        auto surface = CreateSurface(window_interface, instance.instance);
-        auto physical_device_selection_result = Util::pickPhysicalDevice(instance.instance, surface);
+        auto surface = createSurface(window_interface, instance.instance);
+        auto physical_device_selection_result = util::pickPhysicalDevice(instance.instance, surface);
         auto physical_device = physical_device_selection_result.physical_device;
-        auto device = Util::CreateVulkanDevice(physical_device, physical_device_selection_result.queue_coordinates);
+        auto device = util::createVulkanDevice(physical_device, physical_device_selection_result.queue_coordinates);
 
-        auto allocator = VulkanAllocator::Create(physical_device, device.logical_device, instance.instance);
+        auto allocator = VulkanAllocator::create(physical_device, device.logical_device, instance.instance);
 
         ivec2 buffer_size{};
         window_interface.GetFramebufferSize(buffer_size.x, buffer_size.y);
         auto swap_chain =
-            VulkanSwapChain::CreateSwapChain(surface, physical_device, device.logical_device, buffer_size);
-        auto frame_controller = VulkanFrameController::Create(device);
-        auto upload_context = CreateVulkanUploadContext(device);
-        auto shader_compiler = Graphics::Shader::SlangShaderCompiler::Create();
-        auto graphics_pipeline = GraphicsPipeline::Create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler);
+            VulkanSwapChain::createSwapChain(surface, physical_device, device.logical_device, buffer_size);
+        auto frame_controller = VulkanFrameController::create(device);
+        auto upload_context = createVulkanUploadContext(device);
+        auto shader_compiler = gfx::shader::SlangShaderCompiler::create();
+        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler);
         auto sampler = createTextureSampler(device.logical_device, physical_device);
         auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device, swap_chain.extent);
         vva_log_info("vulkan renderer created");
@@ -57,13 +57,13 @@ namespace Funccia::Graphic::Vulkan {
         };
     }
 
-    auto VulkanRenderer::CreateSurface(WindowInterface& window,
+    auto VulkanRenderer::createSurface(WindowInterface& window,
                                        const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR {
-        VkSurfaceKHR _surface;
+        VkSurfaceKHR surface;
         if (!SDL_Vulkan_CreateSurface(static_cast<SDL_Window*>(window.GetNativeWindow()), *instance, nullptr,
-                                      &_surface)) {
+                                      &surface)) {
             throw std::runtime_error("failed to create window surface!");
         }
-        return vk::raii::SurfaceKHR(instance, _surface);
+        return vk::raii::SurfaceKHR(instance, surface);
     }
 }

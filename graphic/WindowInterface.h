@@ -8,15 +8,15 @@
 
 #include "RenderBackend.h"
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     enum class Key;
 }
 
-namespace Funccia::Input {
+namespace vva::Input {
     class MouseState;
 }
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     class WindowInterface{
         public:
         virtual ~WindowInterface() = default;

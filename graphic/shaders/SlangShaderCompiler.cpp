@@ -8,13 +8,13 @@
 
 #include "../../util/Log.h"
 
-namespace Funccia::Graphics::Shader {
+namespace vva::gfx::shader {
     namespace {
         void report(Slang::ComPtr<slang::IBlob>& d) {
             if (d) { std::fprintf(stderr, "%s\n", (const char*)d->getBufferPointer()); d = nullptr; }
         }
     }
-    auto SlangShaderCompiler::Create() -> SlangShaderCompiler {
+    auto SlangShaderCompiler::create() -> SlangShaderCompiler {
         Slang::ComPtr<slang::IGlobalSession> global_session;
         slang::createGlobalSession(global_session.writeRef());
 

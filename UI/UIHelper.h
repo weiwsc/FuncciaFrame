@@ -8,7 +8,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 
-namespace Funccia::UI {
+namespace vva::UI {
     using vec4 = glm::vec4;
     using vec2 = glm::vec2;
     class UIHelper {

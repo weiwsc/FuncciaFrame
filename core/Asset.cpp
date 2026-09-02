@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace Funccia::Core {
+namespace vva::core {
     Asset::Asset() {
         m_GUID = "";
         m_dataSize = 0;

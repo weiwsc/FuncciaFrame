@@ -26,8 +26,8 @@ struct Timer {
     }
 };
 
-namespace Funccia::UI {
-    Window::Window(Graphic::WindowInterface *window) {
+namespace vva::UI {
+    Window::Window(gfx::WindowInterface *window) {
         m_window = window;
         //TextUI();
         //TestUI();
@@ -36,7 +36,7 @@ namespace Funccia::UI {
     }
 
 
-    auto Window::Render(Graphic::IUiRenderer &renderer, Graphic::ITextRenderer &text_renderer, float target_x,
+    auto Window::Render(gfx::IUiRenderer &renderer, gfx::ITextRenderer &text_renderer, float target_x,
                         float target_y, const glm::vec2 &screenSize) -> void {
             {
             PROFILE_SCOPE("layout::fit_x");
@@ -106,8 +106,8 @@ namespace Funccia::UI {
 
     }
 
-    auto Window::RenderProfile(Graphic::IUiRenderer &renderer, Graphic::ITextRenderer &text_renderer,
-                               Graphic::ITextRenderer &text_render,
+    auto Window::RenderProfile(gfx::IUiRenderer &renderer, gfx::ITextRenderer &text_renderer,
+                               gfx::ITextRenderer &text_render,
                                float target_x, float target_y, const glm::vec2 &screenSize) -> void {
         auto start = std::chrono::high_resolution_clock::now();
         root->CalculateFitSizeOnAxis(Axis::Horizontal);
@@ -168,7 +168,7 @@ namespace Funccia::UI {
         buffer << file.rdbuf();
         std::string content = buffer.str();
         root->m_children.clear();
-        Funccia::UI::JsonUiBuilder::ParseUI(content, root.get());
+        vva::UI::JsonUiBuilder::ParseUI(content, root.get());
     }
 
     auto Window::SetHoveredElement(UIElement *element) -> void {

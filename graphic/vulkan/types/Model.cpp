@@ -12,16 +12,16 @@
 #include "../VulkanDevice.h"
 #include "../VulkanUploadContext.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     namespace {
-        using Vertex = Shader::Param::PosNormalUV;
+        using Vertex = shader::param::PosNormalUV;
 
         struct ModelLoadResult {
             std::vector<Vertex> vertex_buffer;
             std::vector<uint32_t> index_buffer;
         };
 
-        auto loadModel(std::string model_path) -> ModelLoadResult {
+        auto loadModel(const std::string& model_path) -> ModelLoadResult {
             tinyobj::attrib_t attrib;
             std::vector<tinyobj::shape_t> shapes;
             std::vector<tinyobj::material_t> materials;
@@ -30,7 +30,7 @@ namespace Funccia::Graphic::Vulkan {
             if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, model_path.c_str())) {
                 throw std::runtime_error(warn + err);
             }
-            std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+            std::unordered_map<Vertex, uint32_t> unique_vertices{};
             std::vector<Vertex> vertices;
             std::vector<uint32_t> indices;
             for (const auto& shape : shapes) {
@@ -46,16 +46,16 @@ namespace Funccia::Graphic::Vulkan {
                         attrib.normals[3 * index.normal_index + 1],
                         attrib.normals[3 * index.normal_index + 2]
                     };
-                    vertex.texCoord = {
+                    vertex.tex_coord = {
                         attrib.texcoords[2 * index.texcoord_index + 0],
                         1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
                     };
-                    if (!uniqueVertices.contains(vertex)) {
-                        uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                    if (!unique_vertices.contains(vertex)) {
+                        unique_vertices[vertex] = static_cast<uint32_t>(vertices.size());
                         vertices.push_back(vertex);
                     }
                     // vertices.push_back(vertex);
-                    indices.push_back(uniqueVertices[vertex]);
+                    indices.push_back(unique_vertices[vertex]);
                 }
             }
             return {
@@ -64,18 +64,18 @@ namespace Funccia::Graphic::Vulkan {
             };
         }
 
-        auto CreateModel(
+        auto createModel(
             VmaAllocator allocator,
             const VulkanDevice& device,
             VulkanUploadContext& upload,
             const ModelLoadResult& data) -> Model {
-            const vk::DeviceSize vertexBytes =
+            const vk::DeviceSize vertex_bytes =
                 data.vertex_buffer.size() * sizeof(Vertex);
-            const vk::DeviceSize indexBytes =
+            const vk::DeviceSize index_bytes =
                 data.index_buffer.size() * sizeof(uint32_t);
 
-            auto makeStaging = [&](const void* src, vk::DeviceSize size) {
-                auto buffer = AllocatedBuffer::CreateBuffer(
+            auto make_staging = [&](const void* src, vk::DeviceSize size) {
+                auto buffer = AllocatedBuffer::createBuffer(
                     allocator, size,
                     vk::BufferUsageFlagBits::eTransferSrc,
                     VMA_MEMORY_USAGE_AUTO_PREFER_HOST,
@@ -86,17 +86,17 @@ namespace Funccia::Graphic::Vulkan {
                 return buffer;
             };
 
-            auto vertexStaging = makeStaging(data.vertex_buffer.data(), vertexBytes);
-            auto indexStaging = makeStaging(data.index_buffer.data(), indexBytes);
+            auto vertex_staging = make_staging(data.vertex_buffer.data(), vertex_bytes);
+            auto index_staging = make_staging(data.index_buffer.data(), index_bytes);
 
-            auto vertexBuffer = AllocatedBuffer::CreateBuffer(
-                allocator, vertexBytes,
+            auto vertex_buffer = AllocatedBuffer::createBuffer(
+                allocator, vertex_bytes,
                 vk::BufferUsageFlagBits::eTransferDst |
                 vk::BufferUsageFlagBits::eVertexBuffer,
                 VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
 
-            auto indexBuffer = AllocatedBuffer::CreateBuffer(
-                allocator, indexBytes,
+            auto index_buffer = AllocatedBuffer::createBuffer(
+                allocator, index_bytes,
                 vk::BufferUsageFlagBits::eTransferDst |
                 vk::BufferUsageFlagBits::eIndexBuffer,
                 VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE);
@@ -106,13 +106,13 @@ namespace Funccia::Graphic::Vulkan {
             cmd.reset();
             cmd.begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 
-            cmd.copyBuffer(vertexStaging.handle(), vertexBuffer.handle(),
-                           vk::BufferCopy{0, 0, vertexBytes});
-            cmd.copyBuffer(indexStaging.handle(), indexBuffer.handle(),
-                           vk::BufferCopy{0, 0, indexBytes});
+            cmd.copyBuffer(vertex_staging.handle(), vertex_buffer.handle(),
+                           vk::BufferCopy{0, 0, vertex_bytes});
+            cmd.copyBuffer(index_staging.handle(), index_buffer.handle(),
+                           vk::BufferCopy{0, 0, index_bytes});
 
             // Make the transfer writes visible to vertex/index fetch in later submits.
-            vk::MemoryBarrier2 copyToRead{
+            vk::MemoryBarrier2 copy_to_read{
                 .srcStageMask = vk::PipelineStageFlagBits2::eCopy,
                 .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
                 .dstStageMask = vk::PipelineStageFlagBits2::eVertexAttributeInput |
@@ -122,7 +122,7 @@ namespace Funccia::Graphic::Vulkan {
             };
             cmd.pipelineBarrier2({
                 .memoryBarrierCount = 1,
-                .pMemoryBarriers = &copyToRead
+                .pMemoryBarriers = &copy_to_read
             });
 
             cmd.end();
@@ -131,14 +131,14 @@ namespace Funccia::Graphic::Vulkan {
                 .commandBufferCount = 1,
                 .pCommandBuffers = &*cmd
             };
-            device.queues.graphics_queue_.submit(submit, *upload.fence);
+            device.queues.graphics_queue.submit(submit, *upload.fence);
             (void)device.logical_device.waitForFences(*upload.fence, vk::True, UINT64_MAX);
 
             // Staging buffers destroyed here by RAII — safe, the fence already waited.
             return Model{
                 .index_count = static_cast<uint32_t>(data.index_buffer.size()),
-                .vertex_buffer = std::move(vertexBuffer),
-                .index_buffer = std::move(indexBuffer)
+                .vertex_buffer = std::move(vertex_buffer),
+                .index_buffer = std::move(index_buffer)
             };
         }
     }
@@ -149,6 +149,6 @@ namespace Funccia::Graphic::Vulkan {
                    VulkanUploadContext& upload) -> Model
     {
         const ModelLoadResult data = loadModel(std::string{model_name});
-        return CreateModel(allocator, device, upload, data);
+        return createModel(allocator, device, upload, data);
     }
 }

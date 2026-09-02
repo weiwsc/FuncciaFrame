@@ -3,7 +3,7 @@
 //
 
 #include "TextFile.h"
-namespace Funccia::Core {
+namespace vva::core {
     TextFile::TextFile() {
         m_asset = nullptr;
     }
@@ -21,7 +21,7 @@ namespace Funccia::Core {
         Resource::Deserialize(deserializer);
     }
 
-    auto TextFile::TypeID() -> Core::TypeID {
+    auto TextFile::TypeID() -> core::TypeID {
         return TypeID::TextFile;
     }
 }

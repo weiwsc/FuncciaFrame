@@ -4,7 +4,7 @@
 
 #pragma once
 #include "VulkanInclude.h"
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanDevice;
 
     struct VulkanUploadContext {
@@ -12,5 +12,5 @@ namespace Funccia::Graphic::Vulkan {
         vk::raii::CommandBuffer command_buffer;
         vk::raii::Fence fence;
     };
-    auto CreateVulkanUploadContext(const VulkanDevice& device) -> VulkanUploadContext;
+    auto createVulkanUploadContext(const VulkanDevice& device) -> VulkanUploadContext;
 }

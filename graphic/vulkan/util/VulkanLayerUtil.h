@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace Funccia::Graphic::Vulkan::Util {
-    auto GetRequiredLayers(const vk::raii::Context& context,
-                           const bool enableValidationLayers) -> std::vector<char const*>;
+namespace vva::gfx::vulkan::util {
+    auto getRequiredLayers(const vk::raii::Context& context,
+                           const bool enable_validation_layers) -> std::vector<char const*>;
 }

@@ -8,14 +8,14 @@
 #include "VulkanImage.h"
 #include "VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanSwapChain {
         vk::raii::SwapchainKHR handle{nullptr};
         std::vector<VulkanSwapChainImage> images;
         vk::SurfaceFormatKHR surface_format{};
         vk::Extent2D extent{};
 
-        static auto CreateSwapChain(const vk::raii::SurfaceKHR& surface,
+        static auto createSwapChain(const vk::raii::SurfaceKHR& surface,
                                           const vk::raii::PhysicalDevice& physical_device,
                                           const vk::raii::Device& device,
                                           const glm::ivec2 buffer_size) -> VulkanSwapChain;

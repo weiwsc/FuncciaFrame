@@ -9,7 +9,7 @@
 
 
 
-namespace Funccia::Core {
+namespace vva::core {
     class Deserializer;
     class Serializer;
 

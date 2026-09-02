@@ -15,7 +15,7 @@
 
 #include "util.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::string, std::byte;
 
     class Resource : public ISerializable{

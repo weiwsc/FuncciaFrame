@@ -8,7 +8,7 @@
 
 #include "util.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     #define B_PER_MB 1048576
     #define B_PER_KB 1024
 

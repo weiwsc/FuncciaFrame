@@ -10,7 +10,7 @@
 #include "Singleton.h"
 #include "StackAllocator.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     class AssetController : public Singleton<AssetController> {
     public:
         AssetController();

@@ -8,7 +8,7 @@
 #include "AssetController.h"
 #include "Resource.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     Serializer::Serializer(const string& _file_name): _stream(_file_name, std::ios::out | std::ios::binary) {
     }
 

@@ -4,7 +4,7 @@
 
 #include "ObjectPoolManager.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     ObjectPool<Asset>* ObjectPoolManager::AssetPool;
     ObjectPool<Resource>* ObjectPoolManager::ResourcePool;
 

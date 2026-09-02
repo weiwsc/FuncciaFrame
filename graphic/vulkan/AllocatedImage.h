@@ -6,7 +6,7 @@
 #include "VulkanInclude.h"
 #include "vk_mem_alloc.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanAllocator;
 
     struct AllocatedImage {
@@ -30,7 +30,7 @@ namespace Funccia::Graphic::Vulkan {
         auto allocation() const noexcept -> VmaAllocation {
             return allocation_;
         }
-        static auto Create(vk::ImageCreateInfo image_create_info, VmaAllocator& allocator) -> AllocatedImage;
+        static auto create(vk::ImageCreateInfo image_create_info, VmaAllocator& allocator) -> AllocatedImage;
     private:
         void reset() noexcept;
         VmaAllocator allocator_ = VK_NULL_HANDLE;

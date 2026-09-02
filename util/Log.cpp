@@ -23,7 +23,7 @@ namespace
     quill::Logger* engine_logger = nullptr;
 }
 
-void Funccia::Engine::Log::init()
+void vva::engine::log::init()
 {
     if (engine_logger)
         return;
@@ -45,7 +45,7 @@ void Funccia::Engine::Log::init()
     engine_logger->set_log_level(quill::LogLevel::TraceL3);
 }
 
-void Funccia::Engine::Log::shutdown()
+void vva::engine::log::shutdown()
 {
     if (!engine_logger)
         return;
@@ -55,7 +55,7 @@ void Funccia::Engine::Log::shutdown()
     engine_logger = nullptr;
 }
 
-quill::Logger* Funccia::Engine::Log::get()
+quill::Logger* vva::engine::log::get()
 {
     return engine_logger;
 }

@@ -8,21 +8,21 @@
 #include "VulkanDevice.h"
 #include "../../util/Log.h"
 
-namespace Funccia::Graphic::Vulkan {
-    auto VulkanFrameController::Create(const VulkanDevice& device) -> VulkanFrameController {
-        const vk::CommandPoolCreateInfo poolInfo{
+namespace vva::gfx::vulkan{
+    auto VulkanFrameController::create(const VulkanDevice& device) -> VulkanFrameController {
+        const vk::CommandPoolCreateInfo pool_info{
             .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-            .queueFamilyIndex = device.queue_coordinates.graphics.QueueFamilyIndex
+            .queueFamilyIndex = device.queue_coordinates.graphics.queue_family_index
         };
-        auto command_pool = vk::raii::CommandPool(device.logical_device, poolInfo);
+        auto command_pool = vk::raii::CommandPool(device.logical_device, pool_info);
 
 
-        vk::CommandBufferAllocateInfo allocInfo{
+        vk::CommandBufferAllocateInfo alloc_info{
             .commandPool = command_pool,
             .level = vk::CommandBufferLevel::ePrimary,
             .commandBufferCount = VulkanRenderConfig::max_frame_in_flight
         };
-        auto command_buffers = vk::raii::CommandBuffers(device.logical_device, allocInfo);
+        auto command_buffers = vk::raii::CommandBuffers(device.logical_device, alloc_info);
 
 
         std::vector<VulkanFrameResource> frame_resources;

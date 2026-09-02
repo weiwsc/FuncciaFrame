@@ -4,12 +4,13 @@
 
 #ifndef FILECONTROLLER_H
 #define FILECONTROLLER_H
+#include <ios>
 #include <optional>
 #include <thread>
 #include <string>
 #include "Singleton.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::string, std::byte;
 
     class FileController : public Singleton<FileController> {

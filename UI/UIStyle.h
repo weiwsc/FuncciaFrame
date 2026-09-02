@@ -9,7 +9,7 @@
 #include "UIFluentAPI.h"
 #include "../graphic/text/FontManager.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     class UIStyle : public UIFluentAPI{
     public:
         std::string tag {};
@@ -43,7 +43,7 @@ namespace Funccia::UI {
         // Text
         //std::string text {};
         int font_size {16};
-        Graphic::TextWrap text_wrap_mode {Graphic::TextWrap::Character};
+        gfx::TextWrap text_wrap_mode {gfx::TextWrap::Character};
         std::string font_path {FontManager::Instance().GetFont()};
 
         bool text_recalculate_flag = true;
@@ -94,7 +94,7 @@ namespace Funccia::UI {
 
         //auto Text(const std::string& _text) -> UIStyle& override;
         auto FontSize(int size) -> UIStyle& override;
-        auto TextWrap(Graphic::TextWrap wrap) -> UIStyle& override;
+        auto TextWrap(gfx::TextWrap wrap) -> UIStyle& override;
 
         auto InvisibleButOccupySpace(bool option) -> UIStyle& override;
 

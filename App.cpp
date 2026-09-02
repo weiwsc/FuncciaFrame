@@ -21,9 +21,9 @@
 
 #include <iostream>
 
-namespace Funccia {
+namespace vva {
     namespace {
-        constexpr auto kRenderBackend = Graphic::RenderBackend::OpenGL;
+        constexpr auto kRenderBackend = gfx::RenderBackend::OpenGL;
     }
 
     App::App() = default;
@@ -51,7 +51,7 @@ namespace Funccia {
                 file_watcher->Poll();
                 window->PollEvents();
 
-                if (window->IsKeyPressed(Graphic::Key::Escape)) {
+                if (window->IsKeyPressed(gfx::Key::Escape)) {
                     window->SetShouldClose(true);
                 }
 
@@ -92,59 +92,59 @@ namespace Funccia {
 
     auto App::Shutdown() -> void {
         window->Close();
-        Funccia::Core::AssetController::Instance().Clear();
+        vva::core::AssetController::Instance().Clear();
     }
 
     auto App::InitCoreSystem() -> void {
-        Funccia::Core::AssetController::Instance().Initialize(100 * 1024 * 1024);
+        vva::core::AssetController::Instance().Initialize(100 * 1024 * 1024);
     }
 
-    auto App::InitWindow(Graphic::RenderBackend backend) -> void {
-        auto sdlWindow = std::make_unique<Funccia::Graphic::GL::SDLWindow>();
+    auto App::InitWindow(gfx::RenderBackend backend) -> void {
+        auto sdlWindow = std::make_unique<vva::gfx::GL::SDLWindow>();
         if (!sdlWindow->Initialize(1920, 1080, application_metadata.applicationTitle, backend)) {
             std::cerr << "Failed to initialize window!" << std::endl;
         }
 
-        auto& windowController = Funccia::Graphic::WindowController::Instance();
+        auto& windowController = vva::gfx::WindowController::Instance();
         windowController.SetWindow(std::move(sdlWindow));
         window = windowController.GetWindow();
     }
 
     auto App::InitFpsCounter() -> void {
-        fps_counter = std::make_unique<Funccia::Util::FpsCounter>();
+        fps_counter = std::make_unique<vva::util::FpsCounter>();
     }
 
     auto App::InitGraphicsDevice() -> void {
-        graphics_device = std::make_unique<Funccia::Graphic::GL::GLGraphicsDevice>();
+        graphics_device = std::make_unique<vva::gfx::GL::GLGraphicsDevice>();
         graphics_device->Init(*window);
     }
 
     auto App::InitUIRenderer() -> void {
-        ui_renderer = std::make_unique<Funccia::Graphic::GL::GLUiRenderer>();
+        ui_renderer = std::make_unique<vva::gfx::GL::GLUiRenderer>();
         ui_renderer->Initialize("../graphic/shaders/vertex/UIShader-ver.glsl",
                                 "../graphic/shaders/fragment/UIShader-frag.glsl");
     }
 
     auto App::InitUIWindow() -> void {
-        ui_window = std::make_unique<Funccia::UI::Window>(window);
+        ui_window = std::make_unique<vva::UI::Window>(window);
 
 
-        Funccia::UI::JsonUiBuilder::ReadComponentSchema(
+        vva::UI::JsonUiBuilder::ReadComponentSchema(
             "../graphic/assets/test.component-schema.json");
-        Funccia::UI::JsonUiBuilder::ReadStyleSheet(
+        vva::UI::JsonUiBuilder::ReadStyleSheet(
             "../graphic/assets/test.style.json");
         ui_window->ReloadFromJSON("../graphic/assets/test.funccia-ui.json");
     }
 
     auto App::InitTextRenderer() -> void {
-        text_renderer = std::make_unique<Funccia::Graphic::GL::GLTextRenderer>();
+        text_renderer = std::make_unique<vva::gfx::GL::GLTextRenderer>();
         text_renderer->Initialize(
             "../graphic/shaders/vertex/FontShader1-ver.glsl",
             "../graphic/shaders/fragment/FontShader1-fag.glsl");
     }
 
     auto App::InitFileWatcher() -> void {
-        file_watcher = std::make_unique<Funccia::Core::FileWatcher>();
+        file_watcher = std::make_unique<vva::core::FileWatcher>();
         file_watcher->Add("../graphic/assets/test.funccia-ui.json",
                           [&](const std::filesystem::path& path) {
                               ui_window->ReloadFromJSON(path.string());
@@ -152,14 +152,14 @@ namespace Funccia {
         );
         file_watcher->Add("../graphic/assets/test.component-schema.json",
                           [&](const std::filesystem::path& path) {
-                              Funccia::UI::JsonUiBuilder::ReadComponentSchema(path.string());
+                              vva::UI::JsonUiBuilder::ReadComponentSchema(path.string());
                               ui_window->ReloadFromJSON(
                                   "../graphic/assets/test.funccia-ui.json");
                           }
         );
         file_watcher->Add("../graphic/assets/test.style.json",
                           [&](const std::filesystem::path& path) {
-                              Funccia::UI::JsonUiBuilder::ReadStyleSheet(path.string());
+                              vva::UI::JsonUiBuilder::ReadStyleSheet(path.string());
                               ui_window->ReloadFromJSON("../graphic/assets/test.funccia-ui.json");
                           }
         );

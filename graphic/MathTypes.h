@@ -11,7 +11,7 @@
 
 #define FF_FORWARD_NEG_Z
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     using vec2 = glm::vec2;
     using ivec2 = glm::ivec2;
     using vec3 = glm::vec3;

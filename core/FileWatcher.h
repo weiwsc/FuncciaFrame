@@ -8,7 +8,7 @@
 #include <thread>
 #include <chrono>
 
-namespace Funccia {
+namespace vva {
     using Callback = std::function<void(const std::filesystem::path&)>;
 struct FileWatch {
     std::filesystem::path path;
@@ -16,7 +16,7 @@ struct FileWatch {
     std::atomic<bool> m_changed{false};
     Callback callback;
 };
-    namespace Core {
+    namespace core {
         class FileWatcher {
         public:
 

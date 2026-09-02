@@ -15,7 +15,7 @@
 #include "UIStyleDef.h"
 #include "UIStyleSheets.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     using json = nlohmann::json;
     using StyleHandler = std::function<void(UIFluentAPI*, const json&)>;
 

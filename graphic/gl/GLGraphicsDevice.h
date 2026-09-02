@@ -5,7 +5,7 @@
 #pragma once
 #include "../GraphicsDevice.h"
 
-namespace Funccia::Graphic::GL
+namespace vva::gfx::GL
 {
     class GLGraphicsDevice : public GraphicsDevice {
     public:

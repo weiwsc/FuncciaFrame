@@ -3,7 +3,7 @@
 //
 #include "VulkanDevice.h"
 
-namespace Funccia::Graphic::Vulkan{
+namespace vva::gfx::vulkan{
 
 
 

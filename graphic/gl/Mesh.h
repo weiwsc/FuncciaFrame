@@ -10,7 +10,7 @@
 
 #include "../Transform.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     class Shader;
 
     class Mesh {

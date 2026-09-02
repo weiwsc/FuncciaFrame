@@ -8,9 +8,9 @@
 #include "slang-com-ptr.h"
 #include "slang-com-helper.h"
 
-namespace Funccia::Graphics::Shader {
+namespace vva::gfx::shader {
     struct SlangShaderCompiler {
-        static auto Create() -> SlangShaderCompiler;
+        static auto create() -> SlangShaderCompiler;
 
         SlangShaderCompiler(Slang::ComPtr<slang::IGlobalSession> global_session,
                             Slang::ComPtr<slang::ISession> session) : global_session_(std::move(global_session)),
@@ -28,6 +28,7 @@ namespace Funccia::Graphics::Shader {
         auto operator=(SlangShaderCompiler&& other) noexcept -> SlangShaderCompiler& {
             global_session_ = std::move(other.global_session_);
             session_ = std::move(other.session_);
+            return *this;
         }
         auto compile(const std::string& module_name, const std::string& entry_point) const ->std::vector<uint32_t>;
     private:

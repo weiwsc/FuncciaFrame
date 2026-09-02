@@ -4,6 +4,6 @@
 
 #include "GraphicsDevice.h"
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
 
 }

@@ -6,8 +6,8 @@
 #define FUNCCIAFRAME_SHADER_H
 #include "../../core/Resource.h"
 
-namespace Funccia::Graphic::GL {
-    class Shader : Core::Resource {
+namespace vva::gfx::GL {
+    class Shader : core::Resource {
     public:
         Shader();
 
@@ -15,11 +15,11 @@ namespace Funccia::Graphic::GL {
 
         void initialize(const std::string &vertexPath, const std::string &fragmentPath);
 
-        void Serialize(Core::Serializer &serializer) override;
+        void Serialize(core::Serializer &serializer) override;
 
-        void Deserialize(Core::Deserializer &deserializer) override;
+        void Deserialize(core::Deserializer &deserializer) override;
 
-        auto TypeID() -> Core::TypeID override { return Core::TypeID::Shader; }
+        auto TypeID() -> core::TypeID override { return core::TypeID::Shader; }
 
         // use/activate the shader
         void use();
@@ -36,8 +36,8 @@ namespace Funccia::Graphic::GL {
     private:
         unsigned int ID;
 
-        Core::Asset *m_vertexShaderSource;
-        Core::Asset *m_fragmentShaderSource;
+        core::Asset *m_vertexShaderSource;
+        core::Asset *m_fragmentShaderSource;
     };
 }
 

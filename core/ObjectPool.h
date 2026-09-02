@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include <concepts>
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::cout, std::endl;
 
     template<typename T>

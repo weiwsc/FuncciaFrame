@@ -6,9 +6,9 @@
 #include <freetype/freetype.h>
 #include "../text/HBShaper.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     GLTextRenderer::GLTextRenderer() {
-        m_atlas = std::make_unique<Funccia::Graphic::GL::GLGlyphAtlas>();
+        m_atlas = std::make_unique<vva::gfx::GL::GLGlyphAtlas>();
         m_atlas->CreateAtlas(2048, 2048, 4);
     }
 

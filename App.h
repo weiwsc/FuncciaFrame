@@ -7,12 +7,12 @@
 
 #include "ApplicationMetadata.h"
 
-namespace Funccia {
-    namespace Util {
+namespace vva {
+    namespace util {
         class FpsCounter;
     }
 
-    namespace Core {
+    namespace core {
         class FileWatcher;
     }
 
@@ -20,7 +20,7 @@ namespace Funccia {
         class Window;
     }
 
-    namespace Graphic {
+    namespace gfx {
         enum class RenderBackend;
         class GraphicsDevice;
         class ITextRenderer;
@@ -28,7 +28,7 @@ namespace Funccia {
         class WindowInterface;
     }
 
-    class App : public Core::Singleton<App> {
+    class App : public core::Singleton<App> {
     public:
         App();
         ~App() override;
@@ -38,7 +38,7 @@ namespace Funccia {
         ApplicationMetadata application_metadata;
     private:
         auto InitCoreSystem() -> void;
-        auto InitWindow(Graphic::RenderBackend backend) -> void;
+        auto InitWindow(gfx::RenderBackend backend) -> void;
         auto InitFpsCounter() -> void;
         auto InitGraphicsDevice() -> void;
         auto InitUIRenderer() -> void;
@@ -46,13 +46,13 @@ namespace Funccia {
         auto InitTextRenderer() -> void;
         auto InitFileWatcher() -> void;
 
-        std::unique_ptr<Funccia::Graphic::IUiRenderer> ui_renderer;
-        std::unique_ptr<Funccia::Graphic::ITextRenderer> text_renderer;
-        std::unique_ptr<Funccia::UI::Window> ui_window;
-        std::unique_ptr<Funccia::Core::FileWatcher> file_watcher;
-        std::unique_ptr<Funccia::Graphic::GraphicsDevice> graphics_device;
-        std::unique_ptr<Funccia::Util::FpsCounter> fps_counter;
-        Graphic::WindowInterface* window = nullptr;
+        std::unique_ptr<vva::gfx::IUiRenderer> ui_renderer;
+        std::unique_ptr<vva::gfx::ITextRenderer> text_renderer;
+        std::unique_ptr<vva::UI::Window> ui_window;
+        std::unique_ptr<vva::core::FileWatcher> file_watcher;
+        std::unique_ptr<vva::gfx::GraphicsDevice> graphics_device;
+        std::unique_ptr<vva::util::FpsCounter> fps_counter;
+        gfx::WindowInterface* window = nullptr;
 
 
     };

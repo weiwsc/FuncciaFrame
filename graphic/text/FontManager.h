@@ -8,8 +8,8 @@
 
 #include "../../core/Singleton.h"
 
-namespace Funccia::UI {
-    class FontManager : public Core::Singleton<FontManager>{
+namespace vva::UI {
+    class FontManager : public core::Singleton<FontManager>{
     public:
         auto GetFont() -> std::string&{
             return m_font;

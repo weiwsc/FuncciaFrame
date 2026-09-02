@@ -7,7 +7,7 @@
 #include <cstddef>
 
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::byte;
 
     class StackAllocator {

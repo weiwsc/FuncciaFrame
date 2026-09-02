@@ -13,7 +13,7 @@
 #include "Shader.h"
 #include "glm/glm.hpp"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     class GLUiRenderer : public IUiRenderer {
     private:
         Shader m_shader;

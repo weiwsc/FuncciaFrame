@@ -10,7 +10,7 @@
 #include <vector>
 #include "UIFluentAPI.h"
 #include <iostream>
-namespace Funccia::UI {
+namespace vva::UI {
     class UIStyle;
     class UIElement;
 

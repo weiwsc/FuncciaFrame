@@ -8,10 +8,10 @@
 
 #include "../AllocatedImage.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanUploadContext;
     struct VulkanDevice;
-    using Image = Funccia::Graphic::Vulkan::AllocatedImage;
+    using Image = vva::gfx::vulkan::AllocatedImage;
 
     struct Texture2D {
         Image source_image;
@@ -20,14 +20,14 @@ namespace Funccia::Graphic::Vulkan {
         vk::Format format;
     };
 
-    auto CreateTextureImage(
+    auto createTextureImage(
         VmaAllocator allocator,
         const vk::raii::Device& device,
         const vk::ImageCreateInfo& image_create_info,
         vk::Format view_format, vk::ImageAspectFlags view_aspect_flags)
         -> Texture2D;
 
-    auto LoadTextureFromFile(
+    auto loadTextureFromFile(
         VmaAllocator allocator,
         const VulkanDevice& device,
         VulkanUploadContext& upload,

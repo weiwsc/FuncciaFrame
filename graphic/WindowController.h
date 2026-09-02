@@ -9,8 +9,8 @@
 #include "WindowInterface.h"
 #include "../core/Singleton.h"
 
-namespace Funccia::Graphic {
-    class WindowController : public Core::Singleton<WindowController> {
+namespace vva::gfx {
+    class WindowController : public core::Singleton<WindowController> {
     public:
         WindowController();
 

@@ -9,7 +9,7 @@
 #include "Resource.h"
 #include "Singleton.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     class ObjectPoolManager : Singleton<ObjectPoolManager>{
     public:
         static ObjectPool<Asset>* AssetPool;

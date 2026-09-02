@@ -11,7 +11,7 @@
 
 #include "../../util/Log.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     SDLWindow::~SDLWindow() {
         delete m_mouse;
     }
@@ -268,7 +268,7 @@ namespace Funccia::Graphic::GL {
     }
 
     auto SDLWindow::MapKey(Key key) -> SDL_Scancode {
-        using Key = Funccia::Graphic::Key;
+        using Key = vva::gfx::Key;
 
         switch (key) {
             // Alphanumeric

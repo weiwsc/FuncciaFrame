@@ -8,16 +8,16 @@
 #include "types/Param.h"
 #include "types/Texture.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct PipelineShaderModule {
         vk::raii::ShaderModule shader_module;
         vk::PipelineShaderStageCreateInfo pipeline_shader_stage_create_info;
     };
 
     namespace {
-        auto PipelineShaderModuleInfo(SlangShaderCompiler& compiler, const vk::raii::Device& device,
-                                      vk::ShaderStageFlagBits stage_flag_bits, std::string_view module_name,
-                                      std::string_view entry_point) -> PipelineShaderModule {
+        auto pipelineShaderModuleInfo(const SlangShaderCompiler& compiler, const vk::raii::Device& device,
+                                      const vk::ShaderStageFlagBits stage_flag_bits, const std::string_view module_name,
+                                      const std::string_view entry_point) -> PipelineShaderModule {
             auto shader_code = compiler.compile(module_name.data(), entry_point.data());
             vk::ShaderModuleCreateInfo vk_shader_module_create_info{
                 .codeSize = shader_code.size() * sizeof(uint32_t),
@@ -35,10 +35,10 @@ namespace Funccia::Graphic::Vulkan {
             };
         }
 
-        vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
+        auto findSupportedFormat(const std::vector<vk::Format>& candidates,
                                        vk::ImageTiling tiling,
                                        vk::FormatFeatureFlags features,
-                                       const vk::raii::PhysicalDevice& physical_device) {
+                                       const vk::raii::PhysicalDevice& physical_device) -> vk::Format {
             for (const auto format : candidates) {
                 vk::FormatProperties props = physical_device.getFormatProperties(format);
 
@@ -63,11 +63,11 @@ namespace Funccia::Graphic::Vulkan {
                                                vk::ShaderStageFlagBits::eFragment, nullptr)
             };
 
-            vk::DescriptorSetLayoutCreateInfo layoutInfo{
+            vk::DescriptorSetLayoutCreateInfo layout_info{
                 .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()
             };
 
-            return vk::raii::DescriptorSetLayout(device, layoutInfo);
+            return vk::raii::DescriptorSetLayout(device, layout_info);
         }
     }
     auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format{
@@ -91,15 +91,15 @@ namespace Funccia::Graphic::Vulkan {
             .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
             .sharingMode = vk::SharingMode::eExclusive
         };
-        return CreateTextureImage(allocator, device,image_create_info,depth_format, vk::ImageAspectFlagBits::eDepth);
+        return createTextureImage(allocator, device,image_create_info,depth_format, vk::ImageAspectFlagBits::eDepth);
     }
-    auto GraphicsPipeline::Create(const vk::raii::Device& device,
+    auto GraphicsPipeline::create(const vk::raii::Device& device,
                                   const vk::raii::PhysicalDevice& physical_device,
                                   const vk::SurfaceFormatKHR& surface_format,
                                   SlangShaderCompiler& compiler) -> GraphicsPipeline {
-        auto vertex_stage = PipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, "my_shader",
+        auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, "my_shader",
                                                      "vertex_main");
-        auto fragment_stage = PipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
+        auto fragment_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
                                                        "my_shader",
                                                        "fragment_main");
         vk::PipelineShaderStageCreateInfo shader_stages[] = {
@@ -108,16 +108,16 @@ namespace Funccia::Graphic::Vulkan {
         };
 
         //get the description from the vertex type
-        auto bindingDescription = Shader::Param::PosNormalUV::getBindingDescription();
-        auto attributeDescriptions = Shader::Param::PosNormalUV::getAttributeDescriptions();
+        auto binding_description = shader::param::PosNormalUV::getBindingDescription();
+        auto attribute_descriptions = shader::param::PosNormalUV::getAttributeDescriptions();
         //this step is binding the shader vertext input layout
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
+        vk::PipelineVertexInputStateCreateInfo vertex_input_info{
             .vertexBindingDescriptionCount = 1,
             //binding number(slot?), size of the vertex input, the rate it is consumed
-            .pVertexBindingDescriptions = &bindingDescription,
+            .pVertexBindingDescriptions = &binding_description,
             //binding slot, and for each attribute, what's the location and length
-            .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
-            .pVertexAttributeDescriptions = attributeDescriptions.data()
+            .vertexAttributeDescriptionCount = static_cast<uint32_t>(attribute_descriptions.size()),
+            .pVertexAttributeDescriptions = attribute_descriptions.data()
         };
 
         //this specify how should the vertex data be interpreted,
@@ -125,14 +125,14 @@ namespace Funccia::Graphic::Vulkan {
         //eTriangleStrip: a ribbon of triangles ...
         //the redraw usually only matters for drawing terrain or water
         //that need to break the strip and restart at new line
-        vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
+        vk::PipelineInputAssemblyStateCreateInfo input_assembly{
             .topology = vk::PrimitiveTopology::eTriangleList
         };
 
         ///this can store the viewport size, but with dynamic rendering
         ///we do not bake the viewport size into the pipeline
         /// for vr, there would be 2 viewports and the scissor count need to be the same as viewport count
-        vk::PipelineViewportStateCreateInfo viewportState{
+        vk::PipelineViewportStateCreateInfo viewport_state{
             .viewportCount = 1,
             .scissorCount = 1
         };
@@ -158,30 +158,30 @@ namespace Funccia::Graphic::Vulkan {
         ///              - Ping-pong,
         ///              - VK_EXT_blend_operation_advanced,
         ///              - Framebuffer fetch / VK_EXT_rasterization_order_attachment_access
-        vk::PipelineColorBlendAttachmentState colorBlendAttachment{
+        vk::PipelineColorBlendAttachmentState color_blend_attachment{
             .blendEnable = vk::False, //disable is for opaque stuff, enable if there's transparent stuff
             .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
             vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA
         };
         ///if there's multiple image in a draw (like G-buffer), use an array of
         ///PipelineMultisampleStateCreateInfo, the order of it decide which slot is it for
-        vk::PipelineColorBlendStateCreateInfo colorBlending{
+        vk::PipelineColorBlendStateCreateInfo color_blending{
             .logicOpEnable = vk::False,
             .logicOp = vk::LogicOp::eCopy, //does this even do anything when logicOpEnable is false?
             .attachmentCount = 1, //array.size() when there's multiple
-            .pAttachments = &colorBlendAttachment // <- in that case put the array here
+            .pAttachments = &color_blend_attachment // <- in that case put the array here
         };
 
         //what is not baked into the pso and instead set during command recording
         //here, the viewport and scissor is dynamic, so resizing the window doesn't require
         //recreating the graphics pipeline
-        std::vector dynamicStates = {
+        std::vector dynamic_states = {
             vk::DynamicState::eViewport,
             vk::DynamicState::eScissor
         };
-        vk::PipelineDynamicStateCreateInfo dynamicState{
-            .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
-            .pDynamicStates = dynamicStates.data()
+        vk::PipelineDynamicStateCreateInfo dynamic_state{
+            .dynamicStateCount = static_cast<uint32_t>(dynamic_states.size()),
+            .pDynamicStates = dynamic_states.data()
         };
         //create descriptor set, change this later
         std::vector<vk::raii::DescriptorSetLayout> descriptor_set_layouts;
@@ -190,16 +190,16 @@ namespace Funccia::Graphic::Vulkan {
             vk::DescriptorSetLayout{*descriptor_set_layouts.front()}
         };
 
-        vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
+        vk::PipelineLayoutCreateInfo pipeline_layout_info{
             .setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts_raw.size()),
             .pSetLayouts = descriptor_set_layouts_raw.data(),
             .pushConstantRangeCount = 0,
             //.pPushConstantRanges = //fill this when adding push constant
         };
 
-        auto pipelineLayout = vk::raii::PipelineLayout(device, pipelineLayoutInfo);
+        auto pipeline_layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
 
-        vk::PipelineDepthStencilStateCreateInfo depthStencil{
+        vk::PipelineDepthStencilStateCreateInfo depth_stencil{
             .depthTestEnable = vk::True,
             .depthWriteEnable = vk::True,
             .depthCompareOp = vk::CompareOp::eLess,
@@ -207,36 +207,36 @@ namespace Funccia::Graphic::Vulkan {
             .stencilTestEnable = vk::False
         };
 
-        vk::Format depthFormat = findDepthFormat(physical_device);
+        vk::Format depth_format = findDepthFormat(physical_device);
 
-        vk::StructureChain<vk::GraphicsPipelineCreateInfo, vk::PipelineRenderingCreateInfo> pipelineCreateInfoChain = {
+        vk::StructureChain<vk::GraphicsPipelineCreateInfo, vk::PipelineRenderingCreateInfo> pipeline_create_info_chain = {
             {
                 .stageCount = 2,
                 .pStages = shader_stages,
-                .pVertexInputState = &vertexInputInfo,
-                .pInputAssemblyState = &inputAssembly,
-                .pViewportState = &viewportState,
+                .pVertexInputState = &vertex_input_info,
+                .pInputAssemblyState = &input_assembly,
+                .pViewportState = &viewport_state,
                 .pRasterizationState = &rasterizer,
                 .pMultisampleState = &multisampling,
-                .pDepthStencilState = &depthStencil,
-                .pColorBlendState = &colorBlending,
-                .pDynamicState = &dynamicState,
-                .layout = pipelineLayout,
+                .pDepthStencilState = &depth_stencil,
+                .pColorBlendState = &color_blending,
+                .pDynamicState = &dynamic_state,
+                .layout = pipeline_layout,
                 .renderPass = nullptr
             },
             {
                 .colorAttachmentCount = 1, //prob need to change this too if there's multiple image
                 .pColorAttachmentFormats = &surface_format.format,
-                .depthAttachmentFormat = depthFormat
+                .depthAttachmentFormat = depth_format
             }
         };
 
-        auto graphicsPipeline = vk::raii::Pipeline(device, nullptr,
-                                                   pipelineCreateInfoChain.get<vk::GraphicsPipelineCreateInfo>());
+        auto graphics_pipeline = vk::raii::Pipeline(device, nullptr,
+                                                   pipeline_create_info_chain.get<vk::GraphicsPipelineCreateInfo>());
         return {
             .descriptor_set_layouts = std::move(descriptor_set_layouts),
-            .layout = std::move(pipelineLayout),
-            .handle = std::move(graphicsPipeline)
+            .layout = std::move(pipeline_layout),
+            .handle = std::move(graphics_pipeline)
         };
     }
 }

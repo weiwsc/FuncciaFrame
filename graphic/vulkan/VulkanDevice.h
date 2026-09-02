@@ -7,7 +7,7 @@
 #include "VulkanInclude.h"
 #include "types/VulkanTypesDef.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanInstance;
 
     struct VulkanDevice {

@@ -8,11 +8,11 @@
 
 #include "glad/glad.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     class Asset;
 }
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     enum class ShaderType {
         Vertex,
         Fragment
@@ -28,8 +28,8 @@ namespace Funccia::Graphic::GL {
 
         static auto LinkProgram(unsigned int vertexShader, unsigned int fragmentShader) -> unsigned int;
 
-        static auto CreateShaderProgram(Core::Asset *vertexShaderSource,
-                                        Core::Asset *fragmentShaderSource) -> unsigned int;
+        static auto CreateShaderProgram(core::Asset *vertexShaderSource,
+                                        core::Asset *fragmentShaderSource) -> unsigned int;
     };
 }
 

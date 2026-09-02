@@ -9,7 +9,7 @@
 #include "UIHelper.h"
 #include "Window.h"
 #include "../core/ProfileTimer.h"
-namespace Funccia::UI {
+namespace vva::UI {
     float UIElement::borderBoxStartOnAxis(Axis axis) const {
         switch (axis) {
             case Axis::Horizontal:
@@ -123,7 +123,7 @@ namespace Funccia::UI {
         return m_border_box_size.OnAxis(axis) + margin;
     }
 
-    auto UIElement::CalculateGrowSizeOnAxis(Axis axis, Graphic::ITextRenderer &text_renderer) -> void {
+    auto UIElement::CalculateGrowSizeOnAxis(Axis axis, gfx::ITextRenderer &text_renderer) -> void {
         if (!m_style.is_rendered) return;
 #ifdef FF_UI_LAZY_LAYOUT
         if (!m_layoutUpdated) return;
@@ -261,7 +261,7 @@ namespace Funccia::UI {
     }
 
 
-    auto UIElement::RenderQueue(Graphic::IUiRenderer &render, Graphic::ITextRenderer &text_renderer, float parent_content_box_x,
+    auto UIElement::RenderQueue(gfx::IUiRenderer &render, gfx::ITextRenderer &text_renderer, float parent_content_box_x,
                                 float parent_content_box_y, float scale) -> void {
         const float s = scale;
         if (m_style.invisible_but_occupy_space || !m_style.is_rendered || m_culled) { return; }

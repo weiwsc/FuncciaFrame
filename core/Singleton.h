@@ -4,7 +4,7 @@
 
 #ifndef SINGLETON_H
 #define SINGLETON_H
-namespace Funccia::Core {
+namespace vva::core {
 
     template<typename T>
     class Singleton

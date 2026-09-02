@@ -7,11 +7,11 @@
 #include "VulkanInclude.h"
 #include "types/Param.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct DescriptorAllocator {
         vk::raii::DescriptorPool descriptor_pool;
         std::vector<vk::raii::DescriptorSet> descriptor_sets;
-        auto Create();
+        auto create();
     };
     auto createDescriptorPool(const vk::raii::Device& device) -> void ;
 

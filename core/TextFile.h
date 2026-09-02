@@ -6,7 +6,7 @@
 #define FUNCCIAFRAME_TEXTFILE_H
 #include "Resource.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     class TextFile : Resource{
     public:
         TextFile();
@@ -15,7 +15,7 @@ namespace Funccia::Core {
 
         void Deserialize(Deserializer &deserializer) override;
 
-        auto TypeID() -> Core::TypeID override;
+        auto TypeID() -> core::TypeID override;
 
     private:
         Asset* m_asset;

@@ -12,7 +12,7 @@
 #include "../VulkanDevice.h"
 #include "../VulkanUploadContext.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     namespace {
         struct DecodedImage {
             uint32_t width;
@@ -20,7 +20,7 @@ namespace Funccia::Graphic::Vulkan {
             std::vector<std::byte> rgba;
         };
 
-        auto DecodeImageRGBA(const std::filesystem::path& path) -> DecodedImage {
+        auto decodeImageRgba(const std::filesystem::path& path) -> DecodedImage {
             using SurfacePtr =
                 std::unique_ptr<SDL_Surface, decltype(&SDL_DestroySurface)>;
 
@@ -51,13 +51,13 @@ namespace Funccia::Graphic::Vulkan {
 
             const auto width = static_cast<uint32_t>(converted->w);
             const auto height = static_cast<uint32_t>(converted->h);
-            constexpr std::size_t bytesPerPixel = 4;
+            constexpr std::size_t kBytesPerPixel = 4;
 
             DecodedImage result{
                 .width = width,
                 .height = height,
                 .rgba = std::vector<std::byte>(
-                    static_cast<std::size_t>(width) * height * bytesPerPixel)
+                    static_cast<std::size_t>(width) * height * kBytesPerPixel)
             };
 
             if (!SDL_LockSurface(converted.get())) {
@@ -69,15 +69,15 @@ namespace Funccia::Graphic::Vulkan {
             const auto* source =
                 static_cast<const std::byte*>(converted->pixels);
 
-            const auto destinationPitch =
-                static_cast<std::size_t>(width) * bytesPerPixel;
+            const auto destination_pitch =
+                static_cast<std::size_t>(width) * kBytesPerPixel;
 
             // Do not assume SDL_Surface::pitch == width * 4.
             for (uint32_t y = 0; y < height; ++y) {
                 std::memcpy(
-                    result.rgba.data() + y * destinationPitch,
+                    result.rgba.data() + y * destination_pitch,
                     source + y * converted->pitch,
-                    destinationPitch);
+                    destination_pitch);
             }
 
             SDL_UnlockSurface(converted.get());
@@ -85,13 +85,13 @@ namespace Funccia::Graphic::Vulkan {
         }
     }
 
-    auto CreateTextureImage(
+    auto createTextureImage(
         VmaAllocator allocator,
         const vk::raii::Device& device,
         const vk::ImageCreateInfo& image_create_info,
         vk::Format view_format, vk::ImageAspectFlags view_aspect_flags)
         -> Texture2D {
-        auto image = AllocatedImage::Create(image_create_info, allocator);
+        auto image = AllocatedImage::create(image_create_info, allocator);
 
         vk::ImageViewCreateInfo image_view_create_info{
             .image = image.handle(),
@@ -116,16 +116,16 @@ namespace Funccia::Graphic::Vulkan {
         };
     }
 
-    auto LoadTextureFromFile(
+    auto loadTextureFromFile(
         VmaAllocator allocator,
         const VulkanDevice& device,
         VulkanUploadContext& upload,
         const std::filesystem::path& path) -> Texture2D {
-        const DecodedImage decoded = DecodeImageRGBA(path);
+        const DecodedImage decoded = decodeImageRgba(path);
         const vk::Extent2D extent{decoded.width, decoded.height};
 
         // Host-visible staging buffer, persistently mapped
-        auto staging = AllocatedBuffer::CreateBuffer(
+        auto staging = AllocatedBuffer::createBuffer(
             allocator,
             decoded.rgba.size(),
             vk::BufferUsageFlagBits::eTransferSrc,
@@ -154,7 +154,7 @@ namespace Funccia::Graphic::Vulkan {
             .initialLayout = vk::ImageLayout::eUndefined
         };
 
-        Texture2D texture = CreateTextureImage(
+        Texture2D texture = createTextureImage(
             allocator, device.logical_device, image_info, image_info.format, vk::ImageAspectFlagBits::eColor);
 
         const auto& cmd = upload.command_buffer;
@@ -162,13 +162,13 @@ namespace Funccia::Graphic::Vulkan {
         cmd.reset();
         cmd.begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 
-        constexpr vk::ImageSubresourceRange colorRange{
+        constexpr vk::ImageSubresourceRange kColorRange{
             .aspectMask = vk::ImageAspectFlagBits::eColor,
             .baseMipLevel = 0, .levelCount = 1,
             .baseArrayLayer = 0, .layerCount = 1
         };
 
-        vk::ImageMemoryBarrier2 toTransferDst{
+        vk::ImageMemoryBarrier2 to_transfer_dst{
             .srcStageMask = vk::PipelineStageFlagBits2::eTopOfPipe,
             .dstStageMask = vk::PipelineStageFlagBits2::eCopy,
             .dstAccessMask = vk::AccessFlagBits2::eTransferWrite,
@@ -177,11 +177,11 @@ namespace Funccia::Graphic::Vulkan {
             .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
             .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
             .image = texture.source_image.handle(),
-            .subresourceRange = colorRange
+            .subresourceRange = kColorRange
         };
         cmd.pipelineBarrier2({
             .imageMemoryBarrierCount = 1,
-            .pImageMemoryBarriers = &toTransferDst
+            .pImageMemoryBarriers = &to_transfer_dst
         });
 
         const vk::BufferImageCopy region{
@@ -201,7 +201,7 @@ namespace Funccia::Graphic::Vulkan {
             vk::ImageLayout::eTransferDstOptimal,
             region);
 
-        vk::ImageMemoryBarrier2 toShaderRead{
+        vk::ImageMemoryBarrier2 to_shader_read{
             .srcStageMask = vk::PipelineStageFlagBits2::eCopy,
             .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
             .dstStageMask = vk::PipelineStageFlagBits2::eFragmentShader,
@@ -211,11 +211,11 @@ namespace Funccia::Graphic::Vulkan {
             .srcQueueFamilyIndex = vk::QueueFamilyIgnored,
             .dstQueueFamilyIndex = vk::QueueFamilyIgnored,
             .image = texture.source_image.handle(),
-            .subresourceRange = colorRange
+            .subresourceRange = kColorRange
         };
         cmd.pipelineBarrier2({
             .imageMemoryBarrierCount = 1,
-            .pImageMemoryBarriers = &toShaderRead
+            .pImageMemoryBarriers = &to_shader_read
         });
 
         cmd.end();
@@ -224,7 +224,7 @@ namespace Funccia::Graphic::Vulkan {
             .commandBufferCount = 1,
             .pCommandBuffers = &*cmd
         };
-        device.queues.graphics_queue_.submit(submit, *upload.fence);
+        device.queues.graphics_queue.submit(submit, *upload.fence);
         (void)device.logical_device.waitForFences(*upload.fence, vk::True, UINT64_MAX);
 
         return texture; // staging buffer is freed here by RAII, safely after the wait
@@ -233,7 +233,7 @@ namespace Funccia::Graphic::Vulkan {
     auto createTextureSampler(const vk::raii::Device& device,
                               const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler {
         vk::PhysicalDeviceProperties properties = physical_device.getProperties();
-        vk::SamplerCreateInfo samplerInfo{
+        vk::SamplerCreateInfo sampler_info{
             .magFilter = vk::Filter::eLinear,
             .minFilter = vk::Filter::eLinear,
             .mipmapMode = vk::SamplerMipmapMode::eLinear,
@@ -246,6 +246,6 @@ namespace Funccia::Graphic::Vulkan {
             .compareEnable = vk::False,
             .compareOp = vk::CompareOp::eAlways
         };
-        return vk::raii::Sampler(device, samplerInfo);
+        return vk::raii::Sampler(device, sampler_info);
     }
 }

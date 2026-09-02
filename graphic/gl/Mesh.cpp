@@ -12,7 +12,7 @@
 #include "Shader.h"
 #include "../../core/util.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     Mesh::Mesh(std::vector<float> vertices, std::vector<int> indices) {
         m_vao = 0;
         m_vbo = 0;

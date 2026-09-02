@@ -5,7 +5,7 @@
 #include "UIStyleDef.h"
 #include "UIStyle.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
 
     void UIStyleDef::merge(const UIStyleDef& other) {
         if (other.tag) tag = other.tag;
@@ -268,7 +268,7 @@ namespace Funccia::UI {
         return *this;
     }
 
-    auto UIStyleDef::TextWrap(Graphic::TextWrap wrap) -> UIStyleDef& {
+    auto UIStyleDef::TextWrap(gfx::TextWrap wrap) -> UIStyleDef& {
         text_wrap_mode = wrap;
         return *this;
     }

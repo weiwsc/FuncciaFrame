@@ -6,7 +6,7 @@
 
 #include "glad/glad.h"
 
-namespace Funccia::Graphic::GL
+namespace vva::gfx::GL
 {
     void GLGraphicsDevice::Init(WindowInterface& window)
     {

@@ -6,7 +6,7 @@
 #include "VulkanInclude.h"
 #include "vk_mem_alloc.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct AllocatedBuffer {
         AllocatedBuffer(VmaAllocator allocator, vk::Buffer buffer, VmaAllocation allocation,
             vk::DeviceSize size, void* mapped_data = nullptr);
@@ -37,7 +37,7 @@ namespace Funccia::Graphic::Vulkan {
         [[nodiscard]] auto mappedData() const noexcept -> void* {
             return mapped_data_;
         }
-        static auto CreateBuffer(
+        static auto createBuffer(
             VmaAllocator allocator,
             vk::DeviceSize size,
             vk::BufferUsageFlags usage_flags,

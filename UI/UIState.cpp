@@ -6,7 +6,7 @@
 
 #include "JsonUiBuilder.h"
 
-void Funccia::UI::UIState::OnChange(UIStyle &ui_style) {
+void vva::UI::UIState::OnChange(UIStyle &ui_style) {
     if (auto it = JsonUiBuilder::styleSheets.find(ui_style.tag); it != JsonUiBuilder::styleSheets.end()) {
         it->second.ApplyStyle(*this, ui_style);
     }

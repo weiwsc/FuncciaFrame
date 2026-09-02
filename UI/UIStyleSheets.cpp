@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-namespace Funccia::UI {
+namespace vva::UI {
     auto UIStyleSheets::ApplyStyle(UIState ui_state, UIStyle& style) -> void {
         if (m_dirty) {
             std::ranges::sort(m_styles, [](const StateStyle& a, const StateStyle& b) {
@@ -28,7 +28,7 @@ namespace Funccia::UI {
         }
     }
 
-    auto UIStyleSheets::Append(Funccia::UI::UIFlag flag, Funccia::UI::UIStyleDef style) -> void {
+    auto UIStyleSheets::Append(vva::UI::UIFlag flag, vva::UI::UIStyleDef style) -> void {
         m_styles.emplace_back(flag, std::move(style));
         m_dirty = true;
 

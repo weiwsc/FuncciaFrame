@@ -4,7 +4,7 @@
 
 #include "AllocatedBuffer.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     AllocatedBuffer::AllocatedBuffer(VmaAllocator allocator, vk::Buffer buffer, VmaAllocation allocation,
                                      vk::DeviceSize size, void* mapped_data) :
         allocator_(allocator), buffer_(buffer), allocation_(allocation),
@@ -41,7 +41,7 @@ namespace Funccia::Graphic::Vulkan {
         allocation_ = VK_NULL_HANDLE;
     }
 
-    auto AllocatedBuffer::CreateBuffer(VmaAllocator allocator, vk::DeviceSize size, vk::BufferUsageFlags usage_flags,
+    auto AllocatedBuffer::createBuffer(VmaAllocator allocator, vk::DeviceSize size, vk::BufferUsageFlags usage_flags,
                                        VmaMemoryUsage memory_usage,
                                        VmaAllocationCreateFlags allocation_create_flags) -> AllocatedBuffer {
         vk::BufferCreateInfo buffer_create_info {
@@ -53,7 +53,7 @@ namespace Funccia::Graphic::Vulkan {
             .flags = allocation_create_flags,
             .usage = memory_usage
         };
-        VkBuffer rawBuffer = VK_NULL_HANDLE;
+        VkBuffer raw_buffer = VK_NULL_HANDLE;
         VmaAllocation allocation = VK_NULL_HANDLE;
         VmaAllocationInfo allocation_info{};
 
@@ -61,7 +61,7 @@ namespace Funccia::Graphic::Vulkan {
             allocator,
             &*buffer_create_info,
             &allocation_create_info,
-            &rawBuffer,
+            &raw_buffer,
             &allocation,
             &allocation_info
         );
@@ -72,7 +72,7 @@ namespace Funccia::Graphic::Vulkan {
         }
         return AllocatedBuffer{
             allocator,
-            vk::Buffer{rawBuffer},
+            vk::Buffer{raw_buffer},
             allocation,
             size,
             allocation_info.pMappedData

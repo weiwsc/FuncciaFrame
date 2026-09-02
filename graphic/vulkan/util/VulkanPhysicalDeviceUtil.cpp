@@ -9,7 +9,7 @@
 #include "../../../util/Log.h"
 #include "../types/VulkanTypesDef.h"
 
-namespace Funccia::Graphic::Vulkan::Util {
+namespace vva::gfx::vulkan::util {
     namespace {
         // auto hasGraphicsQueue(const vk::raii::PhysicalDevice& dev) -> bool {
         //     auto qfs = dev.getQueueFamilyProperties();
@@ -38,7 +38,7 @@ namespace Funccia::Graphic::Vulkan::Util {
         auto isSuitable(const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface ) -> bool {
             return device.getProperties().apiVersion >=
            VulkanDeviceRequirement::minimum_api_version
-    && VulkanDeviceRequirement::is_required_feature_supported(device)
+    && VulkanDeviceRequirement::isRequiredFeatureSupported(device)
     && supportsExtensions(device, VulkanDeviceRequirement::extensions)
     && isSwapChainAvailable(device, surface);
         }
@@ -49,20 +49,20 @@ namespace Funccia::Graphic::Vulkan::Util {
         -> PickPhysicalDeviceResult {
         auto devices = instance.enumeratePhysicalDevices();
         DeviceQueueCoordinates queue_selection {};
-        const auto devIter = std::ranges::find_if(devices, [&](auto const& device) {
+        const auto dev_iter = std::ranges::find_if(devices, [&](auto const& device) {
             vva_log_info("Physical Device: {}", device.getProperties2().properties.deviceName.data());
             //check if the device has the required queue family
-            if (const auto selection_result= Util::SelectDeviceQueues(surface, device)) {
+            if (const auto selection_result= util::selectDeviceQueues(surface, device)) {
                 queue_selection = selection_result.value();
             } else {return false;}
             return isSuitable(device, surface);
         });
-        if (devIter == devices.end()) {
+        if (dev_iter == devices.end()) {
             vva_log_error("failed to find a suitable GPU!");
             throw std::runtime_error("failed to find a suitable GPU!");
         }
         return PickPhysicalDeviceResult {
-            .physical_device = *devIter,
+            .physical_device = *dev_iter,
             .queue_coordinates = queue_selection
         };
     }

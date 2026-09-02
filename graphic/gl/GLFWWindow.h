@@ -10,7 +10,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace Funccia::Graphic::GL {
+namespace funccia::graphic::GL {
     class GLFWWindow : public WindowInterface {
     public:
         GLFWWindow() = default;

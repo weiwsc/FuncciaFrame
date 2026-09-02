@@ -4,7 +4,7 @@
 
 #include "MouseState.h"
 
-namespace Funccia::Input {
+namespace vva::Input {
     auto MouseState::SetPosition(glm::vec2 pos) -> void {
         m_posPrev = m_pos;
         m_pos = pos;

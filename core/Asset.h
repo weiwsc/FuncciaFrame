@@ -8,7 +8,7 @@
 #include <string>
 #include "ObjectPool.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::string, std::byte;
 
     class Asset{

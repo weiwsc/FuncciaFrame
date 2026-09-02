@@ -3,7 +3,7 @@
 //
 
 #include "UIElement.h"
-namespace Funccia::UI {
+namespace vva::UI {
     auto UIElement::AddChild(Tag tag)->UIElement* {
         auto child = std::make_unique<UIElement>(tag);
         return AddChild(std::move(child));

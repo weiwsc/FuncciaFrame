@@ -8,31 +8,31 @@
 #include "../VulkanConfig.h"
 #include "../../../util/Log.h"
 
-namespace Funccia::Graphic::Vulkan::Util {
+namespace vva::gfx::vulkan::util {
 
 
     namespace {
 
         auto assembleVulkanDevice(
             vk::raii::PhysicalDevice physical_device,
-                             const vk::DeviceCreateInfo& deviceCreateInfo,
+                             const vk::DeviceCreateInfo& device_create_info,
                              const DeviceQueueCoordinates& queue_selection)->VulkanDevice {
 
-            auto logical_device = vk::raii::Device(physical_device, deviceCreateInfo);
+            auto logical_device = vk::raii::Device(physical_device, device_create_info);
             vva_log_info("Logical Device Created");
             DeviceQueues queues {
-                .graphics_queue_ = vk::raii::Queue(logical_device,
-                                                   queue_selection.graphics.QueueFamilyIndex,
-                                                   queue_selection.graphics.QueueIndex),
-                .present_queue_ = vk::raii::Queue(logical_device,
-                                                  queue_selection.present.QueueFamilyIndex,
-                                                  queue_selection.present.QueueIndex),
-                .compute_queue_ = vk::raii::Queue(logical_device,
-                                                  queue_selection.compute.QueueFamilyIndex,
-                                                  queue_selection.compute.QueueIndex),
-                .transfer_queue_ = vk::raii::Queue(logical_device,
-                                                   queue_selection.transfer.QueueFamilyIndex,
-                                                   queue_selection.transfer.QueueIndex)
+                .graphics_queue = vk::raii::Queue(logical_device,
+                                                   queue_selection.graphics.queue_family_index,
+                                                   queue_selection.graphics.queue_index),
+                .present_queue = vk::raii::Queue(logical_device,
+                                                  queue_selection.present.queue_family_index,
+                                                  queue_selection.present.queue_index),
+                .compute_queue = vk::raii::Queue(logical_device,
+                                                  queue_selection.compute.queue_family_index,
+                                                  queue_selection.compute.queue_index),
+                .transfer_queue = vk::raii::Queue(logical_device,
+                                                   queue_selection.transfer.queue_family_index,
+                                                   queue_selection.transfer.queue_index)
             };
 
             vva_log_info("Vulkan Device Created");
@@ -44,15 +44,15 @@ namespace Funccia::Graphic::Vulkan::Util {
             };
         }
 
-        auto SelectAllCapableQueueFamily(const vk::raii::SurfaceKHR& surface,
+        auto selectAllCapableQueueFamily(const vk::raii::SurfaceKHR& surface,
                                          const vk::raii::PhysicalDevice& physical_device) -> std::optional<QueueCoordinate> {
             std::vector<vk::QueueFamilyProperties2> queue_family_properties = physical_device.
                 getQueueFamilyProperties2();
 
-            constexpr auto required = VulkanDeviceRequirement::required_queue_flags;
+            constexpr auto kRequired = VulkanDeviceRequirement::required_queue_flags;
 
             for (size_t i = 0; i < queue_family_properties.size(); i++) {
-                if (((queue_family_properties[i].queueFamilyProperties.queueFlags & required) == required)
+                if (((queue_family_properties[i].queueFamilyProperties.queueFlags & kRequired) == kRequired)
                     && (physical_device.getSurfaceSupportKHR(static_cast<uint32_t>(i), *surface))) {
                     vva_log_info("Found Queue Family Capable of Graphics, Compute, Transfer, Present at index {}", i);
                     return std::optional<QueueCoordinate>({static_cast<uint32_t>(i), 0});
@@ -62,9 +62,9 @@ namespace Funccia::Graphic::Vulkan::Util {
         }
 
     }
-    auto SelectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates> {
+    auto selectDeviceQueues(const vk::raii::SurfaceKHR& surface, const vk::raii::PhysicalDevice& physical_device) -> std::optional<DeviceQueueCoordinates> {
         //std::vector<vk::QueueFamilyProperties> queueFamilyProperties = device.physical_device_.getQueueFamilyProperties2();
-        if (const auto result = SelectAllCapableQueueFamily(surface, physical_device)) {
+        if (const auto result = selectAllCapableQueueFamily(surface, physical_device)) {
             const QueueCoordinate graphics = result.value();
             return std::optional<DeviceQueueCoordinates>{{.graphics = graphics, .present = graphics, .compute = graphics, .transfer = graphics}};
         }
@@ -73,12 +73,12 @@ namespace Funccia::Graphic::Vulkan::Util {
             return std::nullopt;
         }
     }
-    auto CreateVulkanDevice(
-        vk::raii::PhysicalDevice physicalDevice, DeviceQueueCoordinates queue_selection) -> VulkanDevice {
+    auto createVulkanDevice(
+        vk::raii::PhysicalDevice physical_device, DeviceQueueCoordinates queue_selection) -> VulkanDevice {
 
         float queue_priority = 0.5;
         vk::DeviceQueueCreateInfo device_queue_create_info{
-            .queueFamilyIndex = queue_selection.graphics.QueueFamilyIndex,
+            .queueFamilyIndex = queue_selection.graphics.queue_family_index,
             .queueCount = 1,
             .pQueuePriorities = &queue_priority
         };
@@ -87,7 +87,7 @@ namespace Funccia::Graphic::Vulkan::Util {
 
         auto required_features = VulkanDeviceRequirement::features();
 
-        vk::DeviceCreateInfo deviceCreateInfo{
+        vk::DeviceCreateInfo device_create_info{
             .pNext = &required_features.get<vk::PhysicalDeviceFeatures2>(),
             .queueCreateInfoCount = 1,
             .pQueueCreateInfos = &device_queue_create_info,
@@ -95,43 +95,43 @@ namespace Funccia::Graphic::Vulkan::Util {
             .ppEnabledExtensionNames = VulkanDeviceRequirement::extensions.data()
         };
 
-        return assembleVulkanDevice(std::move(physicalDevice),
-            deviceCreateInfo,
+        return assembleVulkanDevice(std::move(physical_device),
+            device_create_info,
             queue_selection);
 
 
     }
 
-    uint32_t findTransferQue(const uint32_t graphicsIndex,
-                             const vk::raii::PhysicalDevice& physicalDevice) {
-        std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+    uint32_t findTransferQue(const uint32_t graphics_index,
+                             const vk::raii::PhysicalDevice& physical_device) {
+        std::vector<vk::QueueFamilyProperties> queue_family_properties = physical_device.getQueueFamilyProperties();
         //find if there's any queue that is specialized for transfer
-        auto transferQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties, [](auto const& qfp) {
+        auto transfer_queue_family_property = std::ranges::find_if(queue_family_properties, [](auto const& qfp) {
             return (qfp.queueFlags & vk::QueueFlagBits::eTransfer) != static_cast<vk::QueueFlags>(0)
                 && (qfp.queueFlags & vk::QueueFlagBits::eGraphics) == static_cast<vk::QueueFlags>(0)
                 && (qfp.queueFlags & vk::QueueFlagBits::eCompute) == static_cast<vk::QueueFlags>(0);
         });
-        auto transferIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(),
-                                                                 transferQueueFamilyProperty));
+        auto transfer_index = static_cast<uint32_t>(std::distance(queue_family_properties.begin(),
+                                                                 transfer_queue_family_property));
 
-        if (transferIndex == queueFamilyProperties.size()) {
+        if (transfer_index == queue_family_properties.size()) {
             //check if the current graphics queue can do transfer
-            transferIndex = (queueFamilyProperties[graphicsIndex].queueFlags & vk::QueueFlagBits::eTransfer) !=
+            transfer_index = (queue_family_properties[graphics_index].queueFlags & vk::QueueFlagBits::eTransfer) !=
                             static_cast<vk::QueueFlags>(0)
-                                ? graphicsIndex
-                                : static_cast<uint32_t>(queueFamilyProperties.size());
-            if (transferIndex == queueFamilyProperties.size()) {
+                                ? graphics_index
+                                : static_cast<uint32_t>(queue_family_properties.size());
+            if (transfer_index == queue_family_properties.size()) {
                 //if not, find if there's any queue that can do transfer
-                transferQueueFamilyProperty = std::ranges::find_if(queueFamilyProperties, [](auto const& qfp) {
+                transfer_queue_family_property = std::ranges::find_if(queue_family_properties, [](auto const& qfp) {
                     return (qfp.queueFlags & vk::QueueFlagBits::eTransfer) != static_cast<vk::QueueFlags>(0);
                 });
-                transferIndex = static_cast<uint32_t>(std::distance(queueFamilyProperties.begin(),
-                                                                    transferQueueFamilyProperty));
-                if (transferIndex == queueFamilyProperties.size()) {
+                transfer_index = static_cast<uint32_t>(std::distance(queue_family_properties.begin(),
+                                                                    transfer_queue_family_property));
+                if (transfer_index == queue_family_properties.size()) {
                     throw std::runtime_error("failed to find a transfer queue family!");
                 }
             }
         }
-        return transferIndex;
+        return transfer_index;
     }
 }

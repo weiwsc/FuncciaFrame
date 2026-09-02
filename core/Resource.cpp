@@ -7,7 +7,7 @@
 #include "AssetController.h"
 #include "Serializer.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     Resource::Resource() {
         m_asset = nullptr;
     }

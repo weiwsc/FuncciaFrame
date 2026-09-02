@@ -6,13 +6,13 @@
 
 #include "../graphic/WindowInterface.h"
 
-namespace Funccia::Util {
+namespace vva::util {
     FpsCounter::FpsCounter() {
         lastTime = std::chrono::steady_clock::now();
         fpsWindowStart = lastTime;
     }
 
-    void FpsCounter::Update(Graphic::WindowInterface& window) {
+    void FpsCounter::Update(gfx::WindowInterface& window) {
         const auto now = std::chrono::steady_clock::now();
         deltaTime = std::chrono::duration<float>(now - lastTime).count();
 

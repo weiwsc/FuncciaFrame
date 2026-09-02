@@ -10,13 +10,13 @@
 #include "../WindowInterface.h"
 #include "../../core/Singleton.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanInstance {
         vk::raii::Context context;
         vk::raii::Instance instance = nullptr;
-        bool enableValidationLayers = true;
-        vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+        bool enable_validation_layers = true;
+        vk::raii::DebugUtilsMessengerEXT debug_messenger = nullptr;
 
-        static auto createVulkanInstance(bool enableValidationLayers) -> VulkanInstance;
+        static auto createVulkanInstance(bool enable_validation_layers) -> VulkanInstance;
     };
 }

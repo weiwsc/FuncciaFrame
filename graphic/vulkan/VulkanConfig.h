@@ -5,7 +5,7 @@
 
 #include "VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanRenderConfig {
         static constexpr uint32_t max_frame_in_flight = 2;
     };
@@ -43,7 +43,7 @@ namespace Funccia::Graphic::Vulkan {
         }
 
         [[nodiscard]]
-        static auto is_required_feature_supported(const vk::raii::PhysicalDevice& device) -> bool {
+        static auto isRequiredFeatureSupported(const vk::raii::PhysicalDevice& device) -> bool {
             auto supported = device.getFeatures2<
                 vk::PhysicalDeviceFeatures2,
                 vk::PhysicalDeviceVulkan11Features,

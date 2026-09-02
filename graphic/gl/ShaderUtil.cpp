@@ -8,7 +8,7 @@
 
 #include "../../core/Asset.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     auto ShaderUtil::CompileVertexShader(const char *source) -> unsigned int {
         return CompileShader(source, ShaderType::Vertex);
     }
@@ -65,8 +65,8 @@ namespace Funccia::Graphic::GL {
         return shaderProgram;
     }
 
-    auto ShaderUtil::CreateShaderProgram(Core::Asset *vertexShaderSource,
-                                         Core::Asset *fragmentShaderSource) -> unsigned int {
+    auto ShaderUtil::CreateShaderProgram(core::Asset *vertexShaderSource,
+                                         core::Asset *fragmentShaderSource) -> unsigned int {
         return LinkProgram(CompileShader(reinterpret_cast<char *>(vertexShaderSource->GetData()), ShaderType::Vertex,
                                          (vertexShaderSource->GetDataSize())),
                            CompileShader(reinterpret_cast<char *>(fragmentShaderSource->GetData()),

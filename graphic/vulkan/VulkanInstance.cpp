@@ -12,18 +12,18 @@
 #include "../../util/Log.h"
 #include "util/VulkanDebugMessengerUtil.h"
 
-namespace Funccia::Graphic::Vulkan {
-    auto VulkanInstance::createVulkanInstance(const bool enableValidationLayers) -> VulkanInstance {
+namespace vva::gfx::vulkan{
+    auto VulkanInstance::createVulkanInstance(const bool enable_validation_layers) -> VulkanInstance {
         vk::ApplicationInfo application_info{
-            .pApplicationName = Funccia::App::Instance().application_metadata.applicationTitle.data(),
+            .pApplicationName = vva::App::Instance().application_metadata.applicationTitle.data(),
             .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
             .pEngineName = "Funccia Engine",
             .engineVersion = VK_MAKE_VERSION(1, 0, 0),
             .apiVersion = VulkanDeviceRequirement::minimum_api_version
         };
         vk::raii::Context context;
-        auto required_layers = Util::GetRequiredLayers(context, enableValidationLayers);
-        auto required_extensions = Util::GetRequiredInstanceExtensions(context, enableValidationLayers);
+        auto required_layers = util::getRequiredLayers(context, enable_validation_layers);
+        auto required_extensions = util::getRequiredInstanceExtensions(context, enable_validation_layers);
 
         vk::InstanceCreateInfo create_info{
             .pApplicationInfo = &application_info,
@@ -36,14 +36,14 @@ namespace Funccia::Graphic::Vulkan {
         auto instance = vk::raii::Instance(context, create_info);
         vva_log_info("vulkan instance created");
 
-        if (auto result = Util::CreateDebugMessenger(instance, enableValidationLayers)) {
-            auto debugMessenger = std::move(*result);
+        if (auto result = util::createDebugMessenger(instance, enable_validation_layers)) {
+            auto debug_messenger = std::move(*result);
 
             return VulkanInstance{
                 .context = std::move(context),
                 .instance = std::move(instance),
-                .enableValidationLayers = enableValidationLayers,
-                .debugMessenger = std::move(debugMessenger)
+                .enable_validation_layers = enable_validation_layers,
+                .debug_messenger = std::move(debug_messenger)
             };
         }
         else {

@@ -7,7 +7,7 @@
 
 #include <glm/vec2.hpp>
 
-namespace Funccia::Input {
+namespace vva::Input {
     enum class MouseButton {
         Left,
         Middle,

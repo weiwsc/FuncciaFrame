@@ -4,7 +4,7 @@
 
 #include "SideOffset.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     auto SideOffset::first(Axis onAxis) const -> value_type {
         switch (onAxis) {
             case Axis::Horizontal:

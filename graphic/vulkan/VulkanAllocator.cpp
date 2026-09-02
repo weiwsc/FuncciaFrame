@@ -10,8 +10,8 @@
 #include "VulkanDevice.h"
 #include "../../util/Log.h"
 
-namespace Funccia::Graphic::Vulkan {
-    auto VulkanAllocator::Create(
+namespace vva::gfx::vulkan{
+    auto VulkanAllocator::create(
         const vk::raii::PhysicalDevice& physical_device,
         const vk::raii::Device& device,
         const vk::raii::Instance& instance) -> VulkanAllocator {

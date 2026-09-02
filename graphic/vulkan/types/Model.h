@@ -7,10 +7,10 @@
 #include "../AllocatedBuffer.h"
 #include "../AllocatedImage.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanUploadContext;
     struct VulkanDevice;
-    using Buffer = Funccia::Graphic::Vulkan::AllocatedBuffer;
+    using Buffer = vva::gfx::vulkan::AllocatedBuffer;
 
     struct Model {
         uint32_t index_count;

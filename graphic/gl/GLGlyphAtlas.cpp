@@ -14,7 +14,7 @@
 #include "../text/HBShaper.h"
 #include "stb_image_write.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     GLGlyphAtlas::~GLGlyphAtlas() {
         for (auto &val: FontDictionary | std::views::values) {
             FT_Done_Face(val);

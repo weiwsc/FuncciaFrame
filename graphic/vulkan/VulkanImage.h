@@ -5,7 +5,7 @@
 #pragma once
 #include "VulkanInclude.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct VulkanSwapChainImage {
         //just a non owning handle of the image, the image is owned by the swap chain
         vk::Image image;
@@ -13,15 +13,15 @@ namespace Funccia::Graphic::Vulkan {
         vk::raii::Semaphore render_finished_semaphore;
     };
 
-    inline auto CreateImageView(const vk::raii::Device& device, const vk::Image& image,
+    inline auto createImageView(const vk::raii::Device& device, const vk::Image& image,
                                 const vk::Format format,
-                                const vk::ImageAspectFlags aspectFlags) -> VulkanSwapChainImage {
+                                const vk::ImageAspectFlags aspect_flags) -> VulkanSwapChainImage {
         vk::ImageViewCreateInfo view_create_info{
             .image = image,
             .viewType = vk::ImageViewType::e2D,
             .format = format,
             .subresourceRange = {
-                .aspectMask = aspectFlags,
+                .aspectMask = aspect_flags,
                 .baseMipLevel = 0,
                 .levelCount = 1,
                 .baseArrayLayer = 0,

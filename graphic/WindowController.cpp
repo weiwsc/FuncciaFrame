@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     WindowController::WindowController() {
         m_window = nullptr;
     }

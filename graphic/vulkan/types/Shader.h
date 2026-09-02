@@ -4,7 +4,7 @@
 
 #pragma once
 #include "../VulkanInclude.h"
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     struct ShaderStage {
         vk::ShaderStageFlagBits shader_stage;
         std::string stage_entry_point_name;

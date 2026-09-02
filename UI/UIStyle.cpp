@@ -3,7 +3,7 @@
 //
 
 #include "UIStyle.h"
-namespace Funccia::UI {
+namespace vva::UI {
     auto UIStyle::SetTag(const std::string& _tag) -> UIStyle & {
         tag = _tag;
         return *this;
@@ -20,7 +20,7 @@ namespace Funccia::UI {
         return *this;
     }
 
-    auto UIStyle::TextWrap(Graphic::TextWrap wrap) -> UIStyle & {
+    auto UIStyle::TextWrap(gfx::TextWrap wrap) -> UIStyle & {
         text_wrap_mode = wrap;
         text_recalculate_flag = true;
         return *this;

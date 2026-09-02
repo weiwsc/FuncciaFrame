@@ -5,7 +5,7 @@
 #ifndef FUNCCIAFRAME_TYPEREGISTRY_H
 #define FUNCCIAFRAME_TYPEREGISTRY_H
 
-namespace Funccia::Core {
+namespace vva::core {
     class ISerializable;
     enum class TypeID {
         None,

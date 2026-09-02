@@ -10,20 +10,20 @@ using namespace std;
 
 
 int main() {
-    //Funccia::App& app = Funccia::App::Instance();
+    //vva::App& app = vva::App::Instance();
     //app.Init();
     //app.Update();
     //app.Shutdown();
     try {
-        Funccia::Engine::Log::init();
-        Funccia::Graphic::GL::SDLWindow window;
+        vva::engine::log::init();
+        vva::gfx::GL::SDLWindow window;
 
-        if (!window.Initialize(1920, 1080, "FuncciaFrame", Funccia::Graphic::RenderBackend::Vulkan)) {
+        if (!window.Initialize(1920, 1080, "FuncciaFrame", vva::gfx::RenderBackend::Vulkan)) {
             std::cerr << "Failed to initialize Vulkan window." << std::endl;
             return 1;
         }
 
-        Funccia::Graphic::Vulkan::VulkanRenderer renderer = Funccia::Graphic::Vulkan::VulkanRenderer::CreateVulkanRenderer(window);
+        vva::gfx::vulkan::VulkanRenderer renderer = vva::gfx::vulkan::VulkanRenderer::createVulkanRenderer(window);
 
 
 
@@ -32,13 +32,13 @@ int main() {
         vva_log_critical("test critical");
         vva_log_trace("hello trace");
         vva_log_warning("Remielle.");
-        Funccia::Engine::Log::shutdown();
+        vva::engine::log::shutdown();
 
         return 0;
     }
     catch (exception& e) {
         vva_log_critical("fatal application error: {}", e.what());
-        Funccia::Engine::Log::shutdown();
+        vva::engine::log::shutdown();
         return 1;
     }
 }

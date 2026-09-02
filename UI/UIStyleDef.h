@@ -11,7 +11,7 @@
 #include "UIFluentAPI.h"
 #include "UIStyle.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     class UIStyleDef : public UIFluentAPI {
     public:
         UIStyleDef() = default;
@@ -54,7 +54,7 @@ namespace Funccia::UI {
         // Text
         //std::optional<std::string> text;
         std::optional<int> font_size;
-        std::optional<Graphic::TextWrap> text_wrap_mode;
+        std::optional<gfx::TextWrap> text_wrap_mode;
         std::optional<std::string> font_path;
 
         std::optional<bool> handle_scroll;
@@ -109,7 +109,7 @@ namespace Funccia::UI {
 
         //auto Text(const std::string& _text) -> UIStyleDef& override;
         auto FontSize(int size) -> UIStyleDef& override;
-        auto TextWrap(Graphic::TextWrap wrap) -> UIStyleDef& override;
+        auto TextWrap(gfx::TextWrap wrap) -> UIStyleDef& override;
 
         auto InvisibleButOccupySpace(bool option) -> UIStyleDef& override;
 

@@ -6,7 +6,7 @@
 
 #include "VulkanAllocator.h"
 
-namespace Funccia::Graphic::Vulkan {
+namespace vva::gfx::vulkan{
     AllocatedImage::AllocatedImage(VmaAllocator allocator, vk::Image image, VmaAllocation allocation) :
         allocator_(allocator), image_(image), allocation_(allocation) {
     }
@@ -27,19 +27,19 @@ namespace Funccia::Graphic::Vulkan {
         return *this;
     }
 
-    auto AllocatedImage::Create(vk::ImageCreateInfo image_create_info, VmaAllocator& allocator) -> AllocatedImage {
-        VmaAllocationCreateInfo allocationInfo{
+    auto AllocatedImage::create(vk::ImageCreateInfo image_create_info, VmaAllocator& allocator) -> AllocatedImage {
+        VmaAllocationCreateInfo allocation_info{
             .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE
         };
 
-        VkImage rawImage = VK_NULL_HANDLE;
+        VkImage raw_image = VK_NULL_HANDLE;
         VmaAllocation allocation = VK_NULL_HANDLE;
 
         const VkResult result = vmaCreateImage(
             allocator,
             &*image_create_info,
-            &allocationInfo,
-            &rawImage,
+            &allocation_info,
+            &raw_image,
             &allocation,
             nullptr);
 
@@ -51,7 +51,7 @@ namespace Funccia::Graphic::Vulkan {
 
         return {
             allocator,
-            vk::Image{rawImage},
+            vk::Image{raw_image},
             allocation
         };
     }

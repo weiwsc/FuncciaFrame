@@ -6,7 +6,7 @@
 
 #include <iostream>
 /*
-namespace Funccia::Graphic::GL {
+namespace funccia::graphic::GL {
     GLFWWindow::~GLFWWindow() {
     }
 
@@ -112,7 +112,7 @@ namespace Funccia::Graphic::GL {
     }
 
     auto GLFWWindow::KeyMap(Key key) -> int {
-        using Key = Funccia::Graphic::Key;
+        using Key = funccia::graphic::Key;
 
         switch (key) {
             // Alphanumeric

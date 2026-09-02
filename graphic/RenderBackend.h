@@ -5,7 +5,7 @@
 #ifndef FUNCCIAFRAME_RENDERBACKEND_H
 #define FUNCCIAFRAME_RENDERBACKEND_H
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     enum class RenderBackend {
         OpenGL,
         Vulkan

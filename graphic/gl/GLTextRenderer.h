@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "GLGlyphAtlas.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     struct ShapedGlyph;
 
     struct PairHash {
@@ -76,4 +76,4 @@ namespace Funccia::Graphic::GL {
         vec2 offset;
         int layer;
     };
-} // namespace Funccia::Graphic::GL
+} // namespace vva::graphic::GL

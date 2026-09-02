@@ -14,7 +14,7 @@
 class Resource;
 #include "Asset.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     using std::byte, std::string;
 
     //===========> template for containers with pointers of Resource types <================

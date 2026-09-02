@@ -7,7 +7,7 @@
 
 #include "core/Singleton.h"
 
-namespace Funccia {
+namespace vva {
     struct ApplicationMetadata {
         std::string applicationTitle {};
     };

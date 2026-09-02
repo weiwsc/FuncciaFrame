@@ -10,15 +10,15 @@
 #include "../shaders/SlangShaderCompiler.h"
 #include "types/Texture.h"
 
-namespace Funccia::Graphic::Vulkan {
-    using SlangShaderCompiler = Graphics::Shader::SlangShaderCompiler;
+namespace vva::gfx::vulkan{
+    using SlangShaderCompiler = gfx::shader::SlangShaderCompiler;
 
     struct GraphicsPipeline {
         std::vector<vk::raii::DescriptorSetLayout> descriptor_set_layouts;
         vk::raii::PipelineLayout layout;
         vk::raii::Pipeline handle;
 
-        static auto Create(const vk::raii::Device& device,
+        static auto create(const vk::raii::Device& device,
                            const vk::raii::PhysicalDevice& physical_device, const vk::SurfaceFormatKHR& surface_format,
                            SlangShaderCompiler& compiler) -> GraphicsPipeline;
     };

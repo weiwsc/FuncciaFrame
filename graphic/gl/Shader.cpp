@@ -9,7 +9,7 @@
 #include "ShaderUtil.h"
 #include "../../core/AssetController.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     Shader::Shader() {
         m_fragmentShaderSource = nullptr;
         m_vertexShaderSource = nullptr;
@@ -20,8 +20,8 @@ namespace Funccia::Graphic::GL {
     }
 
     void Shader::initialize(const std::string &vertexPath, const std::string &fragmentPath) {
-        m_vertexShaderSource = Core::AssetController::Instance().GetAsset(vertexPath);
-        m_fragmentShaderSource = Core::AssetController::Instance().GetAsset(fragmentPath);
+        m_vertexShaderSource = core::AssetController::Instance().GetAsset(vertexPath);
+        m_fragmentShaderSource = core::AssetController::Instance().GetAsset(fragmentPath);
         ID = ShaderUtil::CreateShaderProgram(m_vertexShaderSource, m_fragmentShaderSource);
     }
 
@@ -29,13 +29,13 @@ namespace Funccia::Graphic::GL {
         glUseProgram(ID);
     }
 
-    void Shader::Serialize(Core::Serializer &serializer) {
+    void Shader::Serialize(core::Serializer &serializer) {
         serializer.write(m_vertexShaderSource);
         serializer.write(m_fragmentShaderSource);
         Resource::Serialize(serializer);
     }
 
-    void Shader::Deserialize(Core::Deserializer &deserializer) {
+    void Shader::Deserialize(core::Deserializer &deserializer) {
         deserializer.read(m_vertexShaderSource);
         deserializer.read(m_fragmentShaderSource);
         Resource::Deserialize(deserializer);

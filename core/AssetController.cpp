@@ -9,7 +9,7 @@
 
 #include "ObjectPoolManager.h"
 
-namespace Funccia::Core {
+namespace vva::core {
     StackAllocator* AssetController::Stack = nullptr;
 
     AssetController::AssetController() {

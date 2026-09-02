@@ -10,15 +10,15 @@
 #include "UIState.h"
 #include "UIStyleDef.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     struct StateStyle {
         UIFlag state;
         UIStyleDef def;
     };
     class UIStyleSheets {
     public:
-        auto ApplyStyle(Funccia::UI::UIState ui_state, Funccia::UI::UIStyle& style) -> void;
-        auto Append(Funccia::UI::UIFlag flag, Funccia::UI::UIStyleDef style) -> void;
+        auto ApplyStyle(vva::UI::UIState ui_state, vva::UI::UIStyle& style) -> void;
+        auto Append(vva::UI::UIFlag flag, vva::UI::UIStyleDef style) -> void;
         auto SetDefaultStyle(UIStyleDef style) -> void {
             m_default_style = std::move(style);
         }

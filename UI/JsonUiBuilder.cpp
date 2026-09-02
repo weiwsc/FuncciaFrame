@@ -7,7 +7,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace Funccia::UI {
+namespace vva::UI {
     auto JsonUiBuilder::ParseUI(const std::string &jsonStr, UIElement *root) -> void {
         try {
             auto j = json::parse(jsonStr);
@@ -274,7 +274,7 @@ namespace Funccia::UI {
         {
             "text-wrap", [](UIFluentAPI *elf, const json &v) {
                 // assuming you have a string->enum mapping
-                elf->TextWrap(v == "wrap" ? Graphic::TextWrap::Character : Graphic::TextWrap::None);
+                elf->TextWrap(v == "wrap" ? gfx::TextWrap::Character : gfx::TextWrap::None);
             }
         },
 

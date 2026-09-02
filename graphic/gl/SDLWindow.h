@@ -8,7 +8,7 @@
 #include "../WindowInterface.h"
 #include "../../input/MouseState.h"
 
-namespace Funccia::Graphic::GL {
+namespace vva::gfx::GL {
     class SDLWindow : public WindowInterface {
     public:
         SDLWindow() = default;

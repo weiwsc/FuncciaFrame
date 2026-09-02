@@ -4,5 +4,5 @@
 
 #include "Param.h"
 
-namespace Funccia::Graphic::Shader::Param {
+namespace vva::gfx::shader::param {
 }

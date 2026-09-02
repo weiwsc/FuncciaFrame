@@ -10,7 +10,7 @@
 #include "vulkan/vulkan_raii.hpp"
 
 #include "../types/VulkanTypesDef.h"
-namespace Funccia::Graphic::Vulkan::Util {
+namespace vva::gfx::vulkan::util {
     struct PickPhysicalDeviceResult {
         vk::raii::PhysicalDevice physical_device;
         DeviceQueueCoordinates queue_coordinates;

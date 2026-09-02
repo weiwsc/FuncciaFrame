@@ -10,7 +10,7 @@
 
 #include "../graphic/RenderTypes.h"
 
-namespace Funccia::UI {
+namespace vva::UI {
     enum class Tag;
     using vec2 = glm::vec2;
     using vec4 = glm::vec4;
@@ -61,7 +61,7 @@ namespace Funccia::UI {
 
         //auto virtual Text(const std::string& _text) -> UIFluentAPI& = 0;
         auto virtual FontSize(int size) -> UIFluentAPI& = 0;
-        auto virtual TextWrap(Graphic::TextWrap wrap) -> UIFluentAPI& = 0;
+        auto virtual TextWrap(gfx::TextWrap wrap) -> UIFluentAPI& = 0;
 
         auto virtual InvisibleButOccupySpace(bool option) -> UIFluentAPI& = 0;
 

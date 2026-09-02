@@ -7,7 +7,7 @@
 
 #include "RenderTypes.h"
 
-namespace Funccia::Graphic {
+namespace vva::gfx {
     class IUiRenderer {
     public:
         virtual ~IUiRenderer() = default;
