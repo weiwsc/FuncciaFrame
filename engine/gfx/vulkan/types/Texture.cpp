@@ -230,22 +230,22 @@ namespace vva::gfx::vulkan{
         return texture; // staging buffer is freed here by RAII, safely after the wait
     }
 
-    auto createTextureSampler(const vk::raii::Device& device,
-                              const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler {
-        vk::PhysicalDeviceProperties properties = physical_device.getProperties();
-        vk::SamplerCreateInfo sampler_info{
-            .magFilter = vk::Filter::eLinear,
-            .minFilter = vk::Filter::eLinear,
-            .mipmapMode = vk::SamplerMipmapMode::eLinear,
-            .addressModeU = vk::SamplerAddressMode::eRepeat,
-            .addressModeV = vk::SamplerAddressMode::eRepeat,
-            .addressModeW = vk::SamplerAddressMode::eRepeat,
-            .mipLodBias = 0.0f,
-            .anisotropyEnable = vk::True,
-            .maxAnisotropy = properties.limits.maxSamplerAnisotropy,
-            .compareEnable = vk::False,
-            .compareOp = vk::CompareOp::eAlways
-        };
-        return vk::raii::Sampler(device, sampler_info);
-    }
+    // auto createTextureSampler(const vk::raii::Device& device,
+    //                           const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler {
+    //     vk::PhysicalDeviceProperties properties = physical_device.getProperties();
+    //     vk::SamplerCreateInfo sampler_info{
+    //         .magFilter = vk::Filter::eLinear,
+    //         .minFilter = vk::Filter::eLinear,
+    //         .mipmapMode = vk::SamplerMipmapMode::eLinear,
+    //         .addressModeU = vk::SamplerAddressMode::eRepeat,
+    //         .addressModeV = vk::SamplerAddressMode::eRepeat,
+    //         .addressModeW = vk::SamplerAddressMode::eRepeat,
+    //         .mipLodBias = 0.0f,
+    //         .anisotropyEnable = vk::True,
+    //         .maxAnisotropy = properties.limits.maxSamplerAnisotropy,
+    //         .compareEnable = vk::False,
+    //         .compareOp = vk::CompareOp::eAlways
+    //     };
+    //     return vk::raii::Sampler(device, sampler_info);
+    // }
 }

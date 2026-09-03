@@ -2,7 +2,8 @@
 # and `export import std;`, so it needs CMAKE_CXX_MODULE_STD (set at the root).
 # Consumers reach it through VulkanInclude.h, which does `import vulkan;`
 # when USE_CPP20_MODULES is defined and falls back to the header otherwise.
-add_library(vulkan_hpp_module STATIC)
+add_library(vulkan_hpp_module STATIC
+       )
 target_sources(vulkan_hpp_module PUBLIC
         FILE_SET cxx_modules TYPE CXX_MODULES
         BASE_DIRS "${Vulkan_INCLUDE_DIR}"
@@ -43,7 +44,6 @@ add_library(vva_gfx_vulkan STATIC
         AllocatedImage.cpp
         SlangShaderCompiler.cpp
         GraphicsPipeline.cpp
-        DescriptorAllocator.cpp
         types/Param.cpp
         types/Model.cpp
         types/Texture.cpp
@@ -57,6 +57,11 @@ add_library(vva_gfx_vulkan STATIC
         GpuTextureRegistry.h
         types/Sampler.cpp
         types/Sampler.h
+        resource_management/TextureSamplerDescriptorSet.cpp
+        resource_management/TextureSamplerDescriptorSet.h
+        resource_management/FrameSceneDataDescriptorSet.cpp
+        resource_management/FrameSceneDataDescriptorSet.h
+        resource_management/DescriptorTypeDef.h
 )
 add_library(vva::gfx::vulkan ALIAS vva_gfx_vulkan)
 

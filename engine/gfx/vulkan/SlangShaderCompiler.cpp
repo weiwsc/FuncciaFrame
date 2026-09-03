@@ -6,6 +6,7 @@
 
 #include <array>
 
+#include "VulkanConfig.h"
 #include "core/Log.h"
 
 namespace vva::gfx::shader {
@@ -27,13 +28,15 @@ namespace vva::gfx::shader {
         target_desc.format = SLANG_SPIRV;
         target_desc.profile = global_session->findProfile("spirv_1_6");
         //https://docs.shader-slang.org/en/latest/external/slang/docs/user-guide/08-compiling.html#pre-defined-macros
-        // std::array<slang::PreprocessorMacroDesc, 2> preprocessorMacroDesc =
-        // {
-        //     slang::PreprocessorMacroDesc{ .name = "BIAS_VALUE", .value = "1138" },
-        //     slang::PreprocessorMacroDesc{ .name = "OTHER_MACRO", .value = "float" }
-        // };
-        // session_desc.preprocessorMacros = preprocessorMacroDesc.data();
-        // session_desc.preprocessorMacroCount = preprocessorMacroDesc.size();
+        const std::string max_textures = std::to_string(vulkan::VulkanRenderConfig::MAX_BINDLESS_TEXTURE);
+        const std::string max_samplers = std::to_string(vulkan::VulkanRenderConfig::MAX_SAMPLERS);
+        std::array<slang::PreprocessorMacroDesc, 2> preprocessor_macro_desc =
+        {
+            slang::PreprocessorMacroDesc{ .name = "MAX_TEXTURES", .value = max_textures.c_str() },
+            slang::PreprocessorMacroDesc{ .name = "MAX_SAMPLERS", .value = max_samplers.c_str() }
+        };
+        session_desc.preprocessorMacros = preprocessor_macro_desc.data();
+        session_desc.preprocessorMacroCount = preprocessor_macro_desc.size();
 
         //https://docs.shader-slang.org/en/latest/external/slang/docs/user-guide/08-compiling.html#compiler-options
         std::array options{

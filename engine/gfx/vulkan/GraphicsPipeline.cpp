@@ -56,30 +56,7 @@ namespace vva::gfx::vulkan{
 
 
 
-        auto createDescriptorSetLayout(const vk::raii::Device& device) -> vk::raii::DescriptorSetLayout {
-            std::array bindings = {
-                //the uniform that contains all scene data
-                vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1,
-                                               vk::ShaderStageFlagBits::eAll,
-                                               nullptr),
-                //all the texture, accessed by index
-                vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eSampledImage,
-                                                VulkanRenderConfig::MAX_BINDLESS_TEXTURE,
-                                               vk::ShaderStageFlagBits::eAll, nullptr),
-                //all the sampler, accessed by index
-                vk::DescriptorSetLayoutBinding{
-                    .binding = 2, .descriptorType = vk::DescriptorType::eSampler,
-                    .descriptorCount = VulkanRenderConfig::MAX_SAMPLERS,
-                    .stageFlags = vk::ShaderStageFlagBits::eAll
-                }
-            };
 
-            vk::DescriptorSetLayoutCreateInfo layout_info{
-                .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()
-            };
-
-            return vk::raii::DescriptorSetLayout(device, layout_info);
-        }
     }
     auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format{
         return findSupportedFormat(
@@ -107,7 +84,8 @@ namespace vva::gfx::vulkan{
     auto GraphicsPipeline::create(const vk::raii::Device& device,
                                   const vk::raii::PhysicalDevice& physical_device,
                                   const vk::SurfaceFormatKHR& surface_format,
-                                  SlangShaderCompiler& compiler) -> GraphicsPipeline {
+                                  SlangShaderCompiler& compiler,
+                           const GlobalDescriptors& global_descriptors) -> GraphicsPipeline {
         auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, "my_shader",
                                                      "vertMain");
         auto fragment_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
@@ -195,11 +173,9 @@ namespace vva::gfx::vulkan{
             .pDynamicStates = dynamic_states.data()
         };
         //create descriptor set, change this later
-        std::vector<vk::raii::DescriptorSetLayout> descriptor_set_layouts;
-        descriptor_set_layouts.emplace_back(createDescriptorSetLayout(device));
-        std::array<vk::DescriptorSetLayout, 1> descriptor_set_layouts_raw{
-            vk::DescriptorSetLayout{*descriptor_set_layouts.front()}
-        };
+        std::vector<vk::DescriptorSetLayout> descriptor_set_layouts;
+        descriptor_set_layouts.push_back(*global_descriptors.texture_sampler.layout);
+        descriptor_set_layouts.push_back(*global_descriptors.frame_scene_data.layout);
 
         vk::PushConstantRange push_constant_range{
             .stageFlags = vk::ShaderStageFlagBits::eAll,
@@ -208,8 +184,8 @@ namespace vva::gfx::vulkan{
         };
 
         vk::PipelineLayoutCreateInfo pipeline_layout_info{
-            .setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts_raw.size()),
-            .pSetLayouts = descriptor_set_layouts_raw.data(),
+            .setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts.size()),
+            .pSetLayouts = descriptor_set_layouts.data(),
             .pushConstantRangeCount = 1,
             .pPushConstantRanges = &push_constant_range//fill this when adding push constant
         };
@@ -254,10 +230,8 @@ namespace vva::gfx::vulkan{
         auto samplers = createSamplers(device);
 
         return {
-            .descriptor_set_layouts = std::move(descriptor_set_layouts),
             .layout = std::move(pipeline_layout),
             .handle = std::move(graphics_pipeline),
-            .samplers = std::move(samplers)
         };
     }
 }

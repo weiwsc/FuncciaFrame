@@ -34,8 +34,8 @@ namespace vva::gfx::vulkan{
         VulkanUploadContext& upload,
         const std::filesystem::path& path) -> Texture2D;
 
-    auto createTextureSampler(const vk::raii::Device& device,
-                              const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler;
-
+    // auto createTextureSampler(const vk::raii::Device& device,
+    //                           const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler;
+    //
 
 }

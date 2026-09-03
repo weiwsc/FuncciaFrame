@@ -17,6 +17,9 @@
 #include "VulkanSwapChain.h"
 #include "VulkanUploadContext.h"
 #include "platform/WindowInterface.h"
+#include "resource_management/DescriptorTypeDef.h"
+#include "resource_management/FrameSceneDataDescriptorSet.h"
+#include "resource_management/TextureSamplerDescriptorSet.h"
 
 namespace vva::gfx::vulkan{
     struct FrameContext {
@@ -40,13 +43,14 @@ namespace vva::gfx::vulkan{
         VulkanUploadContext upload_context;
         shader::SlangShaderCompiler slang_shader_compiler;
         GraphicsPipeline graphics_pipeline;
-        vk::raii::Sampler sampler;
+        std::vector<vk::raii::Sampler> samplers;
         Texture2D depth_resource;
     };
 
+
     class VulkanRenderer {
     public:
-        explicit VulkanRenderer(VulkanContext context);
+        explicit VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors);
 
         static auto createVulkanRenderer(WindowInterface& window_interface,
                                          const VulkanRendererDesc& desc) -> VulkanRenderer;
@@ -54,5 +58,6 @@ namespace vva::gfx::vulkan{
     private:
         static auto createSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;
         VulkanContext context_;
+        GlobalDescriptors descriptors_;
     };
 }

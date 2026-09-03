@@ -7,13 +7,14 @@
 #include <SDL3/SDL_vulkan.h>
 
 #include "core/Log.h"
+#include "types/Sampler.h"
 #include "types/Texture.h"
 #include "util/VulkanLogicalDeviceUtil.h"
 #include "util/VulkanPhysicalDeviceUtil.h"
 
 namespace vva::gfx::vulkan{
-    VulkanRenderer::VulkanRenderer(VulkanContext context)
-        : context_(std::move(context)) {
+    VulkanRenderer::VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors)
+        : context_(std::move(context)), descriptors_(std::move(descriptors)) {
     }
 
     auto VulkanRenderer::createVulkanRenderer(WindowInterface& window_interface,
@@ -33,9 +34,19 @@ namespace vva::gfx::vulkan{
         auto frame_controller = VulkanFrameController::create(device);
         auto upload_context = createVulkanUploadContext(device);
         auto shader_compiler = shader::SlangShaderCompiler::create(desc.shader_dir);
-        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler);
-        auto sampler = createTextureSampler(device.logical_device, physical_device);
+
+        auto texture_sampler_set = TextureSamplerDescriptorSet::create(device.logical_device);
+        auto frame_scene_data_set = FrameSceneDataDescriptorSet::create(device.logical_device);
+        GlobalDescriptors global_descriptors = {
+            .texture_sampler = std::move(texture_sampler_set),
+            .frame_scene_data = std::move(frame_scene_data_set)
+        };
+        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler, global_descriptors);
+        auto samplers = createSamplers(device.logical_device);
         auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device, swap_chain.extent);
+
+        global_descriptors.texture_sampler.writeSamplers(samplers);
+
         vva_log_info("vulkan renderer created");
         return VulkanRenderer{
             {
@@ -48,9 +59,10 @@ namespace vva::gfx::vulkan{
                 .upload_context = std::move(upload_context),
                 .slang_shader_compiler = std::move(shader_compiler),
                 .graphics_pipeline = std::move(graphics_pipeline),
-                .sampler = std::move(sampler),
+                .samplers = std::move(samplers),
                 .depth_resource = std::move(depth_resource)
-            }
+            },
+            std::move(global_descriptors)
         };
     }
 
