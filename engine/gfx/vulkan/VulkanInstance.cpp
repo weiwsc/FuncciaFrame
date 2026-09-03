@@ -18,7 +18,7 @@ namespace vva::gfx::vulkan{
             .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
             .pEngineName = "Funccia Engine",
             .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-            .apiVersion = VulkanDeviceRequirement::minimum_api_version
+            .apiVersion = VulkanDeviceRequirement::MINIMUM_API_VERSION
         };
         vk::raii::Context context;
         auto required_layers = util::getRequiredLayers(context, enable_validation_layers);

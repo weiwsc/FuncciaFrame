@@ -18,6 +18,17 @@ target_compile_definitions(vulkan_hpp_module
 target_link_libraries(vulkan_hpp_module PUBLIC Vulkan::Vulkan)
 target_compile_features(vulkan_hpp_module PUBLIC cxx_std_23)
 
+# Optional: documented copies of the Vulkan/VMA/Slang headers, used for IDE hover docs.
+# external/ is gitignored and doc_header is a machine-local symlink, so this is a no-op
+# on any machine without it. SYSTEM BEFORE puts the directory ahead of the SDK include
+# dir, and PUBLIC on the module target means the module BMI and every consumer see the
+# same copy, which the VK_HEADER_VERSION static assert requires.
+set(VVA_DOC_HEADER_DIR "${CMAKE_SOURCE_DIR}/external/doc_header")
+if(IS_DIRECTORY "${VVA_DOC_HEADER_DIR}/vulkan")
+    target_include_directories(vulkan_hpp_module SYSTEM BEFORE PUBLIC "${VVA_DOC_HEADER_DIR}")
+    message(STATUS "Using documented headers from ${VVA_DOC_HEADER_DIR}")
+endif()
+
 add_library(vva_gfx_vulkan STATIC
         VulkanRenderer.cpp
         VulkanInstance.cpp
@@ -42,6 +53,10 @@ add_library(vva_gfx_vulkan STATIC
         util/VulkanPhysicalDeviceUtil.cpp
         util/VulkanLogicalDeviceUtil.cpp
         util/VulkanDebugMessengerUtil.cpp
+        GpuTextureRegistry.cpp
+        GpuTextureRegistry.h
+        types/Sampler.cpp
+        types/Sampler.h
 )
 add_library(vva::gfx::vulkan ALIAS vva_gfx_vulkan)
 

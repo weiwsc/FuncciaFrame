@@ -7,16 +7,18 @@
 
 namespace vva::gfx::vulkan{
     struct VulkanRenderConfig {
-        static constexpr uint32_t max_frame_in_flight = 2;
+        static constexpr uint32_t MAX_FRAME_IN_FLIGHT = 2;
+        static constexpr uint32_t MAX_BINDLESS_TEXTURE = 1280;
+        static constexpr uint32_t MAX_SAMPLERS = 6;
     };
 
     struct VulkanDeviceRequirement {
-        static constexpr uint32_t minimum_api_version = vk::ApiVersion14;
-        static constexpr std::array extensions{
+        static constexpr uint32_t MINIMUM_API_VERSION = vk::ApiVersion14;
+        static constexpr std::array EXTENSIONS{
             vk::KHRSwapchainExtensionName
         };
 
-        static constexpr vk::QueueFlags required_queue_flags =
+        static constexpr vk::QueueFlags REQUIRED_QUEUE_FLAGS =
             vk::QueueFlagBits::eGraphics |
             vk::QueueFlagBits::eCompute |
             vk::QueueFlagBits::eTransfer;

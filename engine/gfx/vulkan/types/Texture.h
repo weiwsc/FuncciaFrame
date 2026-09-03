@@ -14,6 +14,7 @@ namespace vva::gfx::vulkan{
     using Image = vva::gfx::vulkan::AllocatedImage;
 
     struct Texture2D {
+        uint32_t slot {}; //slot in the global texture array (I guess 0 means not uploaded?)
         Image source_image;
         vk::raii::ImageView image_view;
         vk::Extent2D extent;
@@ -35,4 +36,6 @@ namespace vva::gfx::vulkan{
 
     auto createTextureSampler(const vk::raii::Device& device,
                               const vk::raii::PhysicalDevice& physical_device) -> vk::raii::Sampler;
+
+
 }

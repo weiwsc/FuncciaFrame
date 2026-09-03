@@ -20,7 +20,7 @@ namespace vva::gfx::vulkan{
             .physicalDevice = static_cast<VkPhysicalDevice>(*physical_device),
             .device = static_cast<VkDevice>(*device),
             .instance = static_cast<VkInstance>(*instance),
-            .vulkanApiVersion = VulkanDeviceRequirement::minimum_api_version
+            .vulkanApiVersion = VulkanDeviceRequirement::MINIMUM_API_VERSION
         };
         VmaAllocator handle{};
         const VkResult result = vmaCreateAllocator(&create_info, &handle);

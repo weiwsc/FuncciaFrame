@@ -17,6 +17,7 @@ namespace vva::gfx::vulkan{
         std::vector<vk::raii::DescriptorSetLayout> descriptor_set_layouts;
         vk::raii::PipelineLayout layout;
         vk::raii::Pipeline handle;
+        std::vector<vk::raii::Sampler> samplers;
 
         static auto create(const vk::raii::Device& device,
                            const vk::raii::PhysicalDevice& physical_device, const vk::SurfaceFormatKHR& surface_format,

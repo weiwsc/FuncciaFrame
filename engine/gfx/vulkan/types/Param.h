@@ -10,11 +10,26 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "../VulkanInclude.h"
 namespace vva::gfx::shader::param {
-    struct UniformBufferObject {
-    alignas(16) glm::mat4 model;
+    struct PushConstants {
+        alignas(16) glm::mat4 model_matrix;
+        alignas(8) vk::DeviceAddress material_address;
+        alignas(8) vk::DeviceAddress object_address;
+    };
+    struct FrameUniformBuffer {
+        alignas(16) glm::mat4 view, projection, view_projection;
+        alignas(16) glm::mat4 inverse_view, inverse_projection;
+        alignas(16) glm::vec3 camera_position;
+        alignas(8) glm::vec2 resolution;
+        alignas(8) glm::vec2 mouse;
+        alignas(4) float time;
+        alignas(4) float delta_time;
+        vk::DeviceAddress lights;
+        //VkDeviceAddress material; //there might be different materials
+    };
+
+    struct CameraBuffer {
     alignas(16) glm::mat4 view;
     alignas(16) glm::mat4 proj;
-    alignas(16) float time;
 };
 struct UniformBufferObject2 {
     alignas(8) glm::vec2 resolution;
@@ -30,14 +45,14 @@ struct UniformBufferObject2 {
         glm::vec3 normal;
         glm::vec2 tex_coord;
 
-        bool operator==(const PosNormalUV& other) const {
+        auto operator==(const PosNormalUV& other) const -> bool {
             return pos == other.pos && normal == other.normal && tex_coord == other.tex_coord;
         }
-        static vk::VertexInputBindingDescription getBindingDescription() {
+        static auto getBindingDescription() -> vk::VertexInputBindingDescription {
             return { 0, sizeof(PosNormalUV), vk::VertexInputRate::eVertex };
         }
 
-        static std::array<vk::VertexInputAttributeDescription, 3> getAttributeDescriptions() {
+        static auto getAttributeDescriptions() -> std::array<vk::VertexInputAttributeDescription, 3> {
             return {
                 vk::VertexInputAttributeDescription( 0, 0, vk::Format::eR32G32B32Sfloat, offsetof(PosNormalUV, pos) ),
                 vk::VertexInputAttributeDescription( 1, 0, vk::Format::eR32G32B32Sfloat, offsetof(PosNormalUV, normal) ),
@@ -48,7 +63,7 @@ struct UniformBufferObject2 {
 
 }
 template<> struct std::hash<vva::gfx::shader::param::PosNormalUV> {
-    size_t operator()(const vva::gfx::shader::param::PosNormalUV& vertex) const {
+    auto operator()(const vva::gfx::shader::param::PosNormalUV& vertex) const noexcept -> size_t {
         return ((hash<glm::vec3>()(vertex.pos)
                  ^ (hash<glm::vec3>()(vertex.normal) << 1)) >> 1)
                ^ (hash<glm::vec2>()(vertex.tex_coord) << 1);

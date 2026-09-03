@@ -162,5 +162,5 @@ CheckOptions:
   readability-identifier-naming.PublicMemberCase: lower_case
   readability-identifier-naming.PrivateMemberCase: lower_case
   readability-identifier-naming.PrivateMemberSuffix: _
-  readability-identifier-naming.ConstexprVariableCase: CamelCase
-  readability-identifier-naming.ConstexprVariablePrefix: k
+  readability-identifier-naming.ConstexprVariableCase: UPPER_CASE
+  #readability-identifier-naming.ConstexprVariablePrefix: k

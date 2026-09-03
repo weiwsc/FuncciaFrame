@@ -5,7 +5,9 @@
 #include "GraphicsPipeline.h"
 
 #include "AllocatedImage.h"
+#include "VulkanConfig.h"
 #include "types/Param.h"
+#include "types/Sampler.h"
 #include "types/Texture.h"
 
 namespace vva::gfx::vulkan{
@@ -56,11 +58,20 @@ namespace vva::gfx::vulkan{
 
         auto createDescriptorSetLayout(const vk::raii::Device& device) -> vk::raii::DescriptorSetLayout {
             std::array bindings = {
+                //the uniform that contains all scene data
                 vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1,
-                                               vk::ShaderStageFlagBits::eVertex,
+                                               vk::ShaderStageFlagBits::eAll,
                                                nullptr),
-                vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1,
-                                               vk::ShaderStageFlagBits::eFragment, nullptr)
+                //all the texture, accessed by index
+                vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eSampledImage,
+                                                VulkanRenderConfig::MAX_BINDLESS_TEXTURE,
+                                               vk::ShaderStageFlagBits::eAll, nullptr),
+                //all the sampler, accessed by index
+                vk::DescriptorSetLayoutBinding{
+                    .binding = 2, .descriptorType = vk::DescriptorType::eSampler,
+                    .descriptorCount = VulkanRenderConfig::MAX_SAMPLERS,
+                    .stageFlags = vk::ShaderStageFlagBits::eAll
+                }
             };
 
             vk::DescriptorSetLayoutCreateInfo layout_info{
@@ -190,11 +201,17 @@ namespace vva::gfx::vulkan{
             vk::DescriptorSetLayout{*descriptor_set_layouts.front()}
         };
 
+        vk::PushConstantRange push_constant_range{
+            .stageFlags = vk::ShaderStageFlagBits::eAll,
+            .offset = 0,
+            .size = sizeof(shader::param::PushConstants)
+        };
+
         vk::PipelineLayoutCreateInfo pipeline_layout_info{
             .setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts_raw.size()),
             .pSetLayouts = descriptor_set_layouts_raw.data(),
-            .pushConstantRangeCount = 0,
-            //.pPushConstantRanges = //fill this when adding push constant
+            .pushConstantRangeCount = 1,
+            .pPushConstantRanges = &push_constant_range//fill this when adding push constant
         };
 
         auto pipeline_layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
@@ -233,10 +250,14 @@ namespace vva::gfx::vulkan{
 
         auto graphics_pipeline = vk::raii::Pipeline(device, nullptr,
                                                    pipeline_create_info_chain.get<vk::GraphicsPipelineCreateInfo>());
+
+        auto samplers = createSamplers(device);
+
         return {
             .descriptor_set_layouts = std::move(descriptor_set_layouts),
             .layout = std::move(pipeline_layout),
-            .handle = std::move(graphics_pipeline)
+            .handle = std::move(graphics_pipeline),
+            .samplers = std::move(samplers)
         };
     }
 }

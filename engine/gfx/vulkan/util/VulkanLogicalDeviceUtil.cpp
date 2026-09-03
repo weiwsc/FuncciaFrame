@@ -49,7 +49,7 @@ namespace vva::gfx::vulkan::util {
             std::vector<vk::QueueFamilyProperties2> queue_family_properties = physical_device.
                 getQueueFamilyProperties2();
 
-            constexpr auto kRequired = VulkanDeviceRequirement::required_queue_flags;
+            constexpr auto kRequired = VulkanDeviceRequirement::REQUIRED_QUEUE_FLAGS;
 
             for (size_t i = 0; i < queue_family_properties.size(); i++) {
                 if (((queue_family_properties[i].queueFamilyProperties.queueFlags & kRequired) == kRequired)
@@ -91,8 +91,8 @@ namespace vva::gfx::vulkan::util {
             .pNext = &required_features.get<vk::PhysicalDeviceFeatures2>(),
             .queueCreateInfoCount = 1,
             .pQueueCreateInfos = &device_queue_create_info,
-            .enabledExtensionCount = static_cast<uint32_t>(VulkanDeviceRequirement::extensions.size()),
-            .ppEnabledExtensionNames = VulkanDeviceRequirement::extensions.data()
+            .enabledExtensionCount = static_cast<uint32_t>(VulkanDeviceRequirement::EXTENSIONS.size()),
+            .ppEnabledExtensionNames = VulkanDeviceRequirement::EXTENSIONS.data()
         };
 
         return assembleVulkanDevice(std::move(physical_device),

@@ -20,15 +20,15 @@ namespace vva::gfx::vulkan{
         vk::CommandBufferAllocateInfo alloc_info{
             .commandPool = command_pool,
             .level = vk::CommandBufferLevel::ePrimary,
-            .commandBufferCount = VulkanRenderConfig::max_frame_in_flight
+            .commandBufferCount = VulkanRenderConfig::MAX_FRAME_IN_FLIGHT
         };
         auto command_buffers = vk::raii::CommandBuffers(device.logical_device, alloc_info);
 
 
         std::vector<VulkanFrameResource> frame_resources;
-        frame_resources.reserve(VulkanRenderConfig::max_frame_in_flight);
+        frame_resources.reserve(VulkanRenderConfig::MAX_FRAME_IN_FLIGHT);
 
-        for (int i = 0; i < VulkanRenderConfig::max_frame_in_flight; ++i) {
+        for (int i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
             frame_resources.emplace_back(
                 VulkanFrameResource{
                     .command_buffer = std::move(command_buffers[i]),
@@ -51,6 +51,6 @@ namespace vva::gfx::vulkan{
     }
 
     auto VulkanFrameController::advanceFrame() -> void {
-        frame_index_ = (frame_index_ + 1) % VulkanRenderConfig::max_frame_in_flight;
+        frame_index_ = (frame_index_ + 1) % VulkanRenderConfig::MAX_FRAME_IN_FLIGHT;
     }
 }

@@ -20,69 +20,69 @@ namespace vva::gfx {
 
         ~Transform() = default;
 
-        [[nodiscard]] vec3 position() const { return m_position; }
-        [[nodiscard]] quat rotation() const { return m_rotation; }
-        [[nodiscard]] vec3 scale() const { return m_scale; }
+        [[nodiscard]] auto position() const -> vec3 { return position_; }
+        [[nodiscard]] auto rotation() const -> quat { return rotation_; }
+        [[nodiscard]] auto scale() const -> vec3 { return scale_; }
 
-        void setPosition(const vec3 &_position) { m_position = _position; }
-        void setPositionXPlane(const vec2 &_position) { m_position = vec3(_position, m_position.z); }
+        void setPosition(const vec3& position) { position_ = position; }
+        void setPositionXPlane(const vec2& position) { position_ = vec3(position, position_.z); }
 
-        void Translate(const vec3 &_translation, Space space = Space::Local);
+        void translate(const vec3& translation, Space space = Space::Local);
 
 
-        void setRotation(const quat &_rotation) { m_rotation = _rotation; }
+        void setRotation(const quat& rotation) { rotation_ = rotation; }
 
-        void Rotate(const vec3 &axis, float angle);
+        void rotate(const vec3& axis, float angle);
 
-        void Rotate(const vec3 &eulers, Space space = Space::Local);
+        void rotate(const vec3& eulers, Space space = Space::Local);
 
-        void Rotate(float xAngle, float yAngle, float zAngle, Space space = Space::Local) {
-            Rotate({xAngle, yAngle, zAngle}, space);
+        void rotate(float x_angle, float y_angle, float z_angle, Space space = Space::Local) {
+            rotate({x_angle, y_angle, z_angle}, space);
         };
 
-        void LookAt(const Transform &target, const vec3 &up = {0, 1, 0});
+        void lookAt(const Transform& target, const vec3& up = Vector3::UP);
 
-        void LookAt(const vec3 &worldPosition, const vec3 &up = {0, 1, 0});
+        void lookAt(const vec3& world_position, const vec3& up = Vector3::UP);
 
-        void setScale(const vec3 &_scale) { m_scale = _scale; }
+        void setScale(const vec3& scale) { scale_ = scale; }
 
 
-        auto getModelMatrix() const -> mat4;
+        [[nodiscard]] auto getModelMatrix() const -> mat4;
 
-        void setTransform(const vec3 &_position, const quat &_rotation, const vec3 &_scale) {
-            m_position = _position;
-            m_rotation = _rotation;
-            m_scale = _scale;
+        void setTransform(const vec3& position, const quat& rotation, const vec3& scale) {
+            position_ = position;
+            rotation_ = rotation;
+            scale_ = scale;
         }
 
 #ifdef FF_FORWARD_NEG_Z
         [[nodiscard]] auto forward() const -> vec3 { return TransformDirection({0, 0, -1}); }
 #else
-        [[nodiscard]] auto forward() const -> vec3 { return TransformDirection({0, 0, 1}); }
+        [[nodiscard]] auto forward() const -> vec3 { return transformDirection({0, 0, 1}); }
 #endif
 
-        [[nodiscard]] auto right() const -> vec3 { return TransformDirection({1, 0, 0}); }
-        [[nodiscard]] auto up() const -> vec3 { return TransformDirection({0, 1, 0}); }
+        [[nodiscard]] auto right() const -> vec3 { return transformDirection({1, 0, 0}); }
+        [[nodiscard]] auto up() const -> vec3 { return transformDirection({0, 1, 0}); }
 
 
-        auto TransformDirection(const vec3 &_direction) const -> vec3;
+        [[nodiscard]] auto transformDirection(const vec3& direction) const -> vec3;
 
-        [[nodiscard]] auto InverseTransformDirection(const vec3 &_direction) const -> vec3;
+        [[nodiscard]] auto inverseTransformDirection(const vec3& direction) const -> vec3;
 
-        void InverseTransformDirections(std::vector<vec3> &_direction) const;
+        void inverseTransformDirections(std::vector<vec3>& direction) const;
 
-        auto TransformPoint(const vec3 &_point) const -> vec3;
+        [[nodiscard]] auto transformPoint(const vec3& point) const -> vec3;
 
-        auto InverseTransformPoint(const vec3 &_point) const -> vec3;
+        [[nodiscard]] auto inverseTransformPoint(const vec3& point) const -> vec3;
 
-        auto TransformVector(const vec3 &_vector) const -> vec3;
+        [[nodiscard]] auto transformVector(const vec3& vector) const -> vec3;
 
-        auto InverseTransformVector(const vec3 &_vector) const -> vec3;
+        [[nodiscard]] auto inverseTransformVector(const vec3& vector) const -> vec3;
 
     private:
-        vec3 m_position{0};
-        quat m_rotation{1, 0, 0, 0};
-        vec3 m_scale{1};
+        vec3 position_{0};
+        quat rotation_{1, 0, 0, 0};
+        vec3 scale_{1};
     };
 }
 

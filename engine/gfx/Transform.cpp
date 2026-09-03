@@ -9,86 +9,78 @@
 
 
 namespace vva::gfx {
-    void Transform::Translate(const vec3 &_translation, Space space) {
+    void Transform::translate(const vec3& translation, const Space space) {
         switch (space) {
-            case Space::World:
-                m_position += _translation;
-                break;
-            case Space::Local:
-                m_position += m_rotation * _translation;
-                break;
+        case Space::World:
+            position_ += translation;
+            break;
+        case Space::Local:
+            position_ += rotation_ * translation;
+            break;
         }
     }
 
-    void Transform::Rotate(const vec3 &axis, float angle) {
-        quat axisRotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
-        m_rotation = axisRotation * m_rotation;
+    void Transform::rotate(const vec3& axis, const float angle) {
+        const quat axis_rotation = glm::angleAxis(glm::radians(angle), glm::normalize(axis));
+        rotation_ = axis_rotation * rotation_;
     }
 
-    void Transform::Rotate(const vec3 &eulers, Space space) {
+    void Transform::rotate(const vec3& eulers, const Space space) {
         quat quaternion = glm::quat(glm::radians(eulers));
         switch (space) {
-            case Space::Local:
-                m_rotation = quaternion * m_rotation;
-                break;
-            case Space::World:
-                m_rotation = m_rotation * quaternion;
-                break;
+        case Space::World:
+            rotation_ = quaternion * rotation_;
+            break;
+        case Space::Local:
+            rotation_ = rotation_ * quaternion;
+            break;
         }
     }
 
-    void Transform::LookAt(const Transform &target, const vec3 &up) {
-#ifdef FF_FORWARD_NEG_Z
-        vec3 forward = target.position() - m_position;
-        forward = glm::normalize(forward);
-        vec3 right = glm::normalize(glm::cross(up, forward));
-        vec3 newUp = glm::normalize(glm::cross(forward, right));
-        m_rotation = glm::quatLookAt(-forward, newUp);
-#else
-        vec3 forward = glm::normalize(target.position() - m_position);
-        vec3 right = glm::normalize(glm::cross(up, forward));
-        vec3 newUp = glm::normalize(glm::cross(forward, right));
-        m_rotation = glm::quatLookAt(forward, newUp);
-#endif
+    void Transform::lookAt(const Transform& target, const vec3& up) {
+        const vec3 forward = glm::normalize(target.position() - position_);
+        rotation_ = glm::quatLookAt(forward, up);
     }
 
-    void Transform::LookAt(const vec3 &worldPosition, const vec3 &up) {
+    void Transform::lookAt(const vec3& world_position, const vec3& up) {
+        const vec3 forward = glm::normalize(world_position - position_);
+        rotation_ = glm::quatLookAt(forward, up);
     }
 
     auto Transform::getModelMatrix() const -> mat4 {
-        return glm::translate(mat4(1), m_position) *
-               glm::mat4_cast(m_rotation) *
-               glm::scale(mat4(1), m_scale);
+        return glm::translate(mat4(1), position_) *
+            glm::mat4_cast(rotation_) *
+            glm::scale(mat4(1), scale_);
     }
 
-    auto Transform::TransformDirection(const vec3 &_direction) const -> vec3 {
-        return m_rotation * (_direction);
+    auto Transform::transformDirection(const vec3& direction) const -> vec3 {
+        return rotation_ * (direction);
     }
 
-    auto Transform::InverseTransformDirection(const vec3 &_direction) const -> vec3 {
-        return glm::inverse(m_rotation) * (_direction);
+    auto Transform::inverseTransformDirection(const vec3& direction) const -> vec3 {
+        return glm::inverse(rotation_) * (direction);
     }
 
-    void Transform::InverseTransformDirections(std::vector<vec3> &_direction) const {
-        glm::quat inverseRotation = glm::inverse(m_rotation);
-        for (auto &dir: _direction) {
-            dir = inverseRotation * dir;
+    void Transform::inverseTransformDirections(std::vector<vec3>& direction) const {
+        glm::quat inverse_rotation = glm::inverse(rotation_);
+        for (auto& dir : direction) {
+            dir = inverse_rotation * dir;
         }
     }
 
-    auto Transform::TransformPoint(const vec3 &_point) const -> vec3 {
-        return m_position + (m_rotation * (m_scale * _point));
+    auto Transform::transformPoint(const vec3& point) const -> vec3 {
+        return position_ + (rotation_ * (scale_ * point));
     }
 
-    auto Transform::InverseTransformPoint(const vec3 &_point) const -> vec3 {
-        return (glm::inverse(m_rotation) * (_point - m_position)) / m_scale;
+    auto Transform::inverseTransformPoint(const vec3& point) const -> vec3 {
+        return (glm::inverse(rotation_) * (point - position_)) / scale_;
     }
 
-    auto Transform::TransformVector(const vec3 &_vector) const -> vec3 {
-        return m_scale * (m_rotation * (_vector));
+    auto Transform::transformVector(const vec3& vector) const -> vec3 {
+        return scale_ * (rotation_ * (vector));
     }
 
-    auto Transform::InverseTransformVector(const vec3 &_vector) const -> vec3 {
-        return (glm::inverse(m_rotation) * _vector) / m_scale;
+    auto Transform::inverseTransformVector(const vec3& vector) const -> vec3 {
+        return (glm::inverse(rotation_) * vector) / scale_;
     }
 }

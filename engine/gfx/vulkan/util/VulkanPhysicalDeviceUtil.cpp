@@ -37,9 +37,9 @@ namespace vva::gfx::vulkan::util {
         }
         auto isSuitable(const vk::raii::PhysicalDevice& device, const vk::raii::SurfaceKHR& surface ) -> bool {
             return device.getProperties().apiVersion >=
-           VulkanDeviceRequirement::minimum_api_version
+           VulkanDeviceRequirement::MINIMUM_API_VERSION
     && VulkanDeviceRequirement::isRequiredFeatureSupported(device)
-    && supportsExtensions(device, VulkanDeviceRequirement::extensions)
+    && supportsExtensions(device, VulkanDeviceRequirement::EXTENSIONS)
     && isSwapChainAvailable(device, surface);
         }
     }
