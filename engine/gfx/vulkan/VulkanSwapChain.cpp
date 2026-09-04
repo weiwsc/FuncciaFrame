@@ -39,9 +39,19 @@ namespace vva::gfx::vulkan{
             }
             for (const auto& available_present_mode : available_present_modes) {
                 if (available_present_mode == vk::PresentModeKHR::eMailbox) {
+                    vva_log_info("using prefered mailbox present mode");
                     return available_present_mode;
                 }
             }
+
+            for (const auto& available_present_mode : available_present_modes) {
+                if (available_present_mode == vk::PresentModeKHR::eImmediate) {
+                    vva_log_info("mailbox present mode not found, using immediate mode");
+                    return available_present_mode;
+                }
+            }
+
+            vva_log_info("using FIFO present mode as fallback");
             return vk::PresentModeKHR::eFifo;
         }
 

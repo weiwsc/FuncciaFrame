@@ -74,7 +74,6 @@ namespace vva::gfx::vulkan {
 
 
         return {
-            .device = &device,
             .layout = std::move(layout),
             .pool = std::move(pool),
             .sets = std::move(descriptor_sets),

@@ -11,7 +11,6 @@
 namespace vva::gfx::vulkan {
     struct FrameSceneDataDescriptorSet {
 
-        const vk::raii::Device* device {nullptr};
         vk::raii::DescriptorSetLayout layout{nullptr};
         vk::raii::DescriptorPool pool{nullptr};
         std::vector<vk::raii::DescriptorSet> sets;

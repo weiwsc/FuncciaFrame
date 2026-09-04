@@ -8,7 +8,7 @@
 #include "VulkanDevice.h"
 #include "core/Log.h"
 
-namespace vva::gfx::vulkan{
+namespace vva::gfx::vulkan {
     auto VulkanFrameController::create(const VulkanDevice& device) -> VulkanFrameController {
         const vk::CommandPoolCreateInfo pool_info{
             .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -32,7 +32,6 @@ namespace vva::gfx::vulkan{
             frame_resources.emplace_back(
                 VulkanFrameResource{
                     .command_buffer = std::move(command_buffers[i]),
-                    .present_complete_semaphore = {device.logical_device, vk::SemaphoreCreateInfo()},
                     .image_available_semaphore = {device.logical_device, vk::SemaphoreCreateInfo()},
                     .in_flight_fences = {
                         device.logical_device, vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled}

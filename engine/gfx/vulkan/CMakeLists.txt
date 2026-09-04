@@ -64,6 +64,8 @@ add_library(vva_gfx_vulkan STATIC
         resource_management/DescriptorTypeDef.h
         types/Model.cpp
         types/Model.h
+        types/Camera.cpp
+        types/Camera.h
 )
 add_library(vva::gfx::vulkan ALIAS vva_gfx_vulkan)
 

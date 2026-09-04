@@ -17,7 +17,7 @@
 #include "graphic/gl/GLGraphicsDevice.h"
 #include "UI/JsonUiBuilder.h"
 #include "UI/Window.h"
-#include "util/FpsCounter.h"
+#include "engine/core/FpsCounter.h"
 
 #include <iostream>
 

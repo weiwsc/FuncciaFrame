@@ -1,7 +1,7 @@
 /graphic/assets/images
 /external/
-assets/textures
-assets/models
+#assets/textures
+#assets/models
 
 # OS junk
 .DS_Store
@@ -21,7 +21,7 @@ assets/models
 bin/
 obj/
 *.o
-*.obj
+#*.obj
 *.so
 *.dll
 *.dylib

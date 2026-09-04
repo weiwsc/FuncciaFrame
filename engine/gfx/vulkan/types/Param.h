@@ -10,11 +10,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "../VulkanInclude.h"
 namespace vva::gfx::shader::param {
+    // struct PushConstants {
+    //     alignas(16) glm::mat4 model_matrix;
+    //     alignas(8) vk::DeviceAddress material_address;
+    //     alignas(8) vk::DeviceAddress object_address;
+    // };
     struct PushConstants {
         alignas(16) glm::mat4 model_matrix;
-        alignas(8) vk::DeviceAddress material_address;
-        alignas(8) vk::DeviceAddress object_address;
+        uint64_t texture_index;
+        uint64_t sampler_index;
     };
+
     struct FrameUniformBuffer {
         alignas(16) glm::mat4 view, projection, view_projection;
         alignas(16) glm::mat4 inverse_view, inverse_projection;

@@ -85,17 +85,17 @@ namespace vva::gfx::vulkan {
             }
         };
         return {
-            .device = &device,
             .layout = std::move(layout),
             .pool = std::move(pool),
             .set = std::move(sets.front())
         };
     }
 
-    auto TextureSamplerDescriptorSet::writeSamplers(std::span<const vk::raii::Sampler> samplers) const -> void {
+    auto TextureSamplerDescriptorSet::writeSamplers(const vk::raii::Device& device,
+                                                   std::span<const vk::raii::Sampler> samplers) const -> void {
         std::vector<vk::DescriptorImageInfo> infos;
         for (const auto& s : samplers) infos.push_back({.sampler = *s});
-        device->updateDescriptorSets(
+        device.updateDescriptorSets(
             vk::WriteDescriptorSet{
                 .dstSet = set, .dstBinding = SAMPLER_BINDING, .dstArrayElement = 0,
                 .descriptorCount = static_cast<uint32_t>(infos.size()),
@@ -103,12 +103,13 @@ namespace vva::gfx::vulkan {
             }, {});
     }
 
-    auto TextureSamplerDescriptorSet::writeTexture(const uint32_t slot, const vk::ImageView view) const -> void {
+    auto TextureSamplerDescriptorSet::writeTexture(const vk::raii::Device& device, const uint32_t slot,
+                                                  const vk::ImageView view) const -> void {
         const vk::DescriptorImageInfo image_info{
             .imageView = view,
             .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal
         };
-        device->updateDescriptorSets(
+        device.updateDescriptorSets(
             vk::WriteDescriptorSet{
                 .dstSet = set,
                 .dstBinding = TEXTURE_BINDING,
@@ -119,7 +120,8 @@ namespace vva::gfx::vulkan {
             }, {});
     }
 
-    auto TextureSamplerDescriptorSet::writeTexture(uint32_t slot, std::span<const vk::ImageView> views) const -> void {
+    auto TextureSamplerDescriptorSet::writeTexture(const vk::raii::Device& device, uint32_t slot,
+                                                  std::span<const vk::ImageView> views) const -> void {
         std::vector<vk::DescriptorImageInfo> image_infos;
         image_infos.reserve(views.size());
         for (auto& view : views) {
@@ -130,7 +132,7 @@ namespace vva::gfx::vulkan {
                 }
             );
         }
-        device->updateDescriptorSets(
+        device.updateDescriptorSets(
             vk::WriteDescriptorSet{
                 .dstSet = set,
                 .dstBinding = TEXTURE_BINDING,

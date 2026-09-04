@@ -1,43 +1,62 @@
 {
-  "name" : "funccia-frame",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "389d14fa0e0692f36967e9eb5499e909317644d5",
-  "dependencies" : [ {
-    "name" : "glm",
-    "version>=" : "1.0.3"
-  }, {
-    "name" : "vcpkg-cmake-config",
-    "version>=" : "2024-05-23"
-  }, {
-    "name" : "vcpkg-cmake",
-    "version>=" : "2024-04-23"
-  }, {
-    "name" : "nlohmann-json",
-    "version>=" : "3.12.0#2"
-  }, {
-    "name" : "re2",
-    "version>=" : "2025-11-05"
-  }, {
-    "name" : "harfbuzz",
-    "version>=" : "13.0.1"
-  }, {
-    "name" : "sdl3",
-    "version>=" : "3.4.2#1",
-    "features" : [ "vulkan" ]
-  }, {
-    "name" : "freetype",
-    "version>=" : "2.13.3"
-  }, {
-    "name" : "quill",
-    "version>=" : "11.1.0"
-  }, {
-    "name" : "vulkan-memory-allocator",
-    "version>=" : "3.3.0"
-  }, {
-    "name" : "sdl3-image",
-    "version>=" : "3.4.0"
-  }, {
-    "name" : "tinyobjloader",
-    "version>=" : "2.0.0rc13"
-  } ]
+  "name": "funccia-frame",
+  "version-string": "1.0.0",
+  "builtin-baseline": "389d14fa0e0692f36967e9eb5499e909317644d5",
+  "dependencies": [
+    {
+      "name": "glm",
+      "version>=": "1.0.3"
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "version>=": "2024-05-23"
+    },
+    {
+      "name": "vcpkg-cmake",
+      "version>=": "2024-04-23"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.12.0#2"
+    },
+    {
+      "name": "re2",
+      "version>=": "2025-11-05"
+    },
+    {
+      "name": "harfbuzz",
+      "version>=": "13.0.1"
+    },
+    {
+      "name": "sdl3",
+      "version>=": "3.4.2#1",
+      "features": [
+        "vulkan"
+      ]
+    },
+    {
+      "name": "freetype",
+      "version>=": "2.13.3"
+    },
+    {
+      "name": "quill",
+      "version>=": "11.1.0"
+    },
+    {
+      "name": "vulkan-memory-allocator",
+      "version>=": "3.3.0"
+    },
+    {
+      "name": "sdl3-image",
+      "version>=": "3.4.0",
+      "features": [
+        "png",
+        "jpeg"
+      ]
+    },
+    {
+      "name": "tinyobjloader",
+      "version>=": "2.0.0rc13"
+    }
+  ]
 }

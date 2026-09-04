@@ -25,6 +25,7 @@ namespace vva::gfx::vulkan{
         auto required_extensions = util::getRequiredInstanceExtensions(context, enable_validation_layers);
 
         vk::InstanceCreateInfo create_info{
+            //.flags = vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR,
             .pApplicationInfo = &application_info,
             .enabledLayerCount = static_cast<uint32_t>(required_layers.size()),
             .ppEnabledLayerNames = required_layers.data(),

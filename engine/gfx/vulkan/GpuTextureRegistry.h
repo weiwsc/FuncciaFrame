@@ -18,7 +18,7 @@ namespace vva::gfx::vulkan {
             }
             const uint32_t slot = textures.size();
 
-            texture_sampler_descriptor_set.writeTexture(slot, *texture.image_view);
+            texture_sampler_descriptor_set.writeTexture(device, slot, *texture.image_view);
 
             texture.slot = slot;
             textures.push_back(std::move(texture));

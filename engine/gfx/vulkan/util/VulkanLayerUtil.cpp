@@ -4,15 +4,17 @@
 
 #include "VulkanLayerUtil.h"
 
+#include "gfx/vulkan/VulkanConfig.h"
+
 namespace vva::gfx::vulkan::util {
     auto getRequiredLayers(const vk::raii::Context& context,
                            const bool enable_validation_layers) -> std::vector<char const*> {
         std::vector<char const*> required_layers;
 
         const std::vector<char const*> validation_layers = {
-            "VK_LAYER_KHRONOS_validation"
+           "VK_LAYER_KHRONOS_validation"
         };
-        if (enable_validation_layers) {
+        if (VulkanSetupConfig::ENABLE_VALIDATION_LAYERS) {
             required_layers.assign(validation_layers.begin(), validation_layers.end());
         }
 

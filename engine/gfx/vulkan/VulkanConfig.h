@@ -6,6 +6,9 @@
 #include "VulkanInclude.h"
 
 namespace vva::gfx::vulkan {
+    struct VulkanSetupConfig {
+        static constexpr bool ENABLE_VALIDATION_LAYERS = false;
+    };
     struct VulkanRenderConfig {
         static constexpr uint32_t MAX_FRAME_IN_FLIGHT = 2;
         static constexpr uint32_t MAX_BINDLESS_TEXTURE = 1280;
@@ -15,7 +18,8 @@ namespace vva::gfx::vulkan {
     struct VulkanDeviceRequirement {
         static constexpr uint32_t MINIMUM_API_VERSION = vk::ApiVersion14;
         static constexpr std::array EXTENSIONS{
-            vk::KHRSwapchainExtensionName
+            vk::KHRSwapchainExtensionName,
+            //vk::KHRPortabilityEnumerationExtensionName
         };
 
         static constexpr vk::QueueFlags REQUIRED_QUEUE_FLAGS =

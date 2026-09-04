@@ -10,7 +10,6 @@ namespace vva::gfx::vulkan{
 
     struct VulkanFrameResource {
         vk::raii::CommandBuffer command_buffer;
-        vk::raii::Semaphore present_complete_semaphore;
         vk::raii::Semaphore image_available_semaphore;
         vk::raii::Fence in_flight_fences;
     };
@@ -19,7 +18,7 @@ namespace vva::gfx::vulkan{
         static auto create(const VulkanDevice& device) -> VulkanFrameController;
         [[nodiscard]] auto frame() const -> const VulkanFrameResource&;
         auto advanceFrame() -> void;
-
+        auto getFrameIndex() -> uint32_t {return frame_index_;};
     private:
         VulkanFrameController(
             vk::raii::CommandPool pool,
