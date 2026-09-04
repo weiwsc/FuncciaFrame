@@ -45,7 +45,7 @@ add_library(vva_gfx_vulkan STATIC
         SlangShaderCompiler.cpp
         GraphicsPipeline.cpp
         types/Param.cpp
-        types/Model.cpp
+        types/Mesh.cpp
         types/Texture.cpp
         types/Shader.cpp
         util/VulkanLayerUtil.cpp
@@ -62,6 +62,8 @@ add_library(vva_gfx_vulkan STATIC
         resource_management/FrameSceneDataDescriptorSet.cpp
         resource_management/FrameSceneDataDescriptorSet.h
         resource_management/DescriptorTypeDef.h
+        types/Model.cpp
+        types/Model.h
 )
 add_library(vva::gfx::vulkan ALIAS vva_gfx_vulkan)
 

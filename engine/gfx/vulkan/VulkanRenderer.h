@@ -20,6 +20,7 @@
 #include "resource_management/DescriptorTypeDef.h"
 #include "resource_management/FrameSceneDataDescriptorSet.h"
 #include "resource_management/TextureSamplerDescriptorSet.h"
+#include "types/Model.h"
 
 namespace vva::gfx::vulkan{
     struct FrameContext {
@@ -45,6 +46,7 @@ namespace vva::gfx::vulkan{
         GraphicsPipeline graphics_pipeline;
         std::vector<vk::raii::Sampler> samplers;
         Texture2D depth_resource;
+        Model models;
     };
 
 
@@ -54,7 +56,8 @@ namespace vva::gfx::vulkan{
 
         static auto createVulkanRenderer(WindowInterface& window_interface,
                                          const VulkanRendererDesc& desc) -> VulkanRenderer;
-
+        auto loadModel(ModelLoadInfo model_load_info) -> ModelHandle;
+        auto drawModel(ModelHandle model_handle) -> void;
     private:
         static auto createSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;
         VulkanContext context_;

@@ -44,6 +44,10 @@ namespace vva::gfx::vulkan{
             VmaMemoryUsage memory_usage,
             VmaAllocationCreateFlags allocation_create_flags = 0
             ) ->AllocatedBuffer;
+
+        auto flush(vk::DeviceSize offset = 0, vk::DeviceSize size = VK_WHOLE_SIZE) const -> void {
+            vmaFlushAllocation(allocator_, allocation_, offset, size);
+        }
     private:
         void reset() noexcept;
         VmaAllocator allocator_ = VK_NULL_HANDLE;

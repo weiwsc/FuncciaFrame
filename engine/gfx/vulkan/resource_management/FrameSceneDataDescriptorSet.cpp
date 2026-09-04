@@ -4,8 +4,13 @@
 
 #include "FrameSceneDataDescriptorSet.h"
 
+#include "gfx/vulkan/VulkanAllocator.h"
+
 namespace vva::gfx::vulkan {
-    auto FrameSceneDataDescriptorSet::create(const vk::raii::Device& device) -> FrameSceneDataDescriptorSet {
+
+
+    auto FrameSceneDataDescriptorSet::create(const vk::raii::Device& device,
+                                             VmaAllocator allocator) -> FrameSceneDataDescriptorSet {
         std::array layout_bindings{
             vk::DescriptorSetLayoutBinding{
                 .binding = 0,
@@ -38,32 +43,49 @@ namespace vva::gfx::vulkan {
             }
         };
         std::vector<vk::DescriptorSetLayout> layouts(VulkanRenderConfig::MAX_FRAME_IN_FLIGHT, layout);
-        std::vector<vk::raii::DescriptorSet> descriptor_sets = device.allocateDescriptorSets(vk::DescriptorSetAllocateInfo{
-            .descriptorPool = pool,
-            .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
-            .pSetLayouts = layouts.data()
-        });
+        std::vector<vk::raii::DescriptorSet> descriptor_sets = device.allocateDescriptorSets(
+            vk::DescriptorSetAllocateInfo{
+                .descriptorPool = pool,
+                .descriptorSetCount = static_cast<uint32_t>(layouts.size()),
+                .pSetLayouts = layouts.data()
+            });
+
+
+        std::vector<AllocatedBuffer> buffers;
+        buffers.reserve(VulkanRenderConfig::MAX_FRAME_IN_FLIGHT);
+        for (uint32_t i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
+            buffers.push_back(AllocatedBuffer::createBuffer(
+                allocator,
+                sizeof(shader::param::FrameUniformBuffer),
+                vk::BufferUsageFlagBits::eUniformBuffer,
+                VMA_MEMORY_USAGE_AUTO,
+                VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT));
+
+            const vk::DescriptorBufferInfo info{
+                .buffer = buffers[i].handle(), .offset = 0, .range = sizeof(shader::param::FrameUniformBuffer)
+            };
+            device.updateDescriptorSets(
+                vk::WriteDescriptorSet{
+                    .dstSet = descriptor_sets[i], .dstBinding = 0, .dstArrayElement = 0,
+                    .descriptorCount = 1,
+                    .descriptorType = vk::DescriptorType::eUniformBuffer, .pBufferInfo = &info
+                }, {});
+        }
+
+
         return {
-            .frame_uniform_buffer = {},
             .device = &device,
             .layout = std::move(layout),
             .pool = std::move(pool),
-            .sets = std::move(descriptor_sets)
+            .sets = std::move(descriptor_sets),
+            .frame_uniform_buffers_allocation = std::move(buffers)
         };
     }
 
-    auto FrameSceneDataDescriptorSet::writeFrameData(vk::Buffer buffer, vk::DeviceSize range, uint32_t frame_index) const -> void {
-        const vk::DescriptorBufferInfo buffer_info {
-            .buffer = buffer,
-            .offset = 0,
-            .range = sizeof(shader::param::FrameUniformBuffer)
-        };
-        std::array descriptor_writes{
-            vk::WriteDescriptorSet{
-                .dstSet = sets[frame_index], .dstBinding = 0, .dstArrayElement = 0, .descriptorCount = 1,
-                .descriptorType = vk::DescriptorType::eUniformBuffer, .pBufferInfo = &buffer_info
-            }
-        };
-        device->updateDescriptorSets(descriptor_writes, {});
+    auto FrameSceneDataDescriptorSet::writeFrameUniform(const shader::param::FrameUniformBuffer& data,
+                                                        uint32_t frame_index) const -> void {
+        const auto& buffer = frame_uniform_buffers_allocation[frame_index];
+        std::memcpy(buffer.mappedData(), &data, sizeof(data));
+        buffer.flush();
     }
 }

@@ -18,6 +18,16 @@ namespace vva::gfx {
     public:
         Transform() = default;
 
+        Transform(const Transform& other)
+            : position_(other.position_),
+              rotation_(other.rotation_),
+              scale_(other.scale_) {}
+        auto operator=(const Transform& other) ->Transform& {
+            this->position_ = other.position_;
+            this->rotation_ = other.rotation_;
+            this->scale_ = other.scale_;
+            return *this;
+        }
         ~Transform() = default;
 
         [[nodiscard]] auto position() const -> vec3 { return position_; }

@@ -1,6 +1,7 @@
 /graphic/assets/images
 /external/
-
+assets/textures
+assets/models
 
 # OS junk
 .DS_Store

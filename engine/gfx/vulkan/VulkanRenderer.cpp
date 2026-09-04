@@ -12,7 +12,7 @@
 #include "util/VulkanLogicalDeviceUtil.h"
 #include "util/VulkanPhysicalDeviceUtil.h"
 
-namespace vva::gfx::vulkan{
+namespace vva::gfx::vulkan {
     VulkanRenderer::VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors)
         : context_(std::move(context)), descriptors_(std::move(descriptors)) {
     }
@@ -36,14 +36,17 @@ namespace vva::gfx::vulkan{
         auto shader_compiler = shader::SlangShaderCompiler::create(desc.shader_dir);
 
         auto texture_sampler_set = TextureSamplerDescriptorSet::create(device.logical_device);
-        auto frame_scene_data_set = FrameSceneDataDescriptorSet::create(device.logical_device);
+        auto frame_scene_data_set = FrameSceneDataDescriptorSet::create(device.logical_device, allocator.get());
         GlobalDescriptors global_descriptors = {
             .texture_sampler = std::move(texture_sampler_set),
             .frame_scene_data = std::move(frame_scene_data_set)
         };
-        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device, swap_chain.surface_format, shader_compiler, global_descriptors);
+        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device,
+                                                          swap_chain.surface_format, shader_compiler,
+                                                          global_descriptors);
         auto samplers = createSamplers(device.logical_device);
-        auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device, swap_chain.extent);
+        auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device,
+                                                   swap_chain.extent);
 
         global_descriptors.texture_sampler.writeSamplers(samplers);
 
@@ -60,10 +63,23 @@ namespace vva::gfx::vulkan{
                 .slang_shader_compiler = std::move(shader_compiler),
                 .graphics_pipeline = std::move(graphics_pipeline),
                 .samplers = std::move(samplers),
-                .depth_resource = std::move(depth_resource)
+                .depth_resource = std::move(depth_resource),
+                .models = {}
             },
             std::move(global_descriptors)
         };
+    }
+
+    auto VulkanRenderer::loadModel(ModelLoadInfo model_load_info) -> ModelHandle {
+        auto result = context_.models.createModel(model_load_info,
+                                                  context_.allocator.get(),
+                                                  context_.device,
+                                                  context_.upload_context);
+        if (result.has_value()) {
+            return result.value();
+        } else {
+            throw std::runtime_error {result.error()};
+        }
     }
 
     auto VulkanRenderer::createSurface(WindowInterface& window,
