@@ -8,7 +8,8 @@
             "binaryDir": "${sourceDir}/build",
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "VVA_USE_VULKAN_MODULE": "ON"
             },
             "condition": {
                 "type": "equals",

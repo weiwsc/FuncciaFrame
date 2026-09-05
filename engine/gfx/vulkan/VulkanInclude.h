@@ -20,5 +20,6 @@
 #if defined(__INTELLISENSE__) || defined(__JETBRAINS_IDE__) || !defined(USE_CPP20_MODULES)
 #include <vulkan/vulkan_raii.hpp>
 #else
+#include "StdModuleCompat.h"
 import vulkan;
 #endif

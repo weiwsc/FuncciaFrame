@@ -13,7 +13,7 @@ namespace vva::gfx::vulkan::util {
         auto sdl_extensions = SDL_Vulkan_GetInstanceExtensions(&sdl_extension_count);
         std::vector required_extensions(sdl_extensions, sdl_extensions + sdl_extension_count);
         //required_extensions.push_back(vk::KHRPortabilityEnumerationExtensionName);
-        if (VulkanSetupConfig::ENABLE_VALIDATION_LAYERS) {
+        if (enable_validation_layers) {
             required_extensions.push_back(vk::EXTDebugUtilsExtensionName);
         }
 

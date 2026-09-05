@@ -4,6 +4,7 @@ add_library(vva_core STATIC
         FileWatcher.h
         FpsCounter.cpp
         FpsCounter.h
+        CpuProfiler.h
 )
 add_library(vva::core ALIAS vva_core)
 

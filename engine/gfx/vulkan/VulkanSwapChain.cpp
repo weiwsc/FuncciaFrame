@@ -33,9 +33,20 @@ namespace vva::gfx::vulkan{
             return available_formats.front();
         }
 
-        auto chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& available_present_modes) -> vk::PresentModeKHR {
+        auto chooseSwapPresentMode(const std::vector<vk::PresentModeKHR>& available_present_modes,
+                                   std::optional<vk::PresentModeKHR> requested_mode) -> vk::PresentModeKHR {
             if (available_present_modes.empty()) {
                 throw std::runtime_error("available present modes empty");
+            }
+            if (requested_mode) {
+                for (const auto mode : available_present_modes) {
+                    if (mode == *requested_mode) {
+                        vva_log_info("using requested present mode: {} (0=immediate, 1=mailbox, 2=FIFO)",
+                                     static_cast<int>(mode));
+                        return mode;
+                    }
+                }
+                throw std::runtime_error("requested present mode is unsupported by this surface");
             }
             for (const auto& available_present_mode : available_present_modes) {
                 if (available_present_mode == vk::PresentModeKHR::eMailbox) {
@@ -114,7 +125,8 @@ namespace vva::gfx::vulkan{
     auto VulkanSwapChain::createSwapChain(const vk::raii::SurfaceKHR& surface,
                                           const vk::raii::PhysicalDevice& physical_device,
                                           const vk::raii::Device& device,
-                                          const glm::ivec2 buffer_size) -> VulkanSwapChain {
+                                          const glm::ivec2 buffer_size,
+                                          std::optional<vk::PresentModeKHR> present_mode) -> VulkanSwapChain {
         const auto surface_capabilities = physical_device.getSurfaceCapabilitiesKHR(*surface);
         const auto swap_chain_extent = chooseSwapExtent(surface_capabilities, buffer_size);
         if (swap_chain_extent.height == 0 || swap_chain_extent.width == 0) {
@@ -137,7 +149,7 @@ namespace vva::gfx::vulkan{
             .imageSharingMode = vk::SharingMode::eExclusive,
             .preTransform = surface_capabilities.currentTransform,
             .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-            .presentMode = chooseSwapPresentMode(physical_device.getSurfacePresentModesKHR(*surface)),
+            .presentMode = chooseSwapPresentMode(physical_device.getSurfacePresentModesKHR(*surface), present_mode),
             .clipped = true
         };
 

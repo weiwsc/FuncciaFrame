@@ -5,6 +5,7 @@
 #pragma once
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -34,6 +35,8 @@ namespace vva::gfx::vulkan{
         std::string app_name{"FuncciaFrame"};
         std::filesystem::path shader_dir;     // directory Slang searches for modules
         bool enable_validation{false};
+        bool per_frame_depth{true};
+        std::optional<vk::PresentModeKHR> present_mode;
     };
 
     struct VulkanContext {
@@ -47,7 +50,8 @@ namespace vva::gfx::vulkan{
         shader::SlangShaderCompiler slang_shader_compiler;
         GraphicsPipeline graphics_pipeline;
         std::vector<vk::raii::Sampler> samplers;
-        Texture2D depth_resource;
+        // Indexed by frame slot; a slot's fence protects attachment reuse.
+        std::vector<Texture2D> depth_resources;
         Model models;
         Camera camera;
     };
@@ -68,6 +72,8 @@ namespace vva::gfx::vulkan{
         auto getModelTransform(const ModelHandle handle) -> Transform& {return context_.models.transforms[handle.handle];}
         auto startFrame() -> void;
         auto endFrame() -> void;
+        // Drain submitted work for benchmark completion or teardown, not per frame.
+        auto waitIdle() -> void { context_.device.logical_device.waitIdle(); }
         auto drawModel(ModelHandle model_handle) -> void;
     private:
         static auto createSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;

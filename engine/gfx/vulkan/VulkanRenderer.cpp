@@ -2,7 +2,9 @@
 // Created by Wangsicong Wei on 2026-06-11.
 //
 
+#include "core/CpuProfiler.h"
 #include "VulkanRenderer.h"
+#include "VulkanConfig.h"
 
 #include <SDL3/SDL_vulkan.h>
 
@@ -71,7 +73,8 @@ namespace vva::gfx::vulkan {
         glm::ivec2 buffer_size{};
         window_interface.GetFramebufferSize(buffer_size.x, buffer_size.y);
         auto swap_chain =
-            VulkanSwapChain::createSwapChain(surface, physical_device, device.logical_device, buffer_size);
+            VulkanSwapChain::createSwapChain(surface, physical_device, device.logical_device, buffer_size,
+                                              desc.present_mode);
         auto frame_controller = VulkanFrameController::create(device);
         auto upload_context = createVulkanUploadContext(device);
         auto shader_compiler = shader::SlangShaderCompiler::create(desc.shader_dir);
@@ -86,8 +89,15 @@ namespace vva::gfx::vulkan {
                                                           swap_chain.surface_format, shader_compiler,
                                                           global_descriptors);
         auto samplers = createSamplers(device.logical_device);
-        auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device,
-                                                   swap_chain.extent);
+        const auto depth_count = desc.per_frame_depth ? VulkanRenderConfig::MAX_FRAME_IN_FLIGHT : 1u;
+        std::vector<Texture2D> depth_resources;
+        depth_resources.reserve(depth_count);
+        for (uint32_t i = 0; i < depth_count; ++i) {
+            depth_resources.push_back(createDepthResources(allocator.get(), device.logical_device,
+                                                           physical_device, swap_chain.extent));
+        }
+        vva_log_info("depth attachments: {} ({} frames in flight)", depth_count,
+                     VulkanRenderConfig::MAX_FRAME_IN_FLIGHT);
 
         global_descriptors.texture_sampler.writeSamplers(device.logical_device, samplers);
 
@@ -117,7 +127,7 @@ namespace vva::gfx::vulkan {
                 .slang_shader_compiler = std::move(shader_compiler),
                 .graphics_pipeline = std::move(graphics_pipeline),
                 .samplers = std::move(samplers),
-                .depth_resource = std::move(depth_resource),
+                .depth_resources = std::move(depth_resources),
                 .models = {},
                 .camera = camera
             },
@@ -147,17 +157,21 @@ namespace vva::gfx::vulkan {
         auto frame_index = context_.frame_controller.getFrameIndex();
         auto& frame_resource = context_.frame_controller.frame();
         frame_state_store_.frame_index = frame_index;
-        auto fence_result = context_
-                            .device
-                            .logical_device.waitForFences(*frame_resource.in_flight_fences, vk::True,
-                                                          UINT64_MAX);
+        auto fence_result = [&] {
+            profile::Scope timer(profile::Section::FenceWait);
+            return context_.device.logical_device.waitForFences(
+                *frame_resource.in_flight_fences, vk::True, UINT64_MAX);
+        }();
         if (fence_result != vk::Result::eSuccess) {
             throw std::runtime_error("failed to wait for fence!");
         }
 
 
-        auto [result, imageIndex] = context_.swap_chain.handle.acquireNextImage(
-            UINT64_MAX, *frame_resource.image_available_semaphore, nullptr);
+        auto [result, imageIndex] = [&] {
+            profile::Scope timer(profile::Section::Acquire);
+            return context_.swap_chain.handle.acquireNextImage(
+                UINT64_MAX, *frame_resource.image_available_semaphore, nullptr);
+        }();
         frame_state_store_.image_index = imageIndex;
         // Due to VULKAN_HPP_HANDLE_ERROR_OUT_OF_DATE_AS_SUCCESS being defined, eErrorOutOfDateKHR can be checked as a result
         // here and does not need to be caught by an exception.
@@ -171,10 +185,11 @@ namespace vva::gfx::vulkan {
             assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
             throw std::runtime_error("failed to acquire swap chain image!");
         }
-        descriptors_.frame_scene_data.writeFrameUniform(
-            updateFrameData(),
-            frame_index
-        );
+        {
+            profile::Scope timer(profile::Section::Update);
+            descriptors_.frame_scene_data.writeFrameUniform(updateFrameData(), frame_index);
+        }
+        profile::Scope record_timer(profile::Section::Record);
         // Only reset the fence if we are submitting work
         context_.device.logical_device.resetFences(*frame_resource.in_flight_fences);
         frame_resource.command_buffer.reset();
@@ -195,14 +210,20 @@ namespace vva::gfx::vulkan {
             vk::ImageAspectFlagBits::eColor
         );
 
+        const bool shared_depth = context_.depth_resources.size() == 1;
+        const auto& depth_resource = context_.depth_resources[shared_depth ? 0 : frame_index];
+        // Per-frame attachment reuse is protected by the fence waited above. Its
+        // contents are discarded, so no dependency on the other frame is needed.
+        // Keep the original cross-frame dependency for the shared-depth baseline.
         transition_image_layout(
             command_buffer,
-            context_.depth_resource.source_image.handle(),
+            depth_resource.source_image.handle(),
             vk::ImageLayout::eUndefined,
             vk::ImageLayout::eDepthAttachmentOptimal,
-            vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-            vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-            vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
+            shared_depth ? vk::AccessFlagBits2::eDepthStencilAttachmentWrite : vk::AccessFlags2{},
+            vk::AccessFlagBits2::eDepthStencilAttachmentRead | vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+            shared_depth ? (vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests)
+                         : vk::PipelineStageFlags2{},
             vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
             vk::ImageAspectFlagBits::eDepth);
 
@@ -217,7 +238,7 @@ namespace vva::gfx::vulkan {
         };
 
         vk::RenderingAttachmentInfo depth_attachment_info = {
-            .imageView = context_.depth_resource.image_view,
+            .imageView = depth_resource.image_view,
             .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
             .loadOp = vk::AttachmentLoadOp::eClear,
             .storeOp = vk::AttachmentStoreOp::eDontCare,
@@ -242,7 +263,7 @@ namespace vva::gfx::vulkan {
     }
 
     auto VulkanRenderer::endFrame() -> void {
-
+        profile::Scope record_timer(profile::Section::Record);
         auto frame_index = context_.frame_controller.getFrameIndex();
         auto& frame_resource = context_.frame_controller.frame();
         auto& command_buffer = frame_resource.command_buffer;
@@ -259,6 +280,7 @@ namespace vva::gfx::vulkan {
             vk::ImageAspectFlagBits::eColor
         );
         command_buffer.end();
+        record_timer.stop();
 
         const auto& render_finished_semaphore = context_.swap_chain.images[frame_state_store_.image_index].render_finished_semaphore;
 
@@ -272,7 +294,10 @@ namespace vva::gfx::vulkan {
             .signalSemaphoreCount = 1,
             .pSignalSemaphores = &*render_finished_semaphore
         };
-        context_.device.queues.graphics_queue.submit(submitInfo, *frame_resource.in_flight_fences);
+        {
+            profile::Scope timer(profile::Section::Submit);
+            context_.device.queues.graphics_queue.submit(submitInfo, *frame_resource.in_flight_fences);
+        }
         // auto result = context_.device.logical_device.waitForFences(*frame_resource.in_flight_fences, vk::True, UINT64_MAX);
         //
         // if (result != vk::Result::eSuccess) {
@@ -286,7 +311,10 @@ namespace vva::gfx::vulkan {
             .pSwapchains = &*context_.swap_chain.handle,
             .pImageIndices = &frame_state_store_.image_index
         };
-        auto result = context_.device.queues.present_queue.presentKHR(presentInfoKHR);
+        auto result = [&] {
+            profile::Scope timer(profile::Section::Present);
+            return context_.device.queues.present_queue.presentKHR(presentInfoKHR);
+        }();
 
         // Due to VULKAN_HPP_HANDLE_ERROR_OUT_OF_DATE_AS_SUCCESS being defined, eErrorOutOfDateKHR can be checked as a result
         // here and does not need to be caught by an exception.
@@ -303,6 +331,7 @@ namespace vva::gfx::vulkan {
     }
 
     auto VulkanRenderer::drawModel(ModelHandle model_handle) -> void {
+        profile::Scope timer(profile::Section::Record);
         auto&  command_buffer = context_.frame_controller.frame().command_buffer;
         auto& mesh = context_.models.meshes[model_handle.handle];
         auto& model_transform = context_.models.transforms[model_handle.handle];

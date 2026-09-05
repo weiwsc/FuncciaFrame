@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <optional>
 #include <glm/vec2.hpp>
 
 #include "VulkanImage.h"
@@ -18,6 +19,7 @@ namespace vva::gfx::vulkan{
         static auto createSwapChain(const vk::raii::SurfaceKHR& surface,
                                           const vk::raii::PhysicalDevice& physical_device,
                                           const vk::raii::Device& device,
-                                          const glm::ivec2 buffer_size) -> VulkanSwapChain;
+                                          const glm::ivec2 buffer_size,
+                                          std::optional<vk::PresentModeKHR> present_mode = std::nullopt) -> VulkanSwapChain;
     };
 }

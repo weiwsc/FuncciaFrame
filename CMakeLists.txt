@@ -21,14 +21,7 @@ endif()
 
 project(FuncciaFrame LANGUAGES CXX)
 
-# MSVC currently reports STL redefinitions when Vulkan's std module is mixed
-# with the headers used by our dependencies. Use the header path by default.
-if(MSVC)
-    set(VVA_VULKAN_MODULE_DEFAULT OFF)
-else()
-    set(VVA_VULKAN_MODULE_DEFAULT ON)
-endif()
-option(VVA_USE_VULKAN_MODULE "Build Vulkan-Hpp as a C++ module" ${VVA_VULKAN_MODULE_DEFAULT})
+option(VVA_USE_VULKAN_MODULE "Build Vulkan-Hpp as a C++ module" ON)
 set(CMAKE_CXX_MODULE_STD ${VVA_USE_VULKAN_MODULE})
 
 set(CMAKE_CXX_STANDARD 23)
