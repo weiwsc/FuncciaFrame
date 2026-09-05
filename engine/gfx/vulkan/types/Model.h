@@ -3,7 +3,11 @@
 //
 
 #pragma once
-import std;
+#include <cstdint>
+#include <expected>
+#include <filesystem>
+#include <string>
+#include <vector>
 #include "Mesh.h"
 #include "Texture.h"
 #include "gfx/Transform.h"

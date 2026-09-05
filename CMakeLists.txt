@@ -8,7 +8,7 @@ elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 4.3)
 else()
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 endif()
-set(CMAKE_CXX_MODULE_STD ON)
+
 
 if(APPLE AND NOT CMAKE_CXX_STDLIB_MODULES_JSON)
     foreach(LLVM_PREFIX "/opt/homebrew/opt/llvm" "/usr/local/opt/llvm")
@@ -20,6 +20,16 @@ if(APPLE AND NOT CMAKE_CXX_STDLIB_MODULES_JSON)
 endif()
 
 project(FuncciaFrame LANGUAGES CXX)
+
+# MSVC currently reports STL redefinitions when Vulkan's std module is mixed
+# with the headers used by our dependencies. Use the header path by default.
+if(MSVC)
+    set(VVA_VULKAN_MODULE_DEFAULT OFF)
+else()
+    set(VVA_VULKAN_MODULE_DEFAULT ON)
+endif()
+option(VVA_USE_VULKAN_MODULE "Build Vulkan-Hpp as a C++ module" ${VVA_VULKAN_MODULE_DEFAULT})
+set(CMAKE_CXX_MODULE_STD ${VVA_USE_VULKAN_MODULE})
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
