@@ -15,5 +15,6 @@ namespace vva::gfx::vulkan{
         vk::raii::Device logical_device{nullptr};
         DeviceQueues queues;
         DeviceQueueCoordinates queue_coordinates;
+        vk::PhysicalDeviceLimits limits {};
     };
 }

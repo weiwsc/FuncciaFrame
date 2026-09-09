@@ -11,7 +11,7 @@ int main() {
         vva::engine::log::init();
 
         vva::gfx::GL::SDLWindow window;
-        if (!window.Initialize(1920 / 2, 1080 / 2, "FuncciaFrame", vva::gfx::RenderBackend::Vulkan)) {
+        if (!window.Initialize(1920 / 1, 1080 / 1, "FuncciaFrame", vva::gfx::RenderBackend::Vulkan)) {
             vva_log_critical("failed to initialize Vulkan window");
             vva::engine::log::shutdown();
             return 1;

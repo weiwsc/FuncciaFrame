@@ -64,7 +64,7 @@ namespace vva::gfx::shader {
 
     auto SlangShaderCompiler::compile(const std::string& module_name,
         const std::string& entry_point) const -> std::vector<uint32_t> {
-
+        vva_log_info("compiling entry point \"{}\" in shader module \"{}\"", entry_point, module_name);
         //https://shader-slang.org/docs/compilation-api/
         Slang::ComPtr<slang::IBlob> diag;
 

@@ -38,7 +38,7 @@ namespace vva::gfx::vulkan {
                     }
                 });
         }
-        vva_log_info("frame controller created");
+        vva_log_info("frame controller created, total frame resource: {}", VulkanRenderConfig::MAX_FRAME_IN_FLIGHT);
         return {
             std::move(command_pool),
             std::move(frame_resources)

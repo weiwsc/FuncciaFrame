@@ -7,7 +7,7 @@
 
 namespace vva::gfx::vulkan {
     struct VulkanSetupConfig {
-        static constexpr bool ENABLE_VALIDATION_LAYERS = false;
+        static constexpr bool ENABLE_VALIDATION_LAYERS = true;
     };
     struct VulkanRenderConfig {
         static constexpr uint32_t MAX_FRAME_IN_FLIGHT = 2;

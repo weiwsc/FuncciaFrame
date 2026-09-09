@@ -5,6 +5,7 @@
 #include "AllocatedImage.h"
 
 #include "VulkanAllocator.h"
+#include "core/Log.h"
 
 namespace vva::gfx::vulkan{
     AllocatedImage::AllocatedImage(VmaAllocator allocator, vk::Image image, VmaAllocation allocation) :
@@ -48,7 +49,7 @@ namespace vva::gfx::vulkan{
                 "vmaCreateImage failed: " +
                 vk::to_string(static_cast<vk::Result>(result)));
         }
-
+        vva_log_trace("allocated image created, height: {}, width: {}", image_create_info.extent.height, image_create_info.extent.width);
         return {
             allocator,
             vk::Image{raw_image},

@@ -6,6 +6,7 @@
 
 #include "AllocatedImage.h"
 #include "VulkanConfig.h"
+#include "core/Log.h"
 #include "types/Param.h"
 #include "types/Sampler.h"
 #include "types/Texture.h"
@@ -86,10 +87,11 @@ namespace vva::gfx::vulkan{
                                   const vk::SurfaceFormatKHR& surface_format,
                                   SlangShaderCompiler& compiler,
                            const GlobalDescriptors& global_descriptors) -> GraphicsPipeline {
-        auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, "my_shader",
+        std::string shader_name {"my_shader"};
+        auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, shader_name,
                                                      "vertMain");
         auto fragment_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
-                                                       "my_shader",
+                                                       shader_name,
                                                        "fragMain");
         vk::PipelineShaderStageCreateInfo shader_stages[] = {
             vertex_stage.pipeline_shader_stage_create_info,
@@ -226,7 +228,7 @@ namespace vva::gfx::vulkan{
 
         auto graphics_pipeline = vk::raii::Pipeline(device, nullptr,
                                                    pipeline_create_info_chain.get<vk::GraphicsPipelineCreateInfo>());
-
+        vva_log_info("graphics pipeline created from shader \"{}\"", shader_name);
         auto samplers = createSamplers(device);
 
         return {

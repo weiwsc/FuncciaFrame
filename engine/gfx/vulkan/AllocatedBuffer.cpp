@@ -4,11 +4,13 @@
 
 #include "AllocatedBuffer.h"
 
+#include "core/Log.h"
+
 namespace vva::gfx::vulkan{
     AllocatedBuffer::AllocatedBuffer(VmaAllocator allocator, vk::Buffer buffer, VmaAllocation allocation,
-                                     vk::DeviceSize size, void* mapped_data) :
+                                     vk::DeviceSize size,VmaAllocationInfo allocation_info) :
         allocator_(allocator), buffer_(buffer), allocation_(allocation),
-        size_(size), mapped_data_(mapped_data) {
+        size_(size),allocation_info_(allocation_info) {
     }
 
     AllocatedBuffer::AllocatedBuffer(AllocatedBuffer&& other) noexcept :
@@ -16,7 +18,7 @@ namespace vva::gfx::vulkan{
         buffer_(std::exchange(other.buffer_, nullptr)),
         allocation_(std::exchange(other.allocation_, VK_NULL_HANDLE)),
         size_(other.size_),
-        mapped_data_(other.mapped_data_) {
+        allocation_info_(other.allocation_info_) {
     }
 
     auto AllocatedBuffer::operator=(AllocatedBuffer&& other) noexcept -> AllocatedBuffer& {
@@ -26,7 +28,7 @@ namespace vva::gfx::vulkan{
             buffer_ = std::exchange(other.buffer_, nullptr);
             allocation_ = std::exchange(other.allocation_, VK_NULL_HANDLE);
             size_ = std::exchange(other.size_, 0);
-            mapped_data_ = std::exchange(other.mapped_data_, nullptr);
+            allocation_info_ = std::exchange(other.allocation_info_, {});
         }
         return *this;
     }
@@ -70,12 +72,13 @@ namespace vva::gfx::vulkan{
                 "vmaCreateBuffer failed: " +
                 vk::to_string(static_cast<vk::Result>(result)));
         }
+        vva_log_trace("allocated buffer created, size: {}", size);
         return AllocatedBuffer{
             allocator,
             vk::Buffer{raw_buffer},
             allocation,
             size,
-            allocation_info.pMappedData
+            allocation_info,
         };
     }
 }

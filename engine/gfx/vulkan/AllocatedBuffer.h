@@ -9,7 +9,7 @@
 namespace vva::gfx::vulkan{
     struct AllocatedBuffer {
         AllocatedBuffer(VmaAllocator allocator, vk::Buffer buffer, VmaAllocation allocation,
-            vk::DeviceSize size, void* mapped_data = nullptr);
+            vk::DeviceSize size,VmaAllocationInfo allocation_info);
 
         AllocatedBuffer(const AllocatedBuffer&) = delete;
         auto operator=(const AllocatedBuffer&) -> AllocatedBuffer& = delete;
@@ -35,7 +35,7 @@ namespace vva::gfx::vulkan{
         }
 
         [[nodiscard]] auto mappedData() const noexcept -> void* {
-            return mapped_data_;
+            return allocation_info_.pMappedData;
         }
         static auto createBuffer(
             VmaAllocator allocator,
@@ -54,6 +54,6 @@ namespace vva::gfx::vulkan{
         vk::Buffer buffer_;
         VmaAllocation allocation_ = VK_NULL_HANDLE;
         vk::DeviceSize size_ = 0;
-        void* mapped_data_ = nullptr;
+        VmaAllocationInfo allocation_info_;
     };
 }

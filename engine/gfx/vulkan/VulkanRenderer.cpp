@@ -102,8 +102,18 @@ namespace vva::gfx::vulkan {
         // Flipping Y here keeps the image upright and preserves the mesh winding, so
         // eCounterClockwise front faces + back-face culling in the pipeline stay correct.
         camera.projection[1][1] *= -1.0f;
-        camera.transform.setPosition({0, 4, 2});
+        camera.transform.setPosition({0, 20, 5});
         camera.transform.lookAt({0, 0, 0});
+
+        device.limits = physical_device.getProperties().limits;
+
+
+        auto draw_data = std::vector<VramVector<shader::param::BasicDrawData>>{};
+        for (int i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
+            draw_data.push_back(
+                VramVector<shader::param::BasicDrawData>::create(allocator.get() ,device.logical_device, 100));
+        }
+
         vva_log_info("vulkan renderer created");
         return VulkanRenderer{
             {
@@ -119,7 +129,8 @@ namespace vva::gfx::vulkan {
                 .samplers = std::move(samplers),
                 .depth_resource = std::move(depth_resource),
                 .models = {},
-                .camera = camera
+                .camera = camera,
+                .draw_datas = std::move(draw_data)
             },
             std::move(global_descriptors)
         };
@@ -320,15 +331,27 @@ namespace vva::gfx::vulkan {
             sets,
             nullptr
         );
-
-        const shader::param::PushConstants pc{
-            .model_matrix = model_transform.getModelMatrix(),   // identity is fine for the first look
+        auto data = std::vector<shader::param::BasicDrawData>{};
+        for (int i = 0; i < 50; ++i) {
+            Transform transform = model_transform;
+            transform.translate({i * 2, 0,0});
+            data.push_back(shader::param::BasicDrawData{
+            .model_matrix = transform.getModelMatrix(),   // identity is fine for the first look
             .texture_index = model_texture.slot,
-            .sampler_index = SAMPLER_LINEAR_REPEAT};
+            .sampler_index = SAMPLER_LINEAR_REPEAT});
+        }
+        auto& vram_vec = context_.draw_datas[frame_state_store_.frame_index];
+        vram_vec.clear();
+        vram_vec.insert_range(data);
+        vram_vec.flush();
+        const shader::param::PushConstants pc {
+            .instances = vram_vec.deviceAddress(),
+            .first_instance = 0
+        };
         command_buffer.pushConstants<shader::param::PushConstants>(
             *context_.graphics_pipeline.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
 
-        command_buffer.drawIndexed(mesh.index_count, 1, 0, 0, 0);
+        command_buffer.drawIndexed(mesh.index_count, vram_vec.size(), 0, 0, 0);
     }
 
     auto VulkanRenderer::createSurface(WindowInterface& window,

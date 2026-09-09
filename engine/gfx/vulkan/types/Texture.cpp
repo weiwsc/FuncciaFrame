@@ -11,6 +11,7 @@
 #include "../AllocatedBuffer.h"
 #include "../VulkanDevice.h"
 #include "../VulkanUploadContext.h"
+#include "core/Log.h"
 
 namespace vva::gfx::vulkan{
     namespace {
@@ -123,7 +124,7 @@ namespace vva::gfx::vulkan{
         const std::filesystem::path& path) -> Texture2D {
         const DecodedImage decoded = decodeImageRgba(path);
         const vk::Extent2D extent{decoded.width, decoded.height};
-
+        vva_log_info("loading texture from file: {}", path.filename().c_str());
         // Host-visible staging buffer, persistently mapped
         auto staging = AllocatedBuffer::createBuffer(
             allocator,

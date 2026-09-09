@@ -26,8 +26,13 @@ struct DrawData
     uint64_t samplerIndex;
 };
 
+struct PushConstants {
+    DrawData* instances;    // base address
+    uint          firstInstance;
+};
+
 [[vk::push_constant]]
-ConstantBuffer<DrawData> draw;
+ConstantBuffer<PushConstants> push_constants;
 struct VSInput {
     [[vk::location(0)]] float3 position;
     [[vk::location(1)]] float3 normal;
@@ -38,12 +43,13 @@ struct VSOutput
     float4 pos : SV_Position;
     float3 fragColor;
     float2 fragTexCoord;
+    nointerpolation uint instanceIndex;
 };
 
 [shader("vertex")]
-VSOutput vertMain(VSInput input) {
+VSOutput vertMain(VSInput input, uint instanceID : SV_InstanceID) {
     VSOutput output;
-    output.pos = mul(frame.projection, mul(frame.view, mul(draw.model, float4(input.position, 1.0))));
+    output.pos = mul(frame.projection, mul(frame.view, mul(push_constants.instances[instanceID].model, float4(input.position, 1.0))));
     //output.fragColor = input.inColor;
     output.fragTexCoord = input.uv;
     return output;
@@ -53,5 +59,5 @@ VSOutput vertMain(VSInput input) {
 
 [shader("fragment")]
 float4 fragMain(VSOutput vertIn) : SV_TARGET {
-   return float4(textures[draw.textureIndex].Sample(samplers[draw.samplerIndex], vertIn.fragTexCoord).rgb, 1.0);
+   return float4(textures[push_constants.instances[vertIn.instanceIndex].textureIndex].Sample(samplers[push_constants.instances[vertIn.instanceIndex].samplerIndex], vertIn.fragTexCoord).rgb, 1.0);
 }

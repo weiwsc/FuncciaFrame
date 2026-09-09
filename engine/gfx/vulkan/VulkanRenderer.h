@@ -21,6 +21,7 @@
 #include "resource_management/DescriptorTypeDef.h"
 #include "resource_management/FrameSceneDataDescriptorSet.h"
 #include "resource_management/TextureSamplerDescriptorSet.h"
+#include "resource_management/VramVector.h"
 #include "types/Camera.h"
 #include "types/Model.h"
 
@@ -50,6 +51,7 @@ namespace vva::gfx::vulkan{
         Texture2D depth_resource;
         Model models;
         Camera camera;
+        std::vector<VramVector<shader::param::BasicDrawData>> draw_datas;
     };
 
     struct FrameStateStore {
