@@ -67,7 +67,7 @@ namespace vva::gfx::vulkan{
         auto createModel(
             VmaAllocator allocator,
             const VulkanDevice& device,
-            VulkanUploadContext& upload,
+            const VulkanUploadContext& upload,
             const ModelLoadResult& data) -> Mesh {
             const vk::DeviceSize vertex_bytes =
                 data.vertex_buffer.size() * sizeof(Vertex);
@@ -146,7 +146,7 @@ namespace vva::gfx::vulkan{
     auto loadModel(std::string_view model_name,
                    VmaAllocator allocator,
                    const VulkanDevice& device,
-                   VulkanUploadContext& upload) -> Mesh
+                   const VulkanUploadContext& upload) -> Mesh
     {
         const ModelLoadResult data = loadModel(std::string{model_name});
         return createModel(allocator, device, upload, data);

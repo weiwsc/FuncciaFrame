@@ -40,8 +40,8 @@ add_library(vva_gfx_vulkan STATIC
         VulkanUploadContext.cpp
         VulkanAllocator.cpp
         VmaImplementation.cpp
-        AllocatedBuffer.cpp
-        AllocatedImage.cpp
+        resource_management/AllocatedBuffer.cpp
+        resource_management/AllocatedImage.cpp
         SlangShaderCompiler.cpp
         GraphicsPipeline.cpp
         types/Param.cpp
@@ -53,8 +53,8 @@ add_library(vva_gfx_vulkan STATIC
         util/VulkanPhysicalDeviceUtil.cpp
         util/VulkanLogicalDeviceUtil.cpp
         util/VulkanDebugMessengerUtil.cpp
-        GpuTextureRegistry.cpp
-        GpuTextureRegistry.h
+        resource_management/GpuResourceRegistry.cpp
+        resource_management/GpuResourceRegistry.h
         types/Sampler.cpp
         types/Sampler.h
         resource_management/TextureSamplerDescriptorSet.cpp

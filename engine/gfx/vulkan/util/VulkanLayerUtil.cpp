@@ -14,7 +14,7 @@ namespace vva::gfx::vulkan::util {
         const std::vector<char const*> validation_layers = {
            "VK_LAYER_KHRONOS_validation"
         };
-        if (VulkanSetupConfig::ENABLE_VALIDATION_LAYERS) {
+        if (enable_validation_layers) {
             required_layers.assign(validation_layers.begin(), validation_layers.end());
         }
 

@@ -16,6 +16,14 @@
 
 namespace vva::gfx::vulkan {
     namespace {
+        auto update_time(FrameStateStore& frame_state_store) -> void {
+            static auto start_time = std::chrono::high_resolution_clock::now();
+            auto current_time = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
+            frame_state_store.delta_time = time - frame_state_store.last_time;
+            frame_state_store.last_time = time;
+        }
+
         void transition_image_layout(
             const vk::raii::CommandBuffer& command_buffer,
             const vk::Image image,
@@ -55,12 +63,15 @@ namespace vva::gfx::vulkan {
     }
 
     VulkanRenderer::VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors)
-        : context_(std::move(context)), descriptors_(std::move(descriptors)) {
+        : context_(std::move(context)), descriptors_(std::move(descriptors)),
+          gpu_resource_registry_(context_.device, descriptors_.texture_sampler, context_.allocator,
+                                 context_.upload_context) {
     }
 
     auto VulkanRenderer::createVulkanRenderer(WindowInterface& window_interface,
                                               const VulkanRendererDesc& desc) -> VulkanRenderer {
-        auto instance = VulkanInstance::createVulkanInstance(desc.app_name, desc.enable_validation);
+        auto instance =
+            VulkanInstance::createVulkanInstance(desc.app_name, VulkanSetupConfig::ENABLE_VALIDATION_LAYERS);
         auto surface = createSurface(window_interface, instance.instance);
         auto physical_device_selection_result = util::pickPhysicalDevice(instance.instance, surface);
         auto physical_device = physical_device_selection_result.physical_device;
@@ -91,19 +102,6 @@ namespace vva::gfx::vulkan {
 
         global_descriptors.texture_sampler.writeSamplers(device.logical_device, samplers);
 
-        Camera camera{
-            .transform = {},
-            .projection = glm::perspective(glm::radians(45.0f),
-                                           (float)swap_chain.extent.width / (float)swap_chain.extent.height,
-                                           0.1f,
-                                           100.0f)
-        };
-        // glm::perspective produces OpenGL clip space (+Y up); Vulkan NDC has +Y down.
-        // Flipping Y here keeps the image upright and preserves the mesh winding, so
-        // eCounterClockwise front faces + back-face culling in the pipeline stay correct.
-        camera.projection[1][1] *= -1.0f;
-        camera.transform.setPosition({0, 20, 5});
-        camera.transform.lookAt({0, 0, 0});
 
         device.limits = physical_device.getProperties().limits;
 
@@ -111,7 +109,7 @@ namespace vva::gfx::vulkan {
         auto draw_data = std::vector<VramVector<shader::param::BasicDrawData>>{};
         for (int i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
             draw_data.push_back(
-                VramVector<shader::param::BasicDrawData>::create(allocator.get() ,device.logical_device, 100));
+                VramVector<shader::param::BasicDrawData>::create(allocator.get(), device.logical_device, 100));
         }
 
         vva_log_info("vulkan renderer created");
@@ -128,30 +126,12 @@ namespace vva::gfx::vulkan {
                 .graphics_pipeline = std::move(graphics_pipeline),
                 .samplers = std::move(samplers),
                 .depth_resource = std::move(depth_resource),
-                .models = {},
-                .camera = camera,
                 .draw_datas = std::move(draw_data)
             },
             std::move(global_descriptors)
         };
     }
 
-    auto VulkanRenderer::loadModel(ModelLoadInfo model_load_info) -> ModelHandle {
-        auto result = context_.models.createModel(std::move(model_load_info),
-                                                  context_.allocator.get(),
-                                                  context_.device,
-                                                  context_.upload_context);
-        if (result.has_value()) {
-            auto handle = result.value();
-            auto& texture = context_.models.textures[handle.handle];
-            texture.slot = handle.handle;
-            descriptors_.texture_sampler.writeTexture(context_.device.logical_device, texture.slot, *texture.image_view);
-            return handle;
-        }
-        else {
-            throw std::runtime_error{result.error()};
-        }
-    }
 
     auto VulkanRenderer::startFrame() -> void {
         //graphicsQueue.waitIdle();
@@ -182,10 +162,10 @@ namespace vva::gfx::vulkan {
             assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
             throw std::runtime_error("failed to acquire swap chain image!");
         }
-        descriptors_.frame_scene_data.writeFrameUniform(
-            updateFrameData(),
-            frame_index
-        );
+
+        update_time(frame_state_store_);
+
+
         // Only reset the fence if we are submitting work
         context_.device.logical_device.resetFences(*frame_resource.in_flight_fences);
         frame_resource.command_buffer.reset();
@@ -253,7 +233,6 @@ namespace vva::gfx::vulkan {
     }
 
     auto VulkanRenderer::endFrame() -> void {
-
         auto frame_index = context_.frame_controller.getFrameIndex();
         auto& frame_resource = context_.frame_controller.frame();
         auto& command_buffer = frame_resource.command_buffer;
@@ -271,7 +250,8 @@ namespace vva::gfx::vulkan {
         );
         command_buffer.end();
 
-        const auto& render_finished_semaphore = context_.swap_chain.images[frame_state_store_.image_index].render_finished_semaphore;
+        const auto& render_finished_semaphore = context_.swap_chain.images[frame_state_store_.image_index].
+            render_finished_semaphore;
 
         vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
         const vk::SubmitInfo submitInfo{
@@ -313,11 +293,10 @@ namespace vva::gfx::vulkan {
         frame_state_store_ = {};
     }
 
-    auto VulkanRenderer::drawModel(ModelHandle model_handle) -> void {
-        auto&  command_buffer = context_.frame_controller.frame().command_buffer;
-        auto& mesh = context_.models.meshes[model_handle.handle];
-        auto& model_transform = context_.models.transforms[model_handle.handle];
-        auto& model_texture = context_.models.textures[model_handle.handle];
+    auto VulkanRenderer::drawModel(Model model) -> void {
+        auto& command_buffer = context_.frame_controller.frame().command_buffer;
+        auto& mesh = gpu_resource_registry_.meshes[model.mesh_handle.id];
+        auto& model_texture = gpu_resource_registry_.textures[model.texture_handle.id];
         command_buffer.bindVertexBuffers(0, (mesh.vertex_buffer.handle()), {0});
         command_buffer.bindIndexBuffer(mesh.index_buffer.handle(), 0, vk::IndexType::eUint32);
 
@@ -326,27 +305,27 @@ namespace vva::gfx::vulkan {
             *descriptors_.frame_scene_data.sets[frame_state_store_.frame_index]
         };
         command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-            context_.graphics_pipeline.layout,
-            0,
-            sets,
-            nullptr
+                                          context_.graphics_pipeline.layout,
+                                          0,
+                                          sets,
+                                          nullptr
         );
         auto data = std::vector<shader::param::BasicDrawData>{};
-        for (int i = 0; i < 50; ++i) {
-            Transform transform = model_transform;
-            transform.translate({i * 2, 0,0});
+        for (int i = 0; i < 100; ++i) {
+            Transform transform = model.transform;
+            transform.translate({(i % 10) * 4 - 10, (i / 10) * 4 - 10, 0});
             data.push_back(shader::param::BasicDrawData{
-            .model_matrix = transform.getModelMatrix(),   // identity is fine for the first look
-            .texture_index = model_texture.slot,
-            .sampler_index = SAMPLER_LINEAR_REPEAT});
+                .model_matrix = transform.getModelMatrix(), // identity is fine for the first look
+                .texture_index = model_texture.slot,
+                .sampler_index = SAMPLER_LINEAR_REPEAT
+            });
         }
         auto& vram_vec = context_.draw_datas[frame_state_store_.frame_index];
         vram_vec.clear();
         vram_vec.insert_range(data);
         vram_vec.flush();
-        const shader::param::PushConstants pc {
+        const shader::param::PushConstants pc{
             .instances = vram_vec.deviceAddress(),
-            .first_instance = 0
         };
         command_buffer.pushConstants<shader::param::PushConstants>(
             *context_.graphics_pipeline.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
@@ -364,16 +343,10 @@ namespace vva::gfx::vulkan {
         return vk::raii::SurfaceKHR(instance, surface);
     }
 
-    auto VulkanRenderer::updateFrameData() -> shader::param::FrameUniformBuffer {
-        auto& camera = context_.camera;
-
-        static auto start_time = std::chrono::high_resolution_clock::now();
-        auto current_time = std::chrono::high_resolution_clock::now();
-        float time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
-        float delta_time = time - last_time_;
-        last_time_ = time;
+    auto VulkanRenderer::updateFrameData(const Camera& camera,
+                                         glm::vec2 mouse_pos) -> void {
         glm::vec2 resolution = {context_.swap_chain.extent.width, context_.swap_chain.extent.height};
-        return {
+        auto frame_data = shader::param::FrameUniformBuffer{
             .view = camera.lookingAt(),
             .projection = camera.projection,
             .view_projection = camera.projection * camera.lookingAt(),
@@ -381,10 +354,11 @@ namespace vva::gfx::vulkan {
             .inverse_projection = glm::inverse(camera.projection),
             .camera_position = camera.transform.position(),
             .resolution = resolution,
-            .mouse = {0, 0},
+            .mouse = mouse_pos,
             .time = last_time_,
-            .delta_time = delta_time,
+            .delta_time = frame_state_store_.delta_time,
             .lights = 0
         };
+        descriptors_.frame_scene_data.writeFrameUniform(frame_data, frame_state_store_.frame_index);
     }
 }

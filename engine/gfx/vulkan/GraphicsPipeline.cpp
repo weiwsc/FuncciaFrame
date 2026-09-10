@@ -4,7 +4,7 @@
 
 #include "GraphicsPipeline.h"
 
-#include "AllocatedImage.h"
+#include "resource_management/AllocatedImage.h"
 #include "VulkanConfig.h"
 #include "core/Log.h"
 #include "types/Param.h"

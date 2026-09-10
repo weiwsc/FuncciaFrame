@@ -28,7 +28,6 @@ struct DrawData
 
 struct PushConstants {
     DrawData* instances;    // base address
-    uint          firstInstance;
 };
 
 [[vk::push_constant]]

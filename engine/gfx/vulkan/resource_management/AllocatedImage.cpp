@@ -4,7 +4,7 @@
 
 #include "AllocatedImage.h"
 
-#include "VulkanAllocator.h"
+#include "../VulkanAllocator.h"
 #include "core/Log.h"
 
 namespace vva::gfx::vulkan{

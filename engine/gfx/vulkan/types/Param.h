@@ -24,7 +24,6 @@ namespace vva::gfx::shader::param {
 
     struct PushConstants {
         vk::DeviceAddress instances; // arena.address() + offset of this frame's array
-        uint32_t first_instance;
     };
 
 

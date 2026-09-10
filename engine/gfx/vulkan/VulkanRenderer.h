@@ -25,16 +25,15 @@
 #include "types/Camera.h"
 #include "types/Model.h"
 
-namespace vva::gfx::vulkan{
+namespace vva::gfx::vulkan {
     struct FrameContext {
-        glm::ivec2 framebufferSize {0, 0};
-        glm::vec4 clearColor {1.0f, 1.0f, 1.0f, 1.0f};
+        glm::ivec2 framebufferSize{0, 0};
+        glm::vec4 clearColor{1.0f, 1.0f, 1.0f, 1.0f};
     };
 
     struct VulkanRendererDesc {
         std::string app_name{"FuncciaFrame"};
-        std::filesystem::path shader_dir;     // directory Slang searches for modules
-        bool enable_validation{false};
+        std::filesystem::path shader_dir; // directory Slang searches for modules
     };
 
     struct VulkanContext {
@@ -49,34 +48,43 @@ namespace vva::gfx::vulkan{
         GraphicsPipeline graphics_pipeline;
         std::vector<vk::raii::Sampler> samplers;
         Texture2D depth_resource;
-        Model models;
-        Camera camera;
+        //Camera camera;
         std::vector<VramVector<shader::param::BasicDrawData>> draw_datas;
     };
 
     struct FrameStateStore {
         uint32_t image_index;
         uint32_t frame_index;
+        float last_time;
+        float time;
+        float delta_time;
     };
 
 
     class VulkanRenderer {
     public:
         explicit VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors);
-        ~VulkanRenderer() {context_.device.logical_device.waitIdle();}
+        ~VulkanRenderer() { context_.device.logical_device.waitIdle(); }
         static auto createVulkanRenderer(WindowInterface& window_interface,
                                          const VulkanRendererDesc& desc) -> VulkanRenderer;
-        auto loadModel(ModelLoadInfo model_load_info) -> ModelHandle;
-        auto getModelTransform(const ModelHandle handle) -> Transform& {return context_.models.transforms[handle.handle];}
+
+
+        auto updateFrameData(const Camera& camera, glm::vec2 mouse_pos) -> void;
         auto startFrame() -> void;
         auto endFrame() -> void;
-        auto drawModel(ModelHandle model_handle) -> void;
+        auto drawModel(Model model) -> void;
+
+        auto resourceRegistry() -> GpuResourceRegistry& {
+            return gpu_resource_registry_;
+        }
+
     private:
         static auto createSurface(WindowInterface& window, const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR;
-        auto updateFrameData() -> shader::param::FrameUniformBuffer;
+
         VulkanContext context_;
         GlobalDescriptors descriptors_;
-        float last_time_ {0};
+        float last_time_{0};
         FrameStateStore frame_state_store_;
+        GpuResourceRegistry gpu_resource_registry_;
     };
 }

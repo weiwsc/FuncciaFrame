@@ -4,8 +4,8 @@
 
 #pragma once
 #include "../VulkanInclude.h"
-#include "../AllocatedBuffer.h"
-#include "../AllocatedImage.h"
+#include "../resource_management/AllocatedBuffer.h"
+#include "../resource_management/AllocatedImage.h"
 
 namespace vva::gfx::vulkan{
     struct VulkanUploadContext;
@@ -21,5 +21,5 @@ namespace vva::gfx::vulkan{
     auto loadModel(std::string_view model_name,
                    VmaAllocator allocator,
                    const VulkanDevice& device,
-                   VulkanUploadContext& upload) -> Mesh;
+                   const VulkanUploadContext& upload) -> Mesh;
 }

@@ -6,38 +6,42 @@
 import std;
 #include "Mesh.h"
 #include "Texture.h"
+#include "core/Log.h"
 #include "gfx/Transform.h"
+#include "gfx/vulkan/VulkanDevice.h"
+#include "gfx/vulkan/resource_management/GpuResourceRegistry.h"
 
 namespace vva::gfx::vulkan {
     struct ModelLoadInfo {
-        Transform transform{};
         std::string mesh_path;
         std::string texture_path;
     };
 
-    struct ModelHandle {
-        uint32_t handle;
-    };
-
     struct Model {
-        std::vector<Transform> transforms;
-        std::vector<Mesh> meshes;
-        std::vector<Texture2D> textures;
+        Transform transform;
+        MeshHandle mesh_handle;
+        TextureHandle texture_handle;
 
-        auto createModel(ModelLoadInfo load_info,
-                         VmaAllocator allocator,
-                         const VulkanDevice& device,
-                         VulkanUploadContext& upload) -> std::expected<ModelHandle, std::string> {
-            std::filesystem::path mesh_path{load_info.mesh_path};
-            std::filesystem::path texture_path{load_info.texture_path};
-            if (!std::filesystem::exists(mesh_path) || !std::filesystem::exists(texture_path)) {
-                return std::unexpected<std::string>{"path for mesh or texture does not exist"};
+
+        // std::vector<Transform> transforms;
+        // std::vector<Mesh> meshes;
+        // //std::vector<Texture2D> textures;
+        //
+        static auto create(Transform transform, ModelLoadInfo load_info,
+                    GpuResourceRegistry& gpu_resource_registry
+        ) -> Model {
+            auto mesh = gpu_resource_registry.retrieveMeshHandle(load_info.mesh_path);
+            auto texture = gpu_resource_registry.retrieveTextureHandle(load_info.texture_path);
+
+            if (!mesh.has_value() || !texture.has_value()) {
+                //TODO: find better way to handle error
+                throw std::runtime_error("mesh or texture not found");
             }
-            transforms.push_back(load_info.transform);
-            meshes.push_back(loadModel(load_info.mesh_path, allocator, device, upload));
-            textures.push_back(loadTextureFromFile(allocator, device, upload, texture_path));
-            return ModelHandle{
-                static_cast<uint32_t>(transforms.size() - 1)
+
+            return {
+                .transform = transform,
+                .mesh_handle = mesh.value(),
+                .texture_handle = texture.value()
             };
         };
     };

@@ -7,7 +7,7 @@
 #include <cstring>
 #include <span>
 
-#include "gfx/vulkan/AllocatedBuffer.h"
+#include "AllocatedBuffer.h"
 
 
 namespace vva::gfx::vulkan {

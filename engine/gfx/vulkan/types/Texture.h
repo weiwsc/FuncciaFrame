@@ -6,7 +6,7 @@
 
 #include <filesystem>
 
-#include "../AllocatedImage.h"
+#include "../resource_management/AllocatedImage.h"
 
 namespace vva::gfx::vulkan{
     struct VulkanUploadContext;
@@ -31,7 +31,7 @@ namespace vva::gfx::vulkan{
     auto loadTextureFromFile(
         VmaAllocator allocator,
         const VulkanDevice& device,
-        VulkanUploadContext& upload,
+        const VulkanUploadContext& upload,
         const std::filesystem::path& path) -> Texture2D;
 
     // auto createTextureSampler(const vk::raii::Device& device,

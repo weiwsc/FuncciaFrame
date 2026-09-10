@@ -6,7 +6,7 @@
 #include "../VulkanConfig.h"
 #include "../VulkanInclude.h"
 #include "../types/Param.h"
-#include "gfx/vulkan/AllocatedBuffer.h"
+#include "AllocatedBuffer.h"
 
 namespace vva::gfx::vulkan {
     struct FrameSceneDataDescriptorSet {

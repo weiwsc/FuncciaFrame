@@ -8,7 +8,7 @@
 
 #include <cstring>
 
-#include "../AllocatedBuffer.h"
+#include "../resource_management/AllocatedBuffer.h"
 #include "../VulkanDevice.h"
 #include "../VulkanUploadContext.h"
 #include "core/Log.h"
@@ -120,7 +120,7 @@ namespace vva::gfx::vulkan{
     auto loadTextureFromFile(
         VmaAllocator allocator,
         const VulkanDevice& device,
-        VulkanUploadContext& upload,
+        const VulkanUploadContext& upload,
         const std::filesystem::path& path) -> Texture2D {
         const DecodedImage decoded = decodeImageRgba(path);
         const vk::Extent2D extent{decoded.width, decoded.height};
