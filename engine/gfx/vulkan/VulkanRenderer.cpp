@@ -63,13 +63,14 @@ namespace vva::gfx::vulkan {
                                                                  .colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear
                                                              }, shader_compiler,
                                                              global_descriptors, true);
-        auto graphics_pipeline_2d = GraphicsPipeline::create("my_2d_shader", device.logical_device, physical_device,
+        auto graphics_pipeline_2d = GraphicsPipeline::create("texture", device.logical_device, physical_device,
                                                              {
                                                                  .format = vk::Format::eR16G16B16A16Sfloat,
                                                                  .colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear
                                                              }, shader_compiler,
                                                              global_descriptors, false,
-                                                             vk::CullModeFlagBits::eNone);
+                                                             vk::CullModeFlagBits::eNone,
+                                                             vk::PrimitiveTopology::eTriangleStrip);
         auto graphics_pipeline_swap_buffer = GraphicsPipeline::create("my_2d_shader", device.logical_device,
                                                                       physical_device,
                                                                       swap_chain.surface_format, shader_compiler,
@@ -268,7 +269,7 @@ namespace vva::gfx::vulkan {
         command_buffer.pushConstants<shader::param::PushConstants>(
             *context_.graphics_pipeline_2d.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
 
-        command_buffer.draw(3, textures.size(), 0, 0);
+        command_buffer.draw(4, textures.size(), 0, 0);
     }
 
 

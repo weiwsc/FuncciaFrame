@@ -24,7 +24,8 @@ namespace vva::gfx::vulkan {
             SlangShaderCompiler& compiler,
             const GlobalDescriptors& global_descriptor,
             bool has_depth_attachments,
-            vk::CullModeFlagBits cull_mode = vk::CullModeFlagBits::eBack) -> GraphicsPipeline;
+            vk::CullModeFlagBits cull_mode = vk::CullModeFlagBits::eBack,
+            vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList) -> GraphicsPipeline;
     };
 
     auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format;

@@ -101,9 +101,11 @@ int main() {
             pass.begin();
             renderer.drawModel(models, frame);
             pass.end();
-
+            //
             auto pass2 = renderer.get2dRenderPass(frame);
             pass2.begin();
+            ///TODO: figure out how to deal with the mouse position mismatch when the buffer size is different from requested window size
+            textures[0].position = {x * 2, y * 2};
             renderer.drawTexture(textures, frame);
             pass2.end();
 

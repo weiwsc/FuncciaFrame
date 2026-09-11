@@ -24,6 +24,7 @@ namespace vva::gfx::shader::param {
     struct TextureDrawData {
         uint64_t texture_index;
         uint64_t sampler_index;
+        glm::vec2 position {0,0};
         glm::vec2 size;
     };
     struct PushConstants {

@@ -109,7 +109,8 @@ namespace vva::gfx::vulkan {
                                   SlangShaderCompiler& compiler,
                                   const GlobalDescriptors& global_descriptors,
                                   bool has_depth_attachment,
-                                  vk::CullModeFlagBits cull_mode) -> GraphicsPipeline {
+                                  vk::CullModeFlagBits cull_mode,
+                                  vk::PrimitiveTopology topology) -> GraphicsPipeline {
         auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, shader_name,
                                                      "vertMain");
         auto fragment_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
@@ -139,7 +140,7 @@ namespace vva::gfx::vulkan {
         //the redraw usually only matters for drawing terrain or water
         //that need to break the strip and restart at new line
         vk::PipelineInputAssemblyStateCreateInfo input_assembly{
-            .topology = vk::PrimitiveTopology::eTriangleList
+            .topology = topology
         };
 
         ///this can store the viewport size, but with dynamic rendering
