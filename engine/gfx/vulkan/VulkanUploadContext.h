@@ -11,6 +11,6 @@ namespace vva::gfx::vulkan{
         vk::raii::CommandPool command_pool;
         vk::raii::CommandBuffer command_buffer;
         vk::raii::Fence fence;
+        static auto create(const VulkanDevice& device) -> VulkanUploadContext;
     };
-    auto createVulkanUploadContext(const VulkanDevice& device) -> VulkanUploadContext;
 }

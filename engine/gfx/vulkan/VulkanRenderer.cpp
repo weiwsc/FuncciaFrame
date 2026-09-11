@@ -15,57 +15,20 @@
 #include "util/VulkanPhysicalDeviceUtil.h"
 
 namespace vva::gfx::vulkan {
-    namespace {
-        auto update_time(FrameStateStore& frame_state_store) -> void {
-            static auto start_time = std::chrono::high_resolution_clock::now();
-            auto current_time = std::chrono::high_resolution_clock::now();
-            float time = std::chrono::duration<float, std::chrono::seconds::period>(current_time - start_time).count();
-            frame_state_store.delta_time = time - frame_state_store.last_time;
-            frame_state_store.last_time = time;
-        }
-
-        void transition_image_layout(
-            const vk::raii::CommandBuffer& command_buffer,
-            const vk::Image image,
-            const vk::ImageLayout old_layout,
-            const vk::ImageLayout new_layout,
-            const vk::AccessFlags2 src_access_mask,
-            const vk::AccessFlags2 dst_access_mask,
-            const vk::PipelineStageFlags2 src_stage_mask,
-            const vk::PipelineStageFlags2 dst_stage_mask,
-            const vk::ImageAspectFlags image_aspect_flags
-        ) {
-            vk::ImageMemoryBarrier2 barrier = {
-                .srcStageMask = src_stage_mask,
-                .srcAccessMask = src_access_mask,
-                .dstStageMask = dst_stage_mask,
-                .dstAccessMask = dst_access_mask,
-                .oldLayout = old_layout,
-                .newLayout = new_layout,
-                .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                .image = image,
-                .subresourceRange = {
-                    .aspectMask = image_aspect_flags,
-                    .baseMipLevel = 0,
-                    .levelCount = 1,
-                    .baseArrayLayer = 0,
-                    .layerCount = 1
-                }
-            };
-            const vk::DependencyInfo dependency_info = {
-                .dependencyFlags = {},
-                .imageMemoryBarrierCount = 1,
-                .pImageMemoryBarriers = &barrier
-            };
-            command_buffer.pipelineBarrier2(dependency_info);
-        }
-    }
-
     VulkanRenderer::VulkanRenderer(VulkanContext context, GlobalDescriptors descriptors)
         : context_(std::move(context)), descriptors_(std::move(descriptors)),
           gpu_resource_registry_(context_.device, descriptors_.texture_sampler, context_.allocator,
                                  context_.upload_context) {
+        auto intermediate_resource = createIntermediateResource(context_.allocator.get(),
+                                                                context_.device.logical_device,
+                                                                context_.device.physical_device,
+                                                                context_.swap_chain.extent);
+        context_.intermediate_resource = gpu_resource_registry_.registerTexture(std::move(intermediate_resource));
+        auto depth_resource = createDepthResources(context_.allocator.get(),
+                                                   context_.device.logical_device,
+                                                   context_.device.physical_device,
+                                                   context_.swap_chain.extent);
+        context_.depth_resource = gpu_resource_registry_.registerTexture(std::move(depth_resource));
     }
 
     auto VulkanRenderer::createVulkanRenderer(WindowInterface& window_interface,
@@ -84,7 +47,7 @@ namespace vva::gfx::vulkan {
         auto swap_chain =
             VulkanSwapChain::createSwapChain(surface, physical_device, device.logical_device, buffer_size);
         auto frame_controller = VulkanFrameController::create(device);
-        auto upload_context = createVulkanUploadContext(device);
+        auto upload_context = VulkanUploadContext::create(device);
         auto shader_compiler = shader::SlangShaderCompiler::create(desc.shader_dir);
 
         auto texture_sampler_set = TextureSamplerDescriptorSet::create(device.logical_device);
@@ -93,12 +56,27 @@ namespace vva::gfx::vulkan {
             .texture_sampler = std::move(texture_sampler_set),
             .frame_scene_data = std::move(frame_scene_data_set)
         };
-        auto graphics_pipeline = GraphicsPipeline::create(device.logical_device, physical_device,
-                                                          swap_chain.surface_format, shader_compiler,
-                                                          global_descriptors);
+        auto graphics_pipeline_3d = GraphicsPipeline::create("my_shader",
+                                                             device.logical_device, physical_device,
+                                                             {
+                                                                 .format = vk::Format::eR16G16B16A16Sfloat,
+                                                                 .colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear
+                                                             }, shader_compiler,
+                                                             global_descriptors, true);
+        auto graphics_pipeline_2d = GraphicsPipeline::create("my_2d_shader", device.logical_device, physical_device,
+                                                             {
+                                                                 .format = vk::Format::eR16G16B16A16Sfloat,
+                                                                 .colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear
+                                                             }, shader_compiler,
+                                                             global_descriptors, false,
+                                                             vk::CullModeFlagBits::eNone);
+        auto graphics_pipeline_swap_buffer = GraphicsPipeline::create("my_2d_shader", device.logical_device,
+                                                                      physical_device,
+                                                                      swap_chain.surface_format, shader_compiler,
+                                                                      global_descriptors, false,
+                                                                      vk::CullModeFlagBits::eNone);
         auto samplers = createSamplers(device.logical_device);
-        auto depth_resource = createDepthResources(allocator.get(), device.logical_device, physical_device,
-                                                   swap_chain.extent);
+
 
         global_descriptors.texture_sampler.writeSamplers(device.logical_device, samplers);
 
@@ -109,8 +87,15 @@ namespace vva::gfx::vulkan {
         auto draw_data = std::vector<VramVector<shader::param::BasicDrawData>>{};
         for (int i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
             draw_data.push_back(
-                VramVector<shader::param::BasicDrawData>::create(allocator.get(), device.logical_device, 100));
+                VramVector<shader::param::BasicDrawData>::create(allocator.get(), device.logical_device, 1000));
         }
+        auto texture_draw_data = std::vector<VramVector<shader::param::TextureDrawData>>{};
+        for (int i = 0; i < VulkanRenderConfig::MAX_FRAME_IN_FLIGHT; ++i) {
+            texture_draw_data.push_back(
+                VramVector<shader::param::TextureDrawData>::create(
+                    allocator.get(), device.logical_device, 1000));
+        }
+
 
         vva_log_info("vulkan renderer created");
         return VulkanRenderer{
@@ -123,204 +108,130 @@ namespace vva::gfx::vulkan {
                 .frame_controller = std::move(frame_controller),
                 .upload_context = std::move(upload_context),
                 .slang_shader_compiler = std::move(shader_compiler),
-                .graphics_pipeline = std::move(graphics_pipeline),
+                .graphics_pipeline_2d = std::move(graphics_pipeline_2d),
+                .graphics_pipeline_3d = std::move(graphics_pipeline_3d),
+                .graphics_pipeline_swap_buffer = std::move(graphics_pipeline_swap_buffer),
                 .samplers = std::move(samplers),
-                .depth_resource = std::move(depth_resource),
-                .draw_datas = std::move(draw_data)
+                .draw_datas = std::move(draw_data),
+                .texture_draw_infos = std::move(texture_draw_data)
             },
             std::move(global_descriptors)
         };
     }
 
 
-    auto VulkanRenderer::startFrame() -> void {
-        //graphicsQueue.waitIdle();
-        auto frame_index = context_.frame_controller.getFrameIndex();
-        auto& frame_resource = context_.frame_controller.frame();
-        frame_state_store_.frame_index = frame_index;
-        auto fence_result = context_
-                            .device
-                            .logical_device.waitForFences(*frame_resource.in_flight_fences, vk::True,
-                                                          UINT64_MAX);
-        if (fence_result != vk::Result::eSuccess) {
-            throw std::runtime_error("failed to wait for fence!");
-        }
-
-
-        auto [result, imageIndex] = context_.swap_chain.handle.acquireNextImage(
-            UINT64_MAX, *frame_resource.image_available_semaphore, nullptr);
-        frame_state_store_.image_index = imageIndex;
-        // Due to VULKAN_HPP_HANDLE_ERROR_OUT_OF_DATE_AS_SUCCESS being defined, eErrorOutOfDateKHR can be checked as a result
-        // here and does not need to be caught by an exception.
-        // if (result == vk::Result::eErrorOutOfDateKHR) {
-        //     recreateSwapChain();
-        //     return;
-        // }
-        // On other success codes than eSuccess and eSuboptimalKHR we just throw an exception.
-        // On any error code, aquireNextImage already threw an exception.
-        if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
-            assert(result == vk::Result::eTimeout || result == vk::Result::eNotReady);
-            throw std::runtime_error("failed to acquire swap chain image!");
-        }
-
-        update_time(frame_state_store_);
-
-
-        // Only reset the fence if we are submitting work
-        context_.device.logical_device.resetFences(*frame_resource.in_flight_fences);
-        frame_resource.command_buffer.reset();
-
-
-        auto& command_buffer = frame_resource.command_buffer;
-        // Before starting rendering, transition the swapchain image to COLOR_ATTACHMENT_OPTIMAL
-        command_buffer.begin({});
-        transition_image_layout(
-            command_buffer,
-            context_.swap_chain.images[imageIndex].image,
-            vk::ImageLayout::eUndefined,
-            vk::ImageLayout::eColorAttachmentOptimal,
-            {}, // srcAccessMask (no need to wait for previous operations)
-            vk::AccessFlagBits2::eColorAttachmentWrite, // dstAccessMask
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput, // srcStage
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput, // dstStage
-            vk::ImageAspectFlagBits::eColor
-        );
-
-        transition_image_layout(
-            command_buffer,
-            context_.depth_resource.source_image.handle(),
-            vk::ImageLayout::eUndefined,
-            vk::ImageLayout::eDepthAttachmentOptimal,
-            vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-            vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-            vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-            vk::PipelineStageFlagBits2::eEarlyFragmentTests | vk::PipelineStageFlagBits2::eLateFragmentTests,
-            vk::ImageAspectFlagBits::eDepth);
-
-        vk::ClearValue clear_color = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f);
-        vk::ClearValue clear_depth = vk::ClearDepthStencilValue(1.0f, 0);
-        vk::RenderingAttachmentInfo attachment_info = {
-            .imageView = context_.swap_chain.images[imageIndex].image_view,
-            .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-            .loadOp = vk::AttachmentLoadOp::eClear,
-            .storeOp = vk::AttachmentStoreOp::eStore,
-            .clearValue = clear_color
-        };
-
-        vk::RenderingAttachmentInfo depth_attachment_info = {
-            .imageView = context_.depth_resource.image_view,
-            .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
-            .loadOp = vk::AttachmentLoadOp::eClear,
-            .storeOp = vk::AttachmentStoreOp::eDontCare,
-            .clearValue = clear_depth
-        };
-        auto extent = context_.swap_chain.extent;
-        vk::RenderingInfo rendering_info = {
-            .renderArea = {.offset = {0, 0}, .extent = extent},
-            .layerCount = 1,
-            .colorAttachmentCount = 1,
-            .pColorAttachments = &attachment_info,
-            .pDepthAttachment = &depth_attachment_info
-        };
-
-        command_buffer.beginRendering(rendering_info);
-
-        command_buffer.bindPipeline(vk::PipelineBindPoint::eGraphics, context_.graphics_pipeline.handle);
-
-        command_buffer.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(extent.width),
-                                                   static_cast<float>(extent.height), 0.0f, 1.0f));
-        command_buffer.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), extent));
+    auto VulkanRenderer::startFrame(TimeInfo time_info) -> FrameState {
+        return context_.frame_controller.startFrame(time_info, context_.device, context_.swap_chain);
     }
 
-    auto VulkanRenderer::endFrame() -> void {
-        auto frame_index = context_.frame_controller.getFrameIndex();
-        auto& frame_resource = context_.frame_controller.frame();
-        auto& command_buffer = frame_resource.command_buffer;
-        command_buffer.endRendering();
-        transition_image_layout(
-            command_buffer,
-            context_.swap_chain.images[frame_state_store_.image_index].image,
-            vk::ImageLayout::eColorAttachmentOptimal,
-            vk::ImageLayout::ePresentSrcKHR,
-            vk::AccessFlagBits2::eColorAttachmentWrite, // srcAccessMask
-            {}, // dstAccessMask
-            vk::PipelineStageFlagBits2::eColorAttachmentOutput, // srcStage
-            vk::PipelineStageFlagBits2::eBottomOfPipe, // dstStage
-            vk::ImageAspectFlagBits::eColor
+    auto VulkanRenderer::endFrame(FrameState frame_state) -> void {
+        RenderPass swap_buffer_pass{
+            .command_buffer = frame_state.frame_resource.command_buffer,
+            .graphics_pipeline = context_.graphics_pipeline_swap_buffer,
+            .render_target_image = context_.swap_chain.images[frame_state.image_index].image,
+            .render_target_image_view = context_.swap_chain.images[frame_state.image_index].image_view,
+            .extent = context_.swap_chain.extent,
+            .depth_image = {nullptr, 0, false},
+            .barrier_config = pickImageTransitionComfig(RenderPassUsage::Swapchain),
+            .clear_color_value = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f),
+            .clear_depth_stencil_value = vk::ClearDepthStencilValue(1.0f, 0.0f)
+        };
+        swap_buffer_pass.begin();
+
+        auto& texture = context_.intermediate_resource.getTexture();
+        glm::vec2 size = {texture.extent.width, texture.extent.height};
+        std::array textures{
+            shader::param::TextureDrawData{
+                .texture_index = texture.slot,
+                .sampler_index = SAMPLER_LINEAR_CLAMP,
+                .size = size
+            }
+        };
+        //=========================refactor this part
+        std::array sets = {
+            *descriptors_.texture_sampler.set,
+            *descriptors_.frame_scene_data.sets[frame_state.frame_index]
+        };
+        auto& command_buffer = frame_state.frame_resource.command_buffer;
+        command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                          context_.graphics_pipeline_swap_buffer.layout,
+                                          0,
+                                          sets,
+                                          nullptr
         );
-        command_buffer.end();
+        auto& draw_data = context_.texture_draw_infos[frame_state.frame_index];
+        //draw_data.clear();
+        draw_data.insert_range(textures);
+        draw_data.flush();
 
-        const auto& render_finished_semaphore = context_.swap_chain.images[frame_state_store_.image_index].
-            render_finished_semaphore;
-
-        vk::PipelineStageFlags waitDestinationStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
-        const vk::SubmitInfo submitInfo{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*frame_resource.image_available_semaphore,
-            .pWaitDstStageMask = &waitDestinationStageMask,
-            .commandBufferCount = 1,
-            .pCommandBuffers = &*command_buffer,
-            .signalSemaphoreCount = 1,
-            .pSignalSemaphores = &*render_finished_semaphore
+        const shader::param::PushConstants pc{
+            .instances = draw_data.deviceAddressAt(draw_data.size() - textures.size()),
         };
-        context_.device.queues.graphics_queue.submit(submitInfo, *frame_resource.in_flight_fences);
-        // auto result = context_.device.logical_device.waitForFences(*frame_resource.in_flight_fences, vk::True, UINT64_MAX);
-        //
-        // if (result != vk::Result::eSuccess) {
-        //     throw std::runtime_error("failed to wait for fence!");
-        // }
+        command_buffer.pushConstants<shader::param::PushConstants>(
+            *context_.graphics_pipeline_swap_buffer.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
 
-        const vk::PresentInfoKHR presentInfoKHR{
-            .waitSemaphoreCount = 1,
-            .pWaitSemaphores = &*render_finished_semaphore,
-            .swapchainCount = 1,
-            .pSwapchains = &*context_.swap_chain.handle,
-            .pImageIndices = &frame_state_store_.image_index
-        };
-        auto result = context_.device.queues.present_queue.presentKHR(presentInfoKHR);
-
-        // Due to VULKAN_HPP_HANDLE_ERROR_OUT_OF_DATE_AS_SUCCESS being defined, eErrorOutOfDateKHR can be checked as a result
-        // here and does not need to be caught by an exception.
-        // if ((result == vk::Result::eSuboptimalKHR) || (result == vk::Result::eErrorOutOfDateKHR) ||
-        //     framebufferResized) {
-        //     framebufferResized = false;
-        //     recreateSwapChain();
-        //     } else {
-        //         // There are no other success codes than eSuccess; on any error code, presentKHR already threw an exception.
-        //         assert(result == vk::Result::eSuccess);
-        //     }
-        context_.frame_controller.advanceFrame();
-        frame_state_store_ = {};
+        command_buffer.draw(3, textures.size(), 0, 0);
+        //=======================================
+        swap_buffer_pass.end();
+        context_.frame_controller.endFrame(frame_state, context_.device, context_.swap_chain);
     }
 
-    auto VulkanRenderer::drawModel(Model model) -> void {
-        auto& command_buffer = context_.frame_controller.frame().command_buffer;
-        auto& mesh = gpu_resource_registry_.meshes[model.mesh_handle.id];
-        auto& model_texture = gpu_resource_registry_.textures[model.texture_handle.id];
+    auto VulkanRenderer::get3dRenderPass(FrameState frame_state) -> RenderPass {
+        auto& image = context_.intermediate_resource.getTexture();
+        return {
+            .command_buffer = frame_state.frame_resource.command_buffer,
+            .graphics_pipeline = context_.graphics_pipeline_3d,
+            .render_target_image = image.source_image.handle(),
+            .render_target_image_view = image.image_view,
+            .extent = image.extent,
+            .depth_image = context_.depth_resource,
+            .barrier_config = pickImageTransitionComfig(RenderPassUsage::Texture),
+            .clear_color_value = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f),
+            .clear_depth_stencil_value = vk::ClearDepthStencilValue(1.0f, 0.0f)
+        };
+    }
+
+    auto VulkanRenderer::get2dRenderPass(FrameState frame_state) -> RenderPass {
+        auto& image = context_.intermediate_resource.getTexture();
+        return {
+            .command_buffer = frame_state.frame_resource.command_buffer,
+            .graphics_pipeline = context_.graphics_pipeline_2d,
+            .render_target_image = image.source_image.handle(),
+            .render_target_image_view = image.image_view,
+            .extent = image.extent,
+            .depth_image = {nullptr, 0, false},
+            .barrier_config = pickImageTransitionComfig(RenderPassUsage::Texture),
+            .clear_color_value = vk::ClearColorValue(0.0f, 0.0f, 0.0f, 1.0f),
+            .clear_depth_stencil_value = vk::ClearDepthStencilValue(1.0f, 0.0f)
+        };
+    }
+
+    auto VulkanRenderer::drawModel(std::span<const Model> models, FrameState frame_state) -> void {
+        auto& command_buffer = frame_state.frame_resource.command_buffer;
+        auto& mesh = gpu_resource_registry_.meshes[models.front().mesh_handle.id];
+        auto& model_texture = gpu_resource_registry_.textures[models.front().texture_handle.id];
         command_buffer.bindVertexBuffers(0, (mesh.vertex_buffer.handle()), {0});
         command_buffer.bindIndexBuffer(mesh.index_buffer.handle(), 0, vk::IndexType::eUint32);
 
         std::array sets = {
             *descriptors_.texture_sampler.set,
-            *descriptors_.frame_scene_data.sets[frame_state_store_.frame_index]
+            *descriptors_.frame_scene_data.sets[frame_state.frame_index]
         };
         command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                          context_.graphics_pipeline.layout,
+                                          context_.graphics_pipeline_3d.layout,
                                           0,
                                           sets,
                                           nullptr
         );
         auto data = std::vector<shader::param::BasicDrawData>{};
-        for (int i = 0; i < 100; ++i) {
-            Transform transform = model.transform;
-            transform.translate({(i % 10) * 4 - 10, (i / 10) * 4 - 10, 0});
+        for (auto& model : models) {
             data.push_back(shader::param::BasicDrawData{
-                .model_matrix = transform.getModelMatrix(), // identity is fine for the first look
+                .model_matrix = model.transform.getModelMatrix(), // identity is fine for the first look
                 .texture_index = model_texture.slot,
                 .sampler_index = SAMPLER_LINEAR_REPEAT
             });
         }
-        auto& vram_vec = context_.draw_datas[frame_state_store_.frame_index];
+        auto& vram_vec = context_.draw_datas[frame_state.frame_index];
         vram_vec.clear();
         vram_vec.insert_range(data);
         vram_vec.flush();
@@ -328,10 +239,38 @@ namespace vva::gfx::vulkan {
             .instances = vram_vec.deviceAddress(),
         };
         command_buffer.pushConstants<shader::param::PushConstants>(
-            *context_.graphics_pipeline.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
+            *context_.graphics_pipeline_3d.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
 
         command_buffer.drawIndexed(mesh.index_count, vram_vec.size(), 0, 0, 0);
     }
+
+    auto VulkanRenderer::drawTexture(std::span<shader::param::TextureDrawData> textures,
+                                     FrameState frame_state) -> void {
+        auto& command_buffer = frame_state.frame_resource.command_buffer;
+        std::array sets = {
+            *descriptors_.texture_sampler.set,
+            *descriptors_.frame_scene_data.sets[frame_state.frame_index]
+        };
+        command_buffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                          context_.graphics_pipeline_2d.layout,
+                                          0,
+                                          sets,
+                                          nullptr
+        );
+        auto& draw_data = context_.texture_draw_infos[frame_state.frame_index];
+        draw_data.clear();
+        draw_data.insert_range(textures);
+        draw_data.flush();
+
+        const shader::param::PushConstants pc{
+            .instances = draw_data.deviceAddressAt(draw_data.size() - textures.size()),
+        };
+        command_buffer.pushConstants<shader::param::PushConstants>(
+            *context_.graphics_pipeline_2d.layout, vk::ShaderStageFlagBits::eAll, 0, pc);
+
+        command_buffer.draw(3, textures.size(), 0, 0);
+    }
+
 
     auto VulkanRenderer::createSurface(WindowInterface& window,
                                        const vk::raii::Instance& instance) -> vk::raii::SurfaceKHR {
@@ -343,8 +282,9 @@ namespace vva::gfx::vulkan {
         return vk::raii::SurfaceKHR(instance, surface);
     }
 
-    auto VulkanRenderer::updateFrameData(const Camera& camera,
-                                         glm::vec2 mouse_pos) -> void {
+    auto VulkanRenderer::updateSceneData(const Camera& camera,
+                                         glm::vec2 mouse_pos,
+                                         const FrameState& frame_state) const -> void {
         glm::vec2 resolution = {context_.swap_chain.extent.width, context_.swap_chain.extent.height};
         auto frame_data = shader::param::FrameUniformBuffer{
             .view = camera.lookingAt(),
@@ -356,9 +296,9 @@ namespace vva::gfx::vulkan {
             .resolution = resolution,
             .mouse = mouse_pos,
             .time = last_time_,
-            .delta_time = frame_state_store_.delta_time,
+            .delta_time = frame_state.time_info.delta_time,
             .lights = 0
         };
-        descriptors_.frame_scene_data.writeFrameUniform(frame_data, frame_state_store_.frame_index);
+        descriptors_.frame_scene_data.writeFrameUniform(frame_data, frame_state.frame_index);
     }
 }

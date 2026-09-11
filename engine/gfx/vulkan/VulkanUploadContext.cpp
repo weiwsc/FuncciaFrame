@@ -5,7 +5,7 @@
 #include "VulkanUploadContext.h"
 #include "VulkanDevice.h"
 namespace vva::gfx::vulkan{
-    auto createVulkanUploadContext(const VulkanDevice& device) -> VulkanUploadContext {
+    auto VulkanUploadContext::create(const VulkanDevice& device) -> VulkanUploadContext {
         vk::CommandPoolCreateInfo pool_info_transfer{
             .flags = vk::CommandPoolCreateFlagBits::eTransient | vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
             .queueFamilyIndex = device.queue_coordinates.transfer.queue_family_index

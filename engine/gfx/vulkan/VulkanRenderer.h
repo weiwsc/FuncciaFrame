@@ -42,22 +42,20 @@ namespace vva::gfx::vulkan {
         VulkanAllocator allocator;
         vk::raii::SurfaceKHR surface{nullptr};
         VulkanSwapChain swap_chain;
+
         VulkanFrameController frame_controller;
         VulkanUploadContext upload_context;
         shader::SlangShaderCompiler slang_shader_compiler;
-        GraphicsPipeline graphics_pipeline;
+
+        GraphicsPipeline graphics_pipeline_2d;
+        GraphicsPipeline graphics_pipeline_3d;
+        GraphicsPipeline graphics_pipeline_swap_buffer;
         std::vector<vk::raii::Sampler> samplers;
-        Texture2D depth_resource;
+        TextureHandle depth_resource {};
+        TextureHandle intermediate_resource {};
         //Camera camera;
         std::vector<VramVector<shader::param::BasicDrawData>> draw_datas;
-    };
-
-    struct FrameStateStore {
-        uint32_t image_index;
-        uint32_t frame_index;
-        float last_time;
-        float time;
-        float delta_time;
+        std::vector<VramVector<shader::param::TextureDrawData>> texture_draw_infos;
     };
 
 
@@ -69,10 +67,16 @@ namespace vva::gfx::vulkan {
                                          const VulkanRendererDesc& desc) -> VulkanRenderer;
 
 
-        auto updateFrameData(const Camera& camera, glm::vec2 mouse_pos) -> void;
-        auto startFrame() -> void;
-        auto endFrame() -> void;
-        auto drawModel(Model model) -> void;
+        auto updateSceneData(const Camera& camera,
+                             glm::vec2 mouse_pos,
+                             const FrameState& frame_state) const -> void;
+        auto startFrame(TimeInfo time_info) -> FrameState;
+        auto endFrame(FrameState frame_state) -> void;
+
+        auto get3dRenderPass(FrameState frame_state) -> RenderPass;
+        auto get2dRenderPass(FrameState frame_state) -> RenderPass;
+        auto drawModel(std::span<const Model> models, FrameState frame_state) -> void;
+        auto drawTexture(std::span<shader::param::TextureDrawData> textures, FrameState frame_state) -> void;
 
         auto resourceRegistry() -> GpuResourceRegistry& {
             return gpu_resource_registry_;
@@ -84,7 +88,6 @@ namespace vva::gfx::vulkan {
         VulkanContext context_;
         GlobalDescriptors descriptors_;
         float last_time_{0};
-        FrameStateStore frame_state_store_;
         GpuResourceRegistry gpu_resource_registry_;
     };
 }

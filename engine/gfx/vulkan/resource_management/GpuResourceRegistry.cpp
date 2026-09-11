@@ -8,6 +8,10 @@
 #include "gfx/vulkan/VulkanDevice.h"
 
 namespace vva::gfx::vulkan {
+    auto TextureHandle::getTexture() -> Texture2D& {
+        return gpu_resource_registry->textures[id];
+    }
+
     auto GpuResourceRegistry::retrieveMeshHandle(std::string_view id) -> std::expected<MeshHandle, std::string> {
         if (id_to_mesh_handle.contains(id)) {
             return id_to_mesh_handle.at(id);
@@ -52,8 +56,10 @@ namespace vva::gfx::vulkan {
 
         texture.slot = slot;
         textures.push_back(std::move(texture));
-        return {
-            slot
+        return TextureHandle {
+            this,
+            slot,
+            true
         }; // this is what goes in Material.albedoTex
     }
 }

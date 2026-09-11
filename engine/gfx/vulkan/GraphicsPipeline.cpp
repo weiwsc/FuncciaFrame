@@ -11,7 +11,7 @@
 #include "types/Sampler.h"
 #include "types/Texture.h"
 
-namespace vva::gfx::vulkan{
+namespace vva::gfx::vulkan {
     struct PipelineShaderModule {
         vk::raii::ShaderModule shader_module;
         vk::PipelineShaderStageCreateInfo pipeline_shader_stage_create_info;
@@ -27,11 +27,11 @@ namespace vva::gfx::vulkan{
                 .pCode = shader_code.data()
             };
             auto shader_module = vk::raii::ShaderModule{device, vk_shader_module_create_info};
-            auto pipeline_shader_stage_create_info = vk::PipelineShaderStageCreateInfo {
-                    .stage = stage_flag_bits,
-                    .module = shader_module,
-                    .pName = "main"
-                };
+            auto pipeline_shader_stage_create_info = vk::PipelineShaderStageCreateInfo{
+                .stage = stage_flag_bits,
+                .module = shader_module,
+                .pName = "main"
+            };
             return {
                 .shader_module = std::move(shader_module),
                 .pipeline_shader_stage_create_info = pipeline_shader_stage_create_info
@@ -39,9 +39,9 @@ namespace vva::gfx::vulkan{
         }
 
         auto findSupportedFormat(const std::vector<vk::Format>& candidates,
-                                       vk::ImageTiling tiling,
-                                       vk::FormatFeatureFlags features,
-                                       const vk::raii::PhysicalDevice& physical_device) -> vk::Format {
+                                 vk::ImageTiling tiling,
+                                 vk::FormatFeatureFlags features,
+                                 const vk::raii::PhysicalDevice& physical_device) -> vk::Format {
             for (const auto format : candidates) {
                 vk::FormatProperties props = physical_device.getFormatProperties(format);
 
@@ -54,12 +54,9 @@ namespace vva::gfx::vulkan{
             }
             throw std::runtime_error("failed to find supported format!");
         }
-
-
-
-
     }
-    auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format{
+
+    auto findDepthFormat(const vk::raii::PhysicalDevice& physical_device) -> vk::Format {
         return findSupportedFormat(
             {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
             vk::ImageTiling::eOptimal,
@@ -67,9 +64,11 @@ namespace vva::gfx::vulkan{
             physical_device
         );
     }
-    auto createDepthResources(const VmaAllocator& allocator, const vk::raii::Device& device, const vk::raii::PhysicalDevice& physical_device, vk::Extent2D size) -> Texture2D {
+
+    auto createDepthResources(const VmaAllocator& allocator, const vk::raii::Device& device,
+                              const vk::raii::PhysicalDevice& physical_device, vk::Extent2D size) -> Texture2D {
         vk::Format depth_format = findDepthFormat(physical_device);
-        vk::ImageCreateInfo image_create_info {
+        vk::ImageCreateInfo image_create_info{
             .imageType = vk::ImageType::e2D,
             .format = depth_format,
             .extent = {size.width, size.height, 1},
@@ -77,17 +76,40 @@ namespace vva::gfx::vulkan{
             .arrayLayers = 1,
             .samples = vk::SampleCountFlagBits::e1,
             .tiling = vk::ImageTiling::eOptimal,
-            .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+            .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eSampled,
             .sharingMode = vk::SharingMode::eExclusive
         };
-        return createTextureImage(allocator, device,image_create_info,depth_format, vk::ImageAspectFlagBits::eDepth);
+        return createTextureImage(allocator, device, image_create_info, depth_format, vk::ImageAspectFlagBits::eDepth);
     }
-    auto GraphicsPipeline::create(const vk::raii::Device& device,
+
+    auto createIntermediateResource(const VmaAllocator& allocator,
+                                    const vk::raii::Device& device,
+                                    const vk::raii::PhysicalDevice& physical_device, vk::Extent2D size) -> Texture2D {
+        vk::ImageCreateInfo image_create_info{
+            .imageType = vk::ImageType::e2D,
+            .format = vk::Format::eR16G16B16A16Sfloat,
+            .extent = {size.width, size.height, 1},
+            .mipLevels = 1,
+            .arrayLayers = 1,
+            .samples = vk::SampleCountFlagBits::e1,
+            .tiling = vk::ImageTiling::eOptimal,
+            .usage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
+            .sharingMode = vk::SharingMode::eExclusive
+        };
+        return createTextureImage(allocator,
+                                  device, image_create_info,
+                                  vk::Format::eR16G16B16A16Sfloat,
+                                  vk::ImageAspectFlagBits::eColor);
+    }
+
+    auto GraphicsPipeline::create(std::string shader_name,
+                                  const vk::raii::Device& device,
                                   const vk::raii::PhysicalDevice& physical_device,
                                   const vk::SurfaceFormatKHR& surface_format,
                                   SlangShaderCompiler& compiler,
-                           const GlobalDescriptors& global_descriptors) -> GraphicsPipeline {
-        std::string shader_name {"my_shader"};
+                                  const GlobalDescriptors& global_descriptors,
+                                  bool has_depth_attachment,
+                                  vk::CullModeFlagBits cull_mode) -> GraphicsPipeline {
         auto vertex_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eVertex, shader_name,
                                                      "vertMain");
         auto fragment_stage = pipelineShaderModuleInfo(compiler, device, vk::ShaderStageFlagBits::eFragment,
@@ -133,7 +155,7 @@ namespace vva::gfx::vulkan{
             .depthClampEnable = vk::False,
             .rasterizerDiscardEnable = vk::False,
             .polygonMode = vk::PolygonMode::eFill,
-            .cullMode = vk::CullModeFlagBits::eBack,
+            .cullMode = cull_mode,
             .frontFace = vk::FrontFace::eCounterClockwise,
             .depthBiasEnable = vk::False,
             .depthBiasSlopeFactor = 1.0f, .lineWidth = 1.0f
@@ -189,45 +211,54 @@ namespace vva::gfx::vulkan{
             .setLayoutCount = static_cast<uint32_t>(descriptor_set_layouts.size()),
             .pSetLayouts = descriptor_set_layouts.data(),
             .pushConstantRangeCount = 1,
-            .pPushConstantRanges = &push_constant_range//fill this when adding push constant
+            .pPushConstantRanges = &push_constant_range //fill this when adding push constant
         };
 
         auto pipeline_layout = vk::raii::PipelineLayout(device, pipeline_layout_info);
 
-        vk::PipelineDepthStencilStateCreateInfo depth_stencil{
-            .depthTestEnable = vk::True,
-            .depthWriteEnable = vk::True,
-            .depthCompareOp = vk::CompareOp::eLess,
-            .depthBoundsTestEnable = vk::False,
-            .stencilTestEnable = vk::False
+
+        vk::PipelineDepthStencilStateCreateInfo depth_stencil{};
+        vk::Format depth_format{};
+
+        if (has_depth_attachment) {
+            depth_stencil = {
+                .depthTestEnable = vk::True,
+                .depthWriteEnable = vk::True,
+                .depthCompareOp = vk::CompareOp::eLess,
+                .depthBoundsTestEnable = vk::False,
+                .stencilTestEnable = vk::False
+            };
+            depth_format = findDepthFormat(physical_device);
+        }
+        vk::GraphicsPipelineCreateInfo graphics_pipeline_create_info{
+            .stageCount = 2,
+            .pStages = shader_stages,
+            .pVertexInputState = &vertex_input_info,
+            .pInputAssemblyState = &input_assembly,
+            .pViewportState = &viewport_state,
+            .pRasterizationState = &rasterizer,
+            .pMultisampleState = &multisampling,
+            .pColorBlendState = &color_blending,
+            .pDynamicState = &dynamic_state,
+            .layout = pipeline_layout,
+            .renderPass = nullptr
         };
-
-        vk::Format depth_format = findDepthFormat(physical_device);
-
-        vk::StructureChain<vk::GraphicsPipelineCreateInfo, vk::PipelineRenderingCreateInfo> pipeline_create_info_chain = {
-            {
-                .stageCount = 2,
-                .pStages = shader_stages,
-                .pVertexInputState = &vertex_input_info,
-                .pInputAssemblyState = &input_assembly,
-                .pViewportState = &viewport_state,
-                .pRasterizationState = &rasterizer,
-                .pMultisampleState = &multisampling,
-                .pDepthStencilState = &depth_stencil,
-                .pColorBlendState = &color_blending,
-                .pDynamicState = &dynamic_state,
-                .layout = pipeline_layout,
-                .renderPass = nullptr
-            },
-            {
-                .colorAttachmentCount = 1, //prob need to change this too if there's multiple image
-                .pColorAttachmentFormats = &surface_format.format,
-                .depthAttachmentFormat = depth_format
-            }
+        vk::PipelineRenderingCreateInfo pipeline_rendering_create_info{
+            .colorAttachmentCount = 1, //prob need to change this too if there's multiple image
+            .pColorAttachmentFormats = &surface_format.format
+        };
+        if (has_depth_attachment) {
+            graphics_pipeline_create_info.pDepthStencilState = &depth_stencil;
+            pipeline_rendering_create_info.depthAttachmentFormat = depth_format;
+        }
+        vk::StructureChain<vk::GraphicsPipelineCreateInfo, vk::PipelineRenderingCreateInfo> pipeline_create_info_chain =
+        {
+            graphics_pipeline_create_info,
+            pipeline_rendering_create_info
         };
 
         auto graphics_pipeline = vk::raii::Pipeline(device, nullptr,
-                                                   pipeline_create_info_chain.get<vk::GraphicsPipelineCreateInfo>());
+                                                    pipeline_create_info_chain.get<vk::GraphicsPipelineCreateInfo>());
         vva_log_info("graphics pipeline created from shader \"{}\"", shader_name);
         auto samplers = createSamplers(device);
 

@@ -4,6 +4,7 @@
 #include "core/FpsCounter.h"
 #include "core/Log.h"
 #include "gfx/vulkan/VulkanRenderer.h"
+#include "gfx/vulkan/types/Sampler.h"
 #include "platform/SDLWindow.h"
 
 int main() {
@@ -12,7 +13,7 @@ int main() {
 
         vva::gfx::GL::SDLWindow window;
         glm::ivec2 dimension = {1920, 1080};
-        if (!window.Initialize(dimension.x / 2, dimension.y / 2, "FuncciaFrame", vva::gfx::RenderBackend::Vulkan)) {
+        if (!window.Initialize(dimension.x, dimension.y, "FuncciaFrame", vva::gfx::RenderBackend::Vulkan)) {
             vva_log_critical("failed to initialize Vulkan window");
             vva::engine::log::shutdown();
             return 1;
@@ -52,20 +53,63 @@ int main() {
         camera.transform.setPosition({0, 20, 5});
         camera.transform.lookAt({0, 0, 0});
 
+        std::vector<vva::gfx::vulkan::Model> models;
+        for (int i = 0; i < 900; ++i) {
+            vva::gfx::Transform transform = model.transform;
+            transform.setPosition({(i % 30) * 3 - 10, (i / 30) * 3 - 10, 0});
+
+            models.push_back(
+                vva::gfx::vulkan::Model{
+                    .transform = transform,
+                    .mesh_handle = model.mesh_handle,
+                    .texture_handle = model.texture_handle
+                });
+        }
+        auto& texture = model.texture_handle.getTexture();
+        std::array textures {
+            vva::gfx::shader::param::TextureDrawData {
+                .texture_index = texture.slot,
+                .sampler_index = vva::gfx::vulkan::SAMPLER_LINEAR_CLAMP,
+                .size = {texture.extent.width, texture.extent.height}
+            }
+        };
+
         while (!window.ShouldClose()) {
             window.PollEvents();
             if (window.IsKeyPressed(vva::gfx::Key::Escape)) window.SetShouldClose(true);
 
             fps_counter.update(window);
 
-            renderer.startFrame();
-            camera.transform.translate({0, 0, sin(fps_counter.getFrameMs()) * fps_counter.getDeltaTime() * 10});
+            auto frame = renderer.startFrame({
+                .delta_time = fps_counter.getDeltaTime(),
+                .time = fps_counter.getTime()
+            });
+            //camera.transform.translate({0, 0, sin(fps_counter.getFrameMs()) * fps_counter.getDeltaTime() * 10});
+            camera.transform.rotate(vva::gfx::Vector3::UP, 20 * fps_counter.getDeltaTime());
+
+            for (auto& obj : models) {
+                obj.transform.rotate(vva::gfx::Vector3::UP, 20 * fps_counter.getDeltaTime());
+            }
+
             double x, y{};
             window.GetCursorPos(x, y);
-            renderer.updateFrameData(camera, {x, y});
+            renderer.updateSceneData(camera, {x, y}, frame);
             model.transform.rotate({vva::gfx::Vector3::UP}, 90.f * fps_counter.getDeltaTime());
-            renderer.drawModel(model);
-            renderer.endFrame();
+
+
+            auto pass = renderer.get3dRenderPass(frame);
+            pass.begin();
+            renderer.drawModel(models, frame);
+            pass.end();
+
+            auto pass2 = renderer.get2dRenderPass(frame);
+            pass2.begin();
+            renderer.drawTexture(textures, frame);
+            pass2.end();
+
+
+
+            renderer.endFrame(frame);
         }
         vva_log_info("sandbox: renderer created, exiting");
         vva_log_info("vivian is going home!");

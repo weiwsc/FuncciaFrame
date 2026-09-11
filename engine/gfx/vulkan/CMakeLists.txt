@@ -68,6 +68,8 @@ add_library(vva_gfx_vulkan STATIC
         types/Camera.h
         resource_management/VramVector.cpp
         resource_management/VramVector.h
+        RenderPass.cpp
+        RenderPass.h
 )
 add_library(vva::gfx::vulkan ALIAS vva_gfx_vulkan)
 

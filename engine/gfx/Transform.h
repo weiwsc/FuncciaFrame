@@ -34,7 +34,7 @@ namespace vva::gfx {
         [[nodiscard]] auto rotation() const -> quat { return rotation_; }
         [[nodiscard]] auto scale() const -> vec3 { return scale_; }
 
-        void setPosition(const vec3& position) { position_ = position; }
+        void setPosition(const vec3 position) { position_ = position; }
         void setPositionXPlane(const vec2& position) { position_ = vec3(position, position_.z); }
 
         void translate(const vec3& translation, Space space = Space::Local);

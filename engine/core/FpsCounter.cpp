@@ -10,11 +10,13 @@ namespace vva::util {
     FpsCounter::FpsCounter() {
         last_time_ = std::chrono::steady_clock::now();
         fps_window_start_ = last_time_;
+        start_time_ = last_time_;
     }
 
     void FpsCounter::update(gfx::WindowInterface& window) {
         const auto now = std::chrono::steady_clock::now();
         delta_time_ = std::chrono::duration<float>(now - last_time_).count();
+        time_ = std::chrono::duration<float>(now - start_time_).count();
 
         frames_since_update_++;
         if (const double elapsed = std::chrono::duration<double>(now - fps_window_start_).count(); elapsed >= 0.5) {

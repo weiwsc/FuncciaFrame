@@ -13,12 +13,18 @@
 #include "gfx/vulkan/types/Mesh.h"
 
 namespace vva::gfx::vulkan {
+    struct GpuResourceRegistry;
+
+
     struct MeshHandle {
         uint64_t id;
     };
 
     struct TextureHandle {
+        GpuResourceRegistry* gpu_resource_registry;
         uint64_t id;
+        bool exists {false};
+        auto getTexture() -> Texture2D&;
     };
 
     struct GpuResourceRegistry {

@@ -21,7 +21,11 @@ namespace vva::gfx::shader::param {
         uint64_t texture_index;
         uint64_t sampler_index;
     };
-
+    struct TextureDrawData {
+        uint64_t texture_index;
+        uint64_t sampler_index;
+        glm::vec2 size;
+    };
     struct PushConstants {
         vk::DeviceAddress instances; // arena.address() + offset of this frame's array
     };
